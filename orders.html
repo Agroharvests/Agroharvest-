@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroHarvest - My Seed Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f4fbf5; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh; padding-bottom: 90px; position: relative; }
+
+        .header { background: linear-gradient(135deg, #14532d, #16a34a); padding: 18px 16px; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 17px; font-weight: 800; }
+        .back-btn { color: white; text-decoration: none; font-size: 18px; }
+
+        .orders-list { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+        .order-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .order-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px; }
+        .order-top h3 { font-size: 15px; font-weight: 800; color: #0f172a; }
+        .status-badge { background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+
+        .order-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
+        .order-grid span { color: #64748b; font-weight: 600; }
+        .order-grid b { color: #0f172a; font-weight: 800; display: block; margin-top: 2px; }
+        .order-grid b.green { color: #16a34a; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state i { font-size: 48px; margin-bottom: 12px; color: #cbd5e1; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 440px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 8px 0; z-index: 100; }
+        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: #16a34a; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+            <h1>My Purchased Seeds</h1>
+            <div style="width: 20px;"></div>
+        </div>
+
+        <div class="orders-list" id="ordersContainer">
+            <div class="empty-state">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Loading your seed plans...</p>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="orders.html" class="nav-item active"><i class="fa-solid fa-boxes-stacked"></i><span>Seeds</span></a>
+            <a href="team.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Team</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
+        </div>
+    </div>
+
+    <script>
+        const activeUser = requireAuth();
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadOrders();
+        });
+
+        async function loadOrders() {
+            try {
+                const { data: orders, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .eq('user_id', activeUser.id)
+                    .order('created_at', { ascending: false });
+
+                const container = document.getElementById('ordersContainer');
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-box-open"></i>
+                            <p>Aapne abhi tak koi seed plan nahi liya hai.</p>
+                            <a href="index.html" style="display:inline-block; margin-top:14px; background:#16a34a; color:white; padding:10px 20px; border-radius:12px; font-weight:800; text-decoration:none; font-size:13px;">View Seed Plans</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = orders.map(ord => `
+                    <div class="order-card">
+                        <div class="order-top">
+                            <h3>${ord.plan_name}</h3>
+                            <span class="status-badge"><i class="fa-solid fa-circle-check"></i> Active</span>
+                        </div>
+                        <div class="order-grid">
+                            <div>
+                                <span>Invested Amount</span>
+                                <b>₹${parseFloat(ord.price).toFixed(2)}</b>
+                            </div>
+                            <div>
+                                <span>Daily Return</span>
+                                <b class="green">₹${parseFloat(ord.daily_income).toFixed(2)}</b>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <span>Validity</span>
+                                <b>${ord.validity_days} Days</b>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <span>Days Remaining</span>
+                                <b class="green">${ord.days_remaining} Days</b>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>
