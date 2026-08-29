@@ -24,7 +24,6 @@
         .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; margin-bottom: 14px; color: #0f172a; }
         .input-box:focus { border-color: #16a34a; }
 
-        /* UPI Apps */
         .upi-apps-label { font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         .upi-apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
         .app-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -42,7 +41,6 @@
         .btn-submit-utr { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
         .btn-submit-utr:disabled { opacity: 0.6; }
 
-        /* History */
         .history-card { background: white; margin: 0 16px 20px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; }
         .history-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
         .badge-status { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
@@ -53,7 +51,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Nav -->
         <div class="top-header">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
@@ -93,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- Manual UPI ID Copy Box -->
+            <!-- Dynamic Receiver UPI ID Display -->
             <div class="upi-box">
                 <div>
                     <p style="font-size: 11px; color: #64748b; font-weight: 700;">Manual Transfer UPI ID</p>
@@ -102,9 +99,8 @@
                 <button onclick="copyUpiId()" class="btn-copy">Copy</button>
             </div>
 
-            <!-- Step 3: Mandatory UTR Input -->
             <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin-bottom: 6px;">3. Enter 12-Digit UTR Number</h3>
-            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px;">Payment successful hone ke baad bank se mila 12-digit UTR/Txn ID dalein:</p>
+            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px;">Payment hone ke baad bank ka 12-digit UTR/Txn ID dalein:</p>
 
             <input type="text" id="utrNumberInput" class="input-box" placeholder="e.g. 423871928371" maxlength="16" required>
 
@@ -126,15 +122,25 @@
 
     <script>
         const activeUser = requireAuth();
-        let targetUpiId = "agroharvest@upi";
+        let targetUpiId = localStorage.getItem('agro_cached_upi') || "agroharvest@upi";
 
         document.addEventListener("DOMContentLoaded", async () => {
+            // Apply cached UPI immediately so user sees it without delay
+            document.getElementById('adminUpiDisplay').innerText = targetUpiId;
+
+            // Fetch live UPI from database
             const sb = getSupabase();
             if (sb) {
-                const { data } = await sb.from('settings').select('value').eq('key', 'upi_id').maybeSingle();
+                const { data, error } = await sb
+                    .from('settings')
+                    .select('value')
+                    .eq('key', 'upi_id')
+                    .maybeSingle();
+
                 if (data && data.value) {
-                    targetUpiId = data.value;
-                    document.getElementById('adminUpiDisplay').innerText = data.value;
+                    targetUpiId = data.value.trim();
+                    document.getElementById('adminUpiDisplay').innerText = targetUpiId;
+                    localStorage.setItem('agro_cached_upi', targetUpiId);
                 }
             }
             loadRechargeHistory();
@@ -152,7 +158,6 @@
             });
         }
 
-        // Open UPI app without fake auto-credit
         function openUpiApp(appType) {
             const amt = parseFloat(document.getElementById('rechargeInput').value);
             if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
@@ -169,7 +174,6 @@
             window.location.href = uri;
         }
 
-        // Strictly submit as PENDING (Admin verifies before adding balance)
         async function submitUtrRequest() {
             const amt = parseFloat(document.getElementById('rechargeInput').value);
             const utr = document.getElementById('utrNumberInput').value.trim();
@@ -185,7 +189,6 @@
             btn.innerText = "Submitting...";
 
             try {
-                // Insert as PENDING only (Zero balance credited automatically)
                 const { error } = await sb.from('recharges').insert([{
                     user_id: activeUser.id,
                     amount: amt,
