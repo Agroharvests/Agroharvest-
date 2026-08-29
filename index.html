@@ -430,54 +430,61 @@
             buySeedPlan(title, price, daily, days);
         }
 
-        async function buySeedPlan(title, price, daily, days) {
-            if (!confirm(`Kya aap ₹${price} ka "${title}" activate karna chahte hain?`)) return;
+async function buySeedPlan(title, price, daily, days) {
+    if (!confirm(`Kya aap ₹${price} ka "${title}" activate karna chahte hain?`)) return;
 
-            const sb = getSupabase();
-            if (!sb) return alert("Database connecting... Kripya dobara try karein.");
+    const sb = getSupabase();
+    if (!sb) return alert("Database connecting... Kripya dobara try karein.");
 
-            try {
-                const { data: userProfile, error: uErr } = await sb
-                    .from('profiles')
-                    .select('balance')
-                    .eq('id', activeUser.id)
-                    .single();
+    try {
+        const { data: userProfile, error: uErr } = await sb
+            .from('profiles')
+            .select('balance')
+            .eq('id', activeUser.id)
+            .single();
 
-                if (uErr || !userProfile) throw new Error("Balance check failed.");
+        if (uErr || !userProfile) throw new Error("Balance check failed.");
 
-                const curBal = parseFloat(userProfile.balance || 0);
-                if (curBal < price) {
-                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
-                    window.location.href = 'recharge.html';
-                    return;
-                }
-
-                await sb.from('profiles').update({ balance: curBal - price }).eq('id', activeUser.id);
-
-                await sb.from('orders').insert([{
-                    user_id: activeUser.id,
-                    plan_name: title,
-                    price: price,
-                    daily_income: daily,
-                    validity_days: days,
-                    days_remaining: days,
-                    status: 'active'
-                }]);
-
-                await sb.from('transactions').insert([{
-                    user_id: activeUser.id,
-                    type: 'purchase',
-                    amount: price,
-                    details: `Activated ${title}`
-                }]);
-
-                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} profit credit hoga.`);
-                window.location.href = 'orders.html';
-
-            } catch (err) {
-                alert("Plan purchase failed: " + err.message);
-            }
+        const curBal = parseFloat(userProfile.balance || 0);
+        if (curBal < price) {
+            alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
+            window.location.href = 'recharge.html';
+            return;
         }
+
+        // Deduct balance
+        await sb.from('profiles').update({ balance: curBal - price }).eq('id', activeUser.id);
+
+        // Insert Order with both user_id and phone
+        const newOrder = {
+            user_id: activeUser.id,
+            phone: activeUser.phone,
+            plan_name: title,
+            price: price,
+            daily_income: daily,
+            validity_days: days,
+            days_remaining: days,
+            status: 'active'
+        };
+
+        const { error: ordErr } = await sb.from('orders').insert([newOrder]);
+        if (ordErr) throw ordErr;
+
+        await sb.from('transactions').insert([{
+            user_id: activeUser.id,
+            type: 'purchase',
+            amount: price,
+            details: `Activated ${title}`
+        }]);
+
+        alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} profit credit hoga.`);
+        window.location.href = 'orders.html';
+
+    } catch (err) {
+        alert("Plan purchase failed: " + err.message);
+    }
+}
+        
 
         function openInviteModal() {
             const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
