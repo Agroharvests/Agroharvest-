@@ -159,6 +159,7 @@
             document.getElementById('feeDisplay').innerText = `- ₹${fee.toFixed(2)}`;
             document.getElementById('netPayoutDisplay').innerText = `₹${net.toFixed(2)}`;
         }
+
 async function submitWithdrawalRequest() {
     const amt = parseFloat(document.getElementById('wdAmount').value);
     const name = document.getElementById('holderName').value.trim();
@@ -176,10 +177,29 @@ async function submitWithdrawalRequest() {
     if (!sb) return alert("Database connection error.");
 
     btn.disabled = true;
-    btn.innerText = "Checking Plan Status...";
+    btn.innerText = "Checking Rules & Plan...";
 
     try {
-        // Active purchased plan check
+        // 1. Strict Check: Aaj ka withdrawal ho chuka hai ya nahi (1 Request Per Day Limit)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const { data: todayWithdrawals, error: wdCheckErr } = await sb
+            .from('withdrawals')
+            .select('id, created_at')
+            .eq('user_id', activeUser.id)
+            .gte('created_at', todayStart.toISOString());
+
+        if (wdCheckErr) throw wdCheckErr;
+
+        if (todayWithdrawals && todayWithdrawals.length > 0) {
+            alert("⚠️ Daily Withdrawal Limit Reached!\n\nAap aaj ka 1 withdrawal request pehle hi laga chuke hain. Kripya agla withdrawal kal (Next Day) try karein.");
+            btn.disabled = false;
+            btn.innerText = "Confirm Bank Withdrawal";
+            return;
+        }
+
+        // 2. Strict Check: Active Crop Plan Verification
         const { data: activePlans, error: planErr } = await sb
             .from('orders')
             .select('id')
@@ -200,7 +220,7 @@ async function submitWithdrawalRequest() {
         const finalAmt = amt - feeAmt;
         const remainingBal = userCurrentBalance - amt;
 
-        // 1. Deduct balance from user profile & save bank details permanently
+        // 3. Deduct balance from user profile & save bank details
         const { error: pErr } = await sb.from('profiles').update({
             balance: remainingBal,
             holder_name: name,
@@ -210,7 +230,7 @@ async function submitWithdrawalRequest() {
 
         if (pErr) throw pErr;
 
-        // 2. Insert into withdrawals table
+        // 4. Insert into withdrawals table
         const { error: wErr } = await sb.from('withdrawals').insert([{
             user_id: activeUser.id,
             phone: activeUser.phone,
@@ -225,7 +245,7 @@ async function submitWithdrawalRequest() {
 
         if (wErr) throw wErr;
 
-        // 3. Log transaction
+        // 5. Log transaction
         await sb.from('transactions').insert([{
             user_id: activeUser.id,
             type: 'withdrawal',
@@ -233,7 +253,7 @@ async function submitWithdrawalRequest() {
             details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
         }]);
 
-        alert(`✅ ₹${amt} ka withdrawal request submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} transfer kar diya jayega.`);
+        alert(`✅ ₹${amt} ka withdrawal request submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} aapke bank account me bhej diya jayega.`);
         
         document.getElementById('wdAmount').value = '';
         calculateNetPayout();
@@ -247,7 +267,6 @@ async function submitWithdrawalRequest() {
         btn.innerText = "Confirm Bank Withdrawal";
     }
 }
-        
 
         async function loadWithdrawalHistory() {
             const box = document.getElementById('wdHistoryList');
