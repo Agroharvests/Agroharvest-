@@ -65,7 +65,8 @@
                 <p>Loading your seed plans...</p>
             </div>
         </div>
-                <div class="bottom-nav">
+
+        <div class="bottom-nav">
             <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item active"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
             <a href="team.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Team</span></a>
@@ -90,7 +91,7 @@
             }
 
             try {
-                // Fetch all orders and match by ID or Phone
+                // Multi-check: match by user_id OR phone
                 const { data: allOrders, error } = await sb
                     .from('orders')
                     .select('*')
@@ -99,8 +100,8 @@
                 if (error) throw error;
 
                 const userOrders = (allOrders || []).filter(o => 
-                    o.user_id === activeUser.id || 
-                    (o.phone && o.phone === activeUser.phone)
+                    String(o.user_id) === String(activeUser.id) || 
+                    (o.phone && String(o.phone) === String(activeUser.phone))
                 );
 
                 if (userOrders.length === 0) {
