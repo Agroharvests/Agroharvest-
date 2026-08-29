@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroHarvest - Register</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f4fbf5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 14px; }
+        .card { width: 100%; max-width: 390px; background: #ffffff; border-radius: 28px; padding: 32px 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); text-align: center; }
+        .logo-box { width: 68px; height: 68px; background: #dcfce7; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; color: #16a34a; }
+        h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+        p.sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+        .form-group { position: relative; margin-bottom: 14px; text-align: left; }
+        .form-group i { position: absolute; left: 16px; top: 16px; color: #94a3b8; font-size: 16px; }
+        .form-input { width: 100%; padding: 14px 14px 14px 44px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 14px; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc; }
+        .form-input:focus { border-color: #16a34a; background: #ffffff; }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3); }
+        .footer-link { margin-top: 20px; font-size: 13px; color: #64748b; font-weight: 600; }
+        .footer-link a { color: #16a34a; text-decoration: none; font-weight: 800; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo-box"><i class="fa-solid fa-seedling"></i></div>
+        <h2>AgroHarvest</h2>
+        <p class="sub">Register & claim ₹50 Signup Bonus</p>
+
+        <form id="regForm" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <input type="tel" id="regPhone" class="form-input" placeholder="10 Digit Mobile Number" maxlength="10" required>
+            </div>
+            <div class="form-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="regPassword" class="form-input" placeholder="Set Password" required>
+            </div>
+            <div class="form-group">
+                <i class="fa-solid fa-user-plus"></i>
+                <input type="text" id="regRef" class="form-input" placeholder="Referral Code (Optional)">
+            </div>
+            <button type="submit" id="regBtn" class="btn-submit">Register Now</button>
+        </form>
+
+        <div class="footer-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+    </div>
+
+    <script>
+        requireGuest();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const refParam = urlParams.get('ref');
+        if (refParam) document.getElementById('regRef').value = refParam;
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const refBy = document.getElementById('regRef').value.trim();
+            const btn = document.getElementById('regBtn');
+
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert("Kripya 10 digit ka sahi mobile number dalein!");
+                return;
+            }
+            if (password.length < 6) {
+                alert("Password kam se kam 6 characters ka hona chahiye!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Creating Account...";
+
+            try {
+                const { data: existing } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('phone', phone)
+                    .maybeSingle();
+
+                if (existing) {
+                    alert("Yeh number pehle se registered hai! Kripya Login karein.");
+                    window.location.href = "login.html";
+                    return;
+                }
+
+                const { data: newUser, error: regErr } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        phone: phone,
+                        password: password,
+                        referral_code: phone,
+                        referred_by: refBy || null,
+                        balance: 50.00,
+                        team_income: 0.00
+                    }])
+                    .select()
+                    .single();
+
+                if (regErr) throw regErr;
+
+                await supabase.from('transactions').insert([{
+                    user_id: newUser.id,
+                    type: 'bonus',
+                    amount: 50.00,
+                    status: 'success',
+                    details: 'Welcome Signup Bonus'
+                }]);
+
+                setSessionUser(newUser);
+                alert("✅ Registration Successful! ₹50 Bonus added.");
+                window.location.replace("index.html");
+
+            } catch (err) {
+                alert("Registration failed: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Register Now";
+            }
+        }
+    </script>
+</body>
+</html>
