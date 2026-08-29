@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Login</title>
+    <title>AgroHarvest - Create Account</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -15,41 +15,37 @@
         
         .mobile-container { width: 100%; max-width: 430px; background: #ffffff; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
 
-        .hero-header { height: 280px; width: 100%; position: relative; background: #166534; overflow: hidden; }
-        .hero-header img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%); display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 18px; }
+        .hero-header { height: 260px; width: 100%; position: relative; background: #166534; overflow: hidden; }
+        .hero-header img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%); display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 18px; }
         
         .lang-badge { background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px; }
         .brand-pill { background: rgba(22, 163, 74, 0.95); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px; }
 
-        .form-sheet { flex: 1; background: #ffffff; margin-top: -36px; border-radius: 36px 36px 0 0; padding: 32px 24px 20px; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 -10px 30px rgba(0,0,0,0.12); }
+        .form-sheet { flex: 1; background: #ffffff; margin-top: -36px; border-radius: 36px 36px 0 0; padding: 30px 24px 20px; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 -10px 30px rgba(0,0,0,0.12); }
         
-        .title-box { margin-bottom: 24px; }
-        .title-box h1 { font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
-        .title-box p { font-size: 13px; color: #64748b; font-weight: 600; margin-top: 4px; }
+        .title-box { margin-bottom: 20px; }
+        .title-box h1 { font-size: 25px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+        .title-box p { font-size: 13px; color: #16a34a; font-weight: 700; margin-top: 2px; }
 
-        .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; height: 58px; }
+        .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; height: 56px; }
         .input-wrap:focus-within { border-color: #16a34a; background: #ffffff; box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12); }
-        .input-icon-box { width: 36px; height: 36px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .input-icon-box { width: 34px; height: 34px; background: #dcfce7; color: #16a34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
         
         .prefix { font-weight: 800; color: #0f172a; font-size: 15px; border-right: 1.5px solid #cbd5e1; padding-right: 10px; }
-        .input-wrap input { width: 100%; border: none; outline: none; background: transparent; font-size: 15px; font-weight: 700; color: #0f172a; }
+        .input-wrap input { width: 100%; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 700; color: #0f172a; }
 
-        .terms-row { display: flex; align-items: center; gap: 8px; margin: 10px 4px 22px; font-size: 12px; font-weight: 600; color: #475569; }
-        .terms-row input { width: 16px; height: 16px; accent-color: #16a34a; }
-        .terms-row a { color: #16a34a; text-decoration: none; font-weight: 700; }
+        .btn-register { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: #ffffff; border: none; padding: 15px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); margin-top: 8px; }
+        .btn-register:active { transform: scale(0.98); }
 
-        .btn-login { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: #ffffff; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); }
-        .btn-login:active { transform: scale(0.98); }
-
-        .footer-text { text-align: center; margin-top: 24px; font-size: 13px; font-weight: 600; color: #64748b; }
+        .footer-text { text-align: center; margin-top: 20px; font-size: 13px; font-weight: 600; color: #64748b; }
         .footer-text a { color: #16a34a; font-weight: 800; text-decoration: none; margin-left: 4px; }
     </style>
 </head>
 <body>
     <div class="mobile-container">
         <div class="hero-header">
-            <img src="banner.png" alt="AgroHarvest Official Poster">
+            <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80" alt="AgroHarvest Smart Farming">
             <div class="hero-overlay">
                 <div class="brand-pill"><i class="fa-solid fa-seedling"></i> AgroHarvest</div>
                 <div class="lang-badge"><i class="fa-solid fa-globe"></i> ENG</div>
@@ -59,34 +55,33 @@
         <div class="form-sheet">
             <div>
                 <div class="title-box">
-                    <h1>Welcome Back</h1>
-                    <p>Grow Smart, Harvest More</p>
+                    <h1>Create Account</h1>
+                    <p>✨ Claim ₹50 Instant Welcome Bonus</p>
                 </div>
 
-                <form id="loginForm" onsubmit="handleLogin(event)">
+                <form id="regForm" onsubmit="handleRegister(event)">
                     <div class="input-wrap">
                         <div class="input-icon-box"><i class="fa-solid fa-phone"></i></div>
                         <span class="prefix">+91</span>
-                        <input type="tel" id="loginPhone" placeholder="Enter Phone Number" maxlength="10" required>
+                        <input type="tel" id="regPhone" placeholder="Enter Mobile Number" maxlength="10" required>
                     </div>
 
                     <div class="input-wrap">
                         <div class="input-icon-box"><i class="fa-solid fa-lock"></i></div>
-                        <input type="password" id="loginPassword" placeholder="Enter your Password" required>
-                        <i class="fa-regular fa-eye-slash" id="togglePass" onclick="togglePasswordVisibility()" style="color: #94a3b8; cursor: pointer;"></i>
+                        <input type="password" id="regPassword" placeholder="Set Password (Min 6 digits)" required>
                     </div>
 
-                    <div class="terms-row">
-                        <input type="checkbox" id="termsCheck" checked required>
-                        <label for="termsCheck">By logging in you agree to the <a href="#">Terms & Conditions</a></label>
+                    <div class="input-wrap">
+                        <div class="input-icon-box"><i class="fa-solid fa-user-plus"></i></div>
+                        <input type="text" id="regRef" placeholder="Referral Code (Optional)">
                     </div>
 
-                    <button type="submit" id="loginBtn" class="btn-login">Login Now</button>
+                    <button type="submit" id="regBtn" class="btn-register">Register & Get ₹50</button>
                 </form>
             </div>
 
             <div class="footer-text">
-                Don't have an account?<a href="register.html">Register</a>
+                Already have an account?<a href="login.html">Login</a>
             </div>
         </div>
     </div>
@@ -94,49 +89,73 @@
     <script>
         requireGuest();
 
-        function togglePasswordVisibility() {
-            const passField = document.getElementById('loginPassword');
-            const icon = document.getElementById('togglePass');
-            if (passField.type === "password") {
-                passField.type = "text";
-                icon.className = "fa-regular fa-eye";
-            } else {
-                passField.type = "password";
-                icon.className = "fa-regular fa-eye-slash";
-            }
-        }
+        const urlParams = new URLSearchParams(window.location.search);
+        const refParam = urlParams.get('ref');
+        if (refParam) document.getElementById('regRef').value = refParam;
 
-        async function handleLogin(e) {
+        async function handleRegister(e) {
             e.preventDefault();
-            const phone = document.getElementById('loginPhone').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.getElementById('loginBtn');
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const refBy = document.getElementById('regRef').value.trim();
+            const btn = document.getElementById('regBtn');
+
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert("Kripya 10 digit ka valid mobile number dalein!");
+                return;
+            }
+            if (password.length < 6) {
+                alert("Password kam se kam 6 characters ka hona chahiye!");
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerText = "Authenticating...";
+            btn.innerText = "Creating Account...";
 
             try {
-                const { data: user, error } = await supabase
+                const { data: existing } = await supabase
                     .from('profiles')
-                    .select('*')
+                    .select('id')
                     .eq('phone', phone)
-                    .eq('password', password)
                     .maybeSingle();
 
-                if (error || !user) {
-                    alert("Mobile number ya password galat hai!");
-                    btn.disabled = false;
-                    btn.innerText = "Login Now";
+                if (existing) {
+                    alert("Yeh number pehle se registered hai! Kripya Login karein.");
+                    window.location.href = "login.html";
                     return;
                 }
 
-                setSessionUser(user);
+                const { data: newUser, error: regErr } = await supabase
+                    .from('profiles')
+                    .insert([{
+                        phone: phone,
+                        password: password,
+                        referral_code: phone,
+                        referred_by: refBy || null,
+                        balance: 50.00,
+                        team_income: 0.00
+                    }])
+                    .select()
+                    .single();
+
+                if (regErr) throw regErr;
+
+                await supabase.from('transactions').insert([{
+                    user_id: newUser.id,
+                    type: 'bonus',
+                    amount: 50.00,
+                    status: 'success',
+                    details: 'Welcome Signup Bonus'
+                }]);
+
+                setSessionUser(newUser);
+                alert("✅ Registration Successful! ₹50 Bonus added.");
                 window.location.replace("index.html");
 
             } catch (err) {
-                alert("Login failed: " + err.message);
+                alert("Registration failed: " + err.message);
                 btn.disabled = false;
-                btn.innerText = "Login Now";
+                btn.innerText = "Register & Get ₹50";
             }
         }
     </script>
