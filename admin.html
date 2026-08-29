@@ -385,6 +385,28 @@
             alert("🎉 12:00 AM Daily Income Engine Executed Successfully!");
             loadAdminDashboard();
         }
+            <!-- VIP Plan Control Switch in admin.html -->
+<div class="card">
+    <div class="card-header">
+        <h3>VIP Premium Plans Control</h3>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button onclick="toggleVipPlan('plan_4999_open')" class="btn-action btn-green" style="flex: 1;">Toggle ₹4,999 Plan</button>
+        <button onclick="toggleVipPlan('plan_9999_open')" class="btn-action btn-green" style="flex: 1;">Toggle ₹9,999 Plan</button>
+    </div>
+</div>
+
+<script>
+async function toggleVipPlan(planKey) {
+    const sb = getSupabase();
+    const { data } = await sb.from('settings').select('value').eq('key', planKey).maybeSingle();
+    const currentVal = data ? data.value : '0';
+    const newVal = currentVal === '1' ? '0' : '1';
+    
+    await sb.from('settings').upsert({ key: planKey, value: newVal });
+    alert(`Plan status changed to: ${newVal === '1' ? 'OPEN / UNLOCKED ✅' : 'LOCKED / UPCOMING 🔒'}`);
+}
+
     </script>
 </body>
 </html>
