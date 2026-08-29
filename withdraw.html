@@ -159,78 +159,95 @@
             document.getElementById('feeDisplay').innerText = `- ₹${fee.toFixed(2)}`;
             document.getElementById('netPayoutDisplay').innerText = `₹${net.toFixed(2)}`;
         }
+async function submitWithdrawalRequest() {
+    const amt = parseFloat(document.getElementById('wdAmount').value);
+    const name = document.getElementById('holderName').value.trim();
+    const acc = document.getElementById('accNumber').value.trim();
+    const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
+    const btn = document.getElementById('btnSubmitWd');
 
-        async function submitWithdrawalRequest() {
-            const amt = parseFloat(document.getElementById('wdAmount').value);
-            const name = document.getElementById('holderName').value.trim();
-            const acc = document.getElementById('accNumber').value.trim();
-            const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
-            const btn = document.getElementById('btnSubmitWd');
+    if (isNaN(amt) || amt < 150) return alert("Minimum withdrawal amount ₹150 hai!");
+    if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
+    if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
+    if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
+    if (!ifsc || ifsc.length < 6) return alert("Kripya sahi IFSC Code dalein!");
 
-            if (isNaN(amt) || amt < 150) return alert("Minimum withdrawal amount ₹150 hai!");
-            if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
-            if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
-            if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
-            if (!ifsc || ifsc.length < 6) return alert("Kripya sahi IFSC Code dalein!");
+    const sb = getSupabase();
+    if (!sb) return alert("Database connection error.");
 
-            const sb = getSupabase();
-            if (!sb) return alert("Database connection error.");
+    btn.disabled = true;
+    btn.innerText = "Checking Plan Status...";
 
-            btn.disabled = true;
-            btn.innerText = "Processing Request...";
+    try {
+        // Active purchased plan check
+        const { data: activePlans, error: planErr } = await sb
+            .from('orders')
+            .select('id')
+            .eq('user_id', activeUser.id)
+            .eq('status', 'active');
 
-            try {
-                const feeAmt = Math.round(amt * 0.10 * 100) / 100;
-                const finalAmt = amt - feeAmt;
-                const remainingBal = userCurrentBalance - amt;
+        if (planErr) throw planErr;
 
-                // 1. Deduct balance from user profile & save bank details permanently
-                const { error: pErr } = await sb.from('profiles').update({
-                    balance: remainingBal,
-                    holder_name: name,
-                    account_number: acc,
-                    ifsc_code: ifsc
-                }).eq('id', activeUser.id);
-
-                if (pErr) throw pErr;
-
-                // 2. Insert into withdrawals table
-                const { error: wErr } = await sb.from('withdrawals').insert([{
-                    user_id: activeUser.id,
-                    phone: activeUser.phone,
-                    amount: amt,
-                    fee_amount: feeAmt,
-                    final_amount: finalAmt,
-                    holder_name: name,
-                    account_number: acc,
-                    ifsc_code: ifsc,
-                    status: 'pending'
-                }]);
-
-                if (wErr) throw wErr;
-
-                // 3. Log transaction
-                await sb.from('transactions').insert([{
-                    user_id: activeUser.id,
-                    type: 'withdrawal',
-                    amount: amt,
-                    details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
-                }]);
-
-                alert(`✅ ₹${amt} ka withdrawal successfully submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} aapke bank account me transfer kar diya jayega.`);
-                
-                document.getElementById('wdAmount').value = '';
-                calculateNetPayout();
-                await loadUserProfileAndBank();
-                await loadWithdrawalHistory();
-
-            } catch (err) {
-                alert("Withdrawal Error: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Confirm Bank Withdrawal";
-            }
+        if (!activePlans || activePlans.length === 0) {
+            alert("⚠️ Withdrawal Blocked!\n\nWithdrawal lene ke liye pehle account me koi bhi ek Crop Plan recharge karke activate karna zaroori hai.");
+            window.location.href = 'index.html';
+            return;
         }
+
+        btn.innerText = "Processing Request...";
+
+        const feeAmt = Math.round(amt * 0.10 * 100) / 100;
+        const finalAmt = amt - feeAmt;
+        const remainingBal = userCurrentBalance - amt;
+
+        // 1. Deduct balance from user profile & save bank details permanently
+        const { error: pErr } = await sb.from('profiles').update({
+            balance: remainingBal,
+            holder_name: name,
+            account_number: acc,
+            ifsc_code: ifsc
+        }).eq('id', activeUser.id);
+
+        if (pErr) throw pErr;
+
+        // 2. Insert into withdrawals table
+        const { error: wErr } = await sb.from('withdrawals').insert([{
+            user_id: activeUser.id,
+            phone: activeUser.phone,
+            amount: amt,
+            fee_amount: feeAmt,
+            final_amount: finalAmt,
+            holder_name: name,
+            account_number: acc,
+            ifsc_code: ifsc,
+            status: 'pending'
+        }]);
+
+        if (wErr) throw wErr;
+
+        // 3. Log transaction
+        await sb.from('transactions').insert([{
+            user_id: activeUser.id,
+            type: 'withdrawal',
+            amount: amt,
+            details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
+        }]);
+
+        alert(`✅ ₹${amt} ka withdrawal request submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} transfer kar diya jayega.`);
+        
+        document.getElementById('wdAmount').value = '';
+        calculateNetPayout();
+        await loadUserProfileAndBank();
+        await loadWithdrawalHistory();
+
+    } catch (err) {
+        alert("Withdrawal Error: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Confirm Bank Withdrawal";
+    }
+}
+        
 
         async function loadWithdrawalHistory() {
             const box = document.getElementById('wdHistoryList');
