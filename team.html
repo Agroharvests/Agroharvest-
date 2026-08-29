@@ -14,11 +14,9 @@
         body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
         .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
-        /* Top Header */
         .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; position: sticky; top: 0; z-index: 50; }
         .ref-pill { font-size: 12px; background: #dcfce7; color: #15803d; padding: 5px 12px; border-radius: 10px; font-weight: 900; border: 1px solid #86efac; }
 
-        /* Tier Counter Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 16px; }
         .stat-card { background: white; border: 2px solid #e2e8f0; border-radius: 20px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
         .stat-card.active { border-color: #16a34a; background: #f0fdf4; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.15); }
@@ -27,18 +25,15 @@
         .stat-card h4 { font-size: 20px; font-weight: 900; color: #0f172a; margin-top: 2px; }
         .stat-card.active h4 { color: #16a34a; }
 
-        /* Total Income Banner */
         .team-banner { margin: 0 16px 16px; background: linear-gradient(135deg, #14532d, #16a34a); border-radius: 20px; padding: 18px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.25); }
         .team-banner p { font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
         .team-banner h3 { font-size: 22px; font-weight: 900; margin-top: 2px; }
         .team-banner-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.18); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
-        /* Level Filter Bar */
         .tab-bar { padding: 0 16px 12px; display: flex; justify-content: space-between; align-items: center; }
         .tab-bar h3 { font-size: 16px; font-weight: 900; color: #0f172a; }
         .tab-badge { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 10px; }
 
-        /* Member Directory Cards */
         .members-box { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
         .member-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.02); }
         
@@ -58,11 +53,9 @@
         .m-stat strong { font-weight: 900; color: #0f172a; font-size: 13px; }
         .m-stat strong.green { color: #16a34a; }
 
-        /* Passbook Section */
         .passbook-box { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
         .comm-item { background: white; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
         
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item i { font-size: 19px; }
@@ -71,13 +64,11 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Nav -->
         <div class="top-header">
             <span>Team Network</span>
-            <span id="myRefBadge" class="ref-pill">CODE: ...</span>
+            <span id="myRefBadge" class="ref-pill">REF: ...</span>
         </div>
 
-        <!-- Team Income Strip -->
         <div class="team-banner">
             <div>
                 <p>Total Team Commission</p>
@@ -88,7 +79,7 @@
             </div>
         </div>
 
-        <!-- 3-Tier Selectable Tabs -->
+        <!-- 3-Tier Navigation -->
         <div class="stats-grid">
             <div class="stat-card active" onclick="switchLevelTab(1, this)">
                 <p>Level 1 (25%)</p>
@@ -104,9 +95,8 @@
             </div>
         </div>
 
-        <!-- Members Section -->
         <div class="tab-bar">
-            <h3 id="currentLevelHeading">Level 1 Direct Members</h3>
+            <h3 id="currentLevelHeading">Level 1 (25%) Direct Members</h3>
             <span id="levelMemberCountBadge" class="tab-badge">0 Members</span>
         </div>
 
@@ -114,7 +104,6 @@
             <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading team tree...</div>
         </div>
 
-        <!-- Commission History Section -->
         <div class="tab-bar">
             <h3>Commission Passbook</h3>
             <span style="font-size: 11px; font-weight: 700; color: #64748b;">Live Transactions</span>
@@ -124,7 +113,6 @@
             <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading passbook...</div>
         </div>
 
-        <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
@@ -151,13 +139,13 @@
             const sb = getSupabase();
             if (!sb) return;
 
-            // 1. Fetch Live User Profile for Total Commission
+            // 1. Fetch live balance & team income
             const { data: prof } = await sb.from('profiles').select('team_income').eq('id', activeUser.id).single();
             if (prof) {
                 document.getElementById('totalTeamIncome').innerText = "₹" + parseFloat(prof.team_income || 0).toFixed(2);
             }
 
-            // 2. Fetch All Profiles to Build Downline Tree
+            // 2. Fetch all database profiles
             const { data: allProfiles } = await sb.from('profiles').select('*');
             const { data: orders } = await sb.from('orders').select('*');
             const { data: comms } = await sb.from('transactions').select('*').eq('user_id', activeUser.id).eq('type', 'commission').order('created_at', { ascending: false });
@@ -165,16 +153,21 @@
             allOrders = orders || [];
             allCommissions = comms || [];
 
-            // Level 1: Direct Referrals
-            level1Users = (allProfiles || []).filter(u => u.referred_by === activeUser.referral_code);
+            // Exclude current logged in user from downline candidates
+            const otherProfiles = (allProfiles || []).filter(u => u.id !== activeUser.id);
 
-            // Level 2: Sponsored by Level 1
+            // Level 1: Only users directly referred by activeUser
+            level1Users = otherProfiles.filter(u => u.referred_by === activeUser.referral_code);
             const l1Codes = level1Users.map(u => u.referral_code);
-            level2Users = (allProfiles || []).filter(u => l1Codes.includes(u.referred_by));
+            const l1Ids = level1Users.map(u => u.id);
 
-            // Level 3: Sponsored by Level 2
+            // Level 2: Only users referred by L1 members (strictly excluding self and L1)
+            level2Users = otherProfiles.filter(u => l1Codes.includes(u.referred_by) && !l1Ids.includes(u.id));
             const l2Codes = level2Users.map(u => u.referral_code);
-            level3Users = (allProfiles || []).filter(u => l2Codes.includes(u.referred_by));
+            const l2Ids = level2Users.map(u => u.id);
+
+            // Level 3: Only users referred by L2 members (strictly excluding self, L1 and L2)
+            level3Users = otherProfiles.filter(u => l2Codes.includes(u.referred_by) && !l1Ids.includes(u.id) && !l2Ids.includes(u.id));
 
             document.getElementById('l1Count').innerText = level1Users.length;
             document.getElementById('l2Count').innerText = level2Users.length;
@@ -203,7 +196,7 @@
             if (!list || list.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700; background: white; border-radius: 18px; border: 1.5px dashed #cbd5e1;">
-                        <i class="fa-solid fa-user-plus" style="font-size: 26px; color: #cbd5e1; margin-bottom: 8px;"></i>
+                        <i class="fa-solid fa-user-slash" style="font-size: 26px; color: #cbd5e1; margin-bottom: 8px;"></i>
                         <p>Is level par abhi tak koi member nahi hai.</p>
                     </div>
                 `;
@@ -215,11 +208,11 @@
                 const maskedPhone = `+91 ${phoneStr.substring(0, 3)}****${phoneStr.substring(7)}`;
                 const regDate = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'Recent';
 
-                // Find Active Plan of this member
+                // Fetch active crop plan
                 const mOrders = allOrders.filter(o => o.user_id === m.id && o.status === 'active');
                 const activePlanName = mOrders.length > 0 ? mOrders[0].plan_name + ` (₹${mOrders[0].price})` : "No Active Plan";
                 
-                // Calculate Total Commission earned from this user
+                // Calculate direct commission from this downline member
                 const commEarned = allCommissions
                     .filter(c => c.from_user_id === m.id)
                     .reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
