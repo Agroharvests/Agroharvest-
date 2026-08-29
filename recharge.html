@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Instant Recharge</title>
+    <title>AgroHarvest - Secure Recharge</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
@@ -21,10 +21,10 @@
         .amount-pill { background: #f8fafc; border: 2px solid #e2e8f0; padding: 12px 6px; border-radius: 16px; font-weight: 900; text-align: center; cursor: pointer; color: #0f172a; font-size: 16px; transition: all 0.2s; }
         .amount-pill.active { background: #dcfce7; border-color: #16a34a; color: #15803d; transform: scale(1.02); }
 
-        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 17px; font-weight: 900; outline: none; margin-bottom: 16px; color: #0f172a; }
+        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; margin-bottom: 14px; color: #0f172a; }
         .input-box:focus { border-color: #16a34a; }
 
-        /* Direct UPI App Trigger Grid */
+        /* UPI Apps */
         .upi-apps-label { font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         .upi-apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
         .app-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -36,18 +36,19 @@
         .icon-paytm { background: #00b9f1; color: white; }
         .app-btn span { font-size: 11px; font-weight: 800; color: #0f172a; }
 
-        .btn-main-pay { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 900; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); }
-        .btn-main-pay:active { transform: scale(0.98); }
+        .upi-box { background: #f0fdf4; border: 1.5px dashed #16a34a; padding: 14px; border-radius: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-copy { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-        /* Manual Fallback */
-        .manual-toggle { text-align: center; margin-top: 14px; font-size: 12px; font-weight: 700; color: #64748b; cursor: pointer; text-decoration: underline; }
+        .btn-submit-utr { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
+        .btn-submit-utr:disabled { opacity: 0.6; }
 
-        /* History Table */
+        /* History */
         .history-card { background: white; margin: 0 16px 20px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; }
         .history-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
         .badge-status { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
         .badge-approved { background: #dcfce7; color: #15803d; }
         .badge-pending { background: #fef3c7; color: #b45309; }
+        .badge-rejected { background: #fee2e2; color: #dc2626; }
     </style>
 </head>
 <body>
@@ -58,54 +59,60 @@
                 <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
                 <span>Recharge Wallet</span>
             </div>
-            <span style="font-size: 12px; background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 10px; font-weight: 800;">INSTANT</span>
+            <span style="font-size: 11px; background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 10px; font-weight: 800;">VERIFIED</span>
         </div>
 
-        <!-- Recharge Configuration Card -->
         <div class="card">
-            <h3 style="font-size: 15px; font-weight: 900; color: #0f172a;">Select Recharge Amount</h3>
+            <h3 style="font-size: 15px; font-weight: 900; color: #0f172a;">1. Select Amount</h3>
             <div class="quick-grid">
                 <div class="amount-pill active" onclick="setRechargeAmt(525, this)">₹525</div>
                 <div class="amount-pill" onclick="setRechargeAmt(1500, this)">₹1,500</div>
                 <div class="amount-pill" onclick="setRechargeAmt(3500, this)">₹3,500</div>
             </div>
 
-            <input type="number" id="rechargeInput" class="input-box" value="525" placeholder="Or enter custom amount">
+            <input type="number" id="rechargeInput" class="input-box" value="525" placeholder="Enter amount">
 
             <div class="upi-apps-label">
-                <span>Fast Direct Pay via App</span>
-                <small style="color: #16a34a; font-weight: 800;">100% Safe & Instant</small>
+                <span>2. Pay via UPI App</span>
+                <small style="color: #64748b; font-weight: 700;">Tap to Open</small>
             </div>
 
             <!-- Direct App Launchers -->
             <div class="upi-apps-grid">
-                <div class="app-btn" onclick="launchDirectPayment('phonepe')">
+                <div class="app-btn" onclick="openUpiApp('phonepe')">
                     <div class="app-icon icon-phonepe"><i class="fa-solid fa-mobile-screen-button"></i></div>
                     <span>PhonePe</span>
                 </div>
-                <div class="app-btn" onclick="launchDirectPayment('gpay')">
+                <div class="app-btn" onclick="openUpiApp('gpay')">
                     <div class="app-icon icon-gpay"><i class="fa-brands fa-google-pay" style="font-size: 26px;"></i></div>
                     <span>Google Pay</span>
                 </div>
-                <div class="app-btn" onclick="launchDirectPayment('paytm')">
+                <div class="app-btn" onclick="openUpiApp('paytm')">
                     <div class="app-icon icon-paytm"><i class="fa-solid fa-bolt"></i></div>
                     <span>Paytm</span>
                 </div>
             </div>
 
-            <button onclick="launchDirectPayment('generic')" id="mainPayBtn" class="btn-main-pay">
-                Pay with Any UPI App <i class="fa-solid fa-arrow-right"></i>
-            </button>
-
-            <div class="manual-toggle" onclick="toggleManualUtr()">Submit 12-Digit UTR manually if needed</div>
-
-            <!-- Manual UTR Fallback (Hidden by default) -->
-            <div id="manualUtrSection" style="display: none; margin-top: 16px; padding-top: 14px; border-top: 1px dashed #cbd5e1;">
-                <input type="text" id="manualUtrInput" class="input-box" placeholder="Enter 12 Digit UTR Number" maxlength="16" style="margin-bottom: 10px;">
-                <button onclick="submitManualUtr()" style="width: 100%; background: #0f172a; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">Submit UTR</button>
+            <!-- Manual UPI ID Copy Box -->
+            <div class="upi-box">
+                <div>
+                    <p style="font-size: 11px; color: #64748b; font-weight: 700;">Manual Transfer UPI ID</p>
+                    <h4 id="adminUpiDisplay" style="font-size: 14px; font-weight: 900; color: #15803d;">agroharvest@upi</h4>
+                </div>
+                <button onclick="copyUpiId()" class="btn-copy">Copy</button>
             </div>
+
+            <!-- Step 3: Mandatory UTR Input -->
+            <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin-bottom: 6px;">3. Enter 12-Digit UTR Number</h3>
+            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px;">Payment successful hone ke baad bank se mila 12-digit UTR/Txn ID dalein:</p>
+
+            <input type="text" id="utrNumberInput" class="input-box" placeholder="e.g. 423871928371" maxlength="16" required>
+
+            <button onclick="submitUtrRequest()" id="subUtrBtn" class="btn-submit-utr">
+                Submit UTR for Verification
+            </button>
         </div>
-                <!-- Live Recharge History Table -->
+                <!-- Recharge History -->
         <div class="history-card">
             <h3 style="font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <span>Recharge History</span>
@@ -120,13 +127,15 @@
     <script>
         const activeUser = requireAuth();
         let targetUpiId = "agroharvest@upi";
-        let pendingPaymentAttempt = null;
 
         document.addEventListener("DOMContentLoaded", async () => {
             const sb = getSupabase();
             if (sb) {
                 const { data } = await sb.from('settings').select('value').eq('key', 'upi_id').maybeSingle();
-                if (data && data.value) targetUpiId = data.value;
+                if (data && data.value) {
+                    targetUpiId = data.value;
+                    document.getElementById('adminUpiDisplay').innerText = data.value;
+                }
             }
             loadRechargeHistory();
         });
@@ -137,100 +146,46 @@
             el.classList.add('active');
         }
 
-        function toggleManualUtr() {
-            const el = document.getElementById('manualUtrSection');
-            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        function copyUpiId() {
+            navigator.clipboard.writeText(targetUpiId).then(() => {
+                alert("✅ UPI ID Copied: " + targetUpiId);
+            });
         }
 
-        // Direct Deep Link Launcher
-        function launchDirectPayment(appType) {
+        // Open UPI app without fake auto-credit
+        function openUpiApp(appType) {
             const amt = parseFloat(document.getElementById('rechargeInput').value);
             if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
 
-            const txnRef = 'TXN' + Date.now().toString().slice(-8);
             const note = `AgroHarvest Recharge UID ${activeUser.phone}`;
+            let uri = `upi://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
 
-            // Standard UPI Deep-link URI
-            let upiUri = `upi://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}&tr=${txnRef}`;
-
-            // App Specific Package Schemes
             if (appType === 'phonepe') {
-                upiUri = `phonepe://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}&tr=${txnRef}`;
+                uri = `phonepe://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
             } else if (appType === 'paytm') {
-                upiUri = `paytmmp://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}&tr=${txnRef}`;
+                uri = `paytmmp://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
             }
 
-            pendingPaymentAttempt = {
-                amount: amt,
-                txnRef: txnRef,
-                timestamp: Date.now()
-            };
-
-            // Launch App
-            window.location.href = upiUri;
-
-            // Prompt auto credit upon user returning to screen
-            setTimeout(() => {
-                if (confirm(`Kya aapne PhonePe / GPay / Paytm se ₹${amt} ka payment successfully pura kar liya hai?`)) {
-                    processInstantAutoCredit(amt, txnRef);
-                }
-            }, 3000);
+            window.location.href = uri;
         }
 
-        // Auto Instant Wallet Credit Engine
-        async function processInstantAutoCredit(amt, txnRef) {
-            const sb = getSupabase();
-            if (!sb) return;
-
-            const btn = document.getElementById('mainPayBtn');
-            btn.disabled = true;
-            btn.innerText = "Crediting Wallet...";
-
-            try {
-                // 1. Record approved recharge
-                await sb.from('recharges').insert([{
-                    user_id: activeUser.id,
-                    amount: amt,
-                    utr: txnRef,
-                    status: 'approved'
-                }]);
-
-                // 2. Add Balance in Profile
-                const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).single();
-                const newBal = parseFloat(prof.balance || 0) + amt;
-                await sb.from('profiles').update({ balance: newBal }).eq('id', activeUser.id);
-
-                // 3. Log in Transactions
-                await sb.from('transactions').insert([{
-                    user_id: activeUser.id,
-                    type: 'recharge',
-                    amount: amt,
-                    details: `Direct Instant UPI Recharge (${txnRef})`
-                }]);
-
-                alert(`🎉 Payment Verified! ₹${amt} aapke wallet mein add kar diye gaye hain.`);
-                window.location.replace("index.html");
-
-            } catch (err) {
-                alert("Recharge logged! Admin verification pending: " + err.message);
-                loadRechargeHistory();
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Pay with Any UPI App";
-            }
-        }
-
-        async function submitManualUtr() {
+        // Strictly submit as PENDING (Admin verifies before adding balance)
+        async function submitUtrRequest() {
             const amt = parseFloat(document.getElementById('rechargeInput').value);
-            const utr = document.getElementById('manualUtrInput').value.trim();
+            const utr = document.getElementById('utrNumberInput').value.trim();
+            const btn = document.getElementById('subUtrBtn');
 
             if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
-            if (!utr || utr.length < 10) return alert("Sahi 12-digit UTR number dalein!");
+            if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number enter karein!");
 
             const sb = getSupabase();
-            if (!sb) return;
+            if (!sb) return alert("Connecting database...");
+
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
 
             try {
+                // Insert as PENDING only (Zero balance credited automatically)
                 const { error } = await sb.from('recharges').insert([{
                     user_id: activeUser.id,
                     amount: amt,
@@ -239,18 +194,21 @@
                 }]);
 
                 if (error) {
-                    if (error.message.includes('unique') || error.message.includes('utr')) {
-                        throw new Error("Yeh UTR pehle se submit kiya ja chuka hai!");
+                    if (error.message.includes('unique') || error.message.includes('utr') || error.message.includes('recharges_utr_key')) {
+                        throw new Error("Yeh UTR number pehle se submit kiya ja chuka hai! Duplicate UTR allow nahi hai.");
                     }
                     throw error;
                 }
 
-                alert("✅ UTR Submitted! Admin 10 minute mein verify karke approve kar dega.");
-                document.getElementById('manualUtrInput').value = '';
+                alert("✅ UTR Request Successfully Submit ho gayi!\nAdmin 5-10 minute me verify karke wallet mein balance add kar dega.");
+                document.getElementById('utrNumberInput').value = '';
                 loadRechargeHistory();
 
             } catch (err) {
                 alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit UTR for Verification";
             }
         }
 
@@ -266,22 +224,25 @@
 
             const box = document.getElementById('rechargeHistoryList');
             if (!list || list.length === 0) {
-                box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Abhi tak koi recharge nahi kiya gaya.</p>`;
+                box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Abhi tak koi recharge submit nahi hua hai.</p>`;
                 return;
             }
 
             box.innerHTML = list.map(item => {
-                const badgeClass = item.status === 'approved' ? 'badge-approved' : 'badge-pending';
+                let badgeClass = 'badge-pending';
+                if (item.status === 'approved') badgeClass = 'badge-approved';
+                if (item.status === 'rejected') badgeClass = 'badge-rejected';
+
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Today';
 
                 return `
                     <div class="history-item">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <strong style="font-size: 14px; color: #16a34a;">+ ₹${parseFloat(item.amount).toFixed(2)}</strong>
+                            <strong style="font-size: 14px; color: #0f172a;">₹${parseFloat(item.amount).toFixed(2)}</strong>
                             <span class="badge-status ${badgeClass}">${item.status}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
-                            <span>Ref: ${item.utr}</span>
+                            <span>UTR: ${item.utr}</span>
                             <span>${dateStr}</span>
                         </div>
                     </div>
