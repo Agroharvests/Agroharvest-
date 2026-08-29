@@ -50,24 +50,20 @@
         .section-bar h3 { font-size: 17px; font-weight: 900; color: #0f172a; }
         .section-bar span { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
 
-        /* High Conversion Crop Plan Cards */
+        /* Plans */
         .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
-        
         .plan-card-pro { background: #ffffff; border-radius: 24px; padding: 18px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
         .plan-card-pro:active { transform: scale(0.985); }
 
-        /* Theme Variants */
         .plan-green { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
         .plan-gold { border-color: #fde68a; background: linear-gradient(180deg, #fefce8 0%, #ffffff 40%); }
         .plan-diamond { border-color: #bae6fd; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
 
-        /* Badges */
         .ribbon-badge { position: absolute; top: 0; right: 0; padding: 6px 14px; font-size: 11px; font-weight: 900; color: white; border-radius: 0 0 0 16px; letter-spacing: 0.3px; text-transform: uppercase; }
         .ribbon-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3); }
         .ribbon-gold { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
         .ribbon-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3); }
 
-        /* Plan Top Info */
         .plan-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
         .plan-img-wrap { width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; border: 2px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
         .plan-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
@@ -78,32 +74,46 @@
         .price-gold { color: #d97706; }
         .price-diamond { color: #0284c7; }
 
-        /* Metric Grid inside Card */
         .plan-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px; margin-bottom: 14px; text-align: center; }
         .stat-col p { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
         .stat-col h5 { font-size: 14px; font-weight: 900; color: #0f172a; }
 
-        /* Action Buttons */
-        .btn-invest { width: 100%; border: none; padding: 13px; border-radius: 16px; font-size: 15px; font-weight: 900; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .btn-invest { width: 100%; border: none; padding: 13px; border-radius: 16px; font-size: 15px; font-weight: 900; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-invest-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
         .btn-invest-gold { background: linear-gradient(135deg, #b45309, #d97706); box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35); }
         .btn-invest-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35); }
+
+        /* Social Share Modal System */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(11, 19, 41, 0.75); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-sheet { background: #ffffff; width: 100%; max-width: 380px; border-radius: 28px; padding: 24px 20px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: sheetUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes sheetUp { from { transform: translateY(30px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        .modal-gift-icon { width: 62px; height: 62px; background: #dcfce7; color: #16a34a; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; border: 2px solid #bbf7d0; box-shadow: 0 8px 18px rgba(22, 163, 74, 0.2); }
+        .ref-box-pro { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: #15803d; margin: 14px 0; word-break: break-all; }
+
+        /* Social Buttons Grid */
+        .social-share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 16px; }
+        .social-btn { border: none; padding: 12px 6px; border-radius: 16px; color: white; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.15s; }
+        .social-btn:active { transform: scale(0.95); }
+        .social-btn i { font-size: 22px; }
+
+        .btn-whatsapp { background: #25d366; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35); }
+        .btn-telegram { background: #0088cc; box-shadow: 0 4px 14px rgba(0, 136, 204, 0.35); }
+        .btn-facebook { background: #1877f2; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.35); }
+
+        .btn-copy-main { width: 100%; background: #0f172a; color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-close-modal { width: 100%; background: transparent; border: none; color: #64748b; font-weight: 800; font-size: 13px; margin-top: 10px; cursor: pointer; padding: 6px; }
 
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item i { font-size: 19px; }
         .nav-item.active { color: #16a34a; }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-card { background: white; width: 100%; max-width: 360px; border-radius: 24px; padding: 24px; text-align: center; }
-        .ref-box { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: #16a34a; margin: 14px 0; word-break: break-all; }
-        .btn-modal { width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Brand Header -->
+        <!-- Top Header -->
         <div class="brand-bar">
             <div class="logo-box">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
@@ -114,7 +124,7 @@
             <div class="filter-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
 
-        <!-- Real Harvester Hero -->
+        <!-- Hero -->
         <div class="hero-banner-box">
             <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester Field">
             <div class="hero-banner-overlay">
@@ -123,7 +133,7 @@
             </div>
         </div>
 
-        <!-- Balance Strip -->
+        <!-- Wallet Strip -->
         <div class="balance-strip">
             <div class="balance-item">
                 <p>Total Balance</p>
@@ -135,7 +145,7 @@
             </div>
         </div>
 
-        <!-- 4 Quick Actions -->
+        <!-- 4 Actions -->
         <div class="actions-row">
             <a href="orders.html" class="act-btn">
                 <div class="act-icon icon-crop"><i class="fa-solid fa-seedling"></i></div>
@@ -155,7 +165,7 @@
             </a>
         </div>
 
-        <!-- Available Plans Heading -->
+        <!-- Available Plans -->
         <div class="section-bar">
             <h3>Available Crop Plans</h3>
             <span>30 Days Yield Cycle</span>
@@ -193,8 +203,8 @@
                 <button onclick="buySeedPlan('Green Plan', 525, 125, 30)" class="btn-invest btn-invest-green">
                     Invest ₹525 <i class="fa-solid fa-arrow-right"></i>
                 </button>
-            </div>
-                        <!-- 2. Gold Plan -->
+    </div>
+                <!-- 2. Gold Plan -->
             <div class="plan-card-pro plan-gold">
                 <div class="ribbon-badge ribbon-gold">👑 Most Popular</div>
                 <div class="plan-head">
@@ -269,21 +279,44 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Referral Modal -->
-        <div id="inviteModal" class="modal">
-            <div class="modal-card">
-                <i class="fa-solid fa-gift" style="font-size: 38px; color: #16a34a; margin-bottom: 8px;"></i>
-                <h3 style="font-size: 18px; font-weight: 900;">Invite & Earn 28%</h3>
-                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Earn 25% L1, 2% L2, and 1% L3 direct commission instantly.</p>
-                <div id="refLinkText" class="ref-box">Generating...</div>
-                <button onclick="copyInvite()" class="btn-modal">Copy Link</button>
-                <button onclick="closeInviteModal()" style="margin-top: 12px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer;">Close</button>
+        <!-- Smooth Social Sharing Modal -->
+        <div id="inviteModal" class="modal-overlay" onclick="closeInviteModal(event)">
+            <div class="modal-sheet" onclick="event.stopPropagation()">
+                <div class="modal-gift-icon">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+                <h3 style="font-size: 19px; font-weight: 900; color: #0f172a;">Invite & Earn 28%</h3>
+                <p style="font-size: 12px; color: #64748b; font-weight: 600; margin-top: 4px;">Earn 25% L1, 2% L2, and 1% L3 direct commission instantly.</p>
+
+                <div id="refLinkText" class="ref-box-pro">Generating your link...</div>
+
+                <!-- 1-Click Social Sharing Buttons -->
+                <div class="social-share-grid">
+                    <button onclick="shareViaWhatsApp()" class="social-btn btn-whatsapp">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        <span>WhatsApp</span>
+                    </button>
+                    <button onclick="shareViaTelegram()" class="social-btn btn-telegram">
+                        <i class="fa-brands fa-telegram"></i>
+                        <span>Telegram</span>
+                    </button>
+                    <button onclick="shareViaFacebook()" class="social-btn btn-facebook">
+                        <i class="fa-brands fa-facebook"></i>
+                        <span>Facebook</span>
+                    </button>
+                </div>
+
+                <button onclick="copyInvite()" class="btn-copy-main">
+                    <i class="fa-regular fa-copy"></i> Copy Referral Link
+                </button>
+                <button onclick="closeInviteModal()" class="btn-close-modal">Close</button>
             </div>
         </div>
     </div>
 
     <script>
         const activeUser = requireAuth();
+        let fullReferralLink = "";
 
         document.addEventListener("DOMContentLoaded", () => {
             loadDashboard();
@@ -336,10 +369,8 @@
                     return;
                 }
 
-                // Deduct balance
                 await sb.from('profiles').update({ balance: curBal - price }).eq('id', activeUser.id);
 
-                // Create Order (Database trigger automatically distributes 25% L1, 2% L2, 1% L3)
                 await sb.from('orders').insert([{
                     user_id: activeUser.id,
                     plan_name: title,
@@ -367,22 +398,37 @@
 
         function openInviteModal() {
             const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            const fullUrl = `${currentPath}register.html?ref=${activeUser.referral_code}`;
-            document.getElementById('refLinkText').innerText = fullUrl;
+            fullReferralLink = `${currentPath}register.html?ref=${activeUser.referral_code}`;
+            document.getElementById('refLinkText').innerText = fullReferralLink;
             document.getElementById('inviteModal').style.display = 'flex';
         }
 
-        function closeInviteModal() {
+        function closeInviteModal(event) {
+            if (event && event.target.id !== 'inviteModal' && !event.target.classList.contains('btn-close-modal')) return;
             document.getElementById('inviteModal').style.display = 'none';
         }
 
         function copyInvite() {
-            const txt = document.getElementById('refLinkText').innerText;
-            navigator.clipboard.writeText(txt).then(() => {
-                alert("Invite link copied!");
-                closeInviteModal();
+            navigator.clipboard.writeText(fullReferralLink).then(() => {
+                alert("✅ Referral Link Copied Successfully!");
+                document.getElementById('inviteModal').style.display = 'none';
             });
+        }
+
+        function shareViaWhatsApp() {
+            const message = encodeURIComponent(`🌾 Join AgroHarvest Smart Farming today & Claim ₹50 Instant Bonus! Daily guaranteed harvest returns.\n\nRegister here: ${fullReferralLink}`);
+            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+        }
+
+        function shareViaTelegram() {
+            const message = encodeURIComponent(`🌾 Join AgroHarvest Smart Farming today & Claim ₹50 Instant Bonus! Daily guaranteed harvest returns.`);
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(fullReferralLink)}&text=${message}`, '_blank');
+        }
+
+        function shareViaFacebook() {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
         }
     </script>
 </body>
-</html>
+    </html>
+                
