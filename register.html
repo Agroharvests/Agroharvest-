@@ -9,46 +9,33 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
-        
         .mobile-container { width: 100%; max-width: 430px; background: #ffffff; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
-
-        .hero-header { height: 260px; width: 100%; position: relative; background: #166534; overflow: hidden; }
-        .hero-header img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 100%); display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 18px; }
-        
-        .lang-badge { background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px; }
+        .hero-header { height: 240px; width: 100%; position: relative; background: #166534; overflow: hidden; }
+        .hero-header img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%); display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 18px; }
         .brand-pill { background: rgba(22, 163, 74, 0.95); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px; }
-
         .form-sheet { flex: 1; background: #ffffff; margin-top: -36px; border-radius: 36px 36px 0 0; padding: 30px 24px 20px; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 -10px 30px rgba(0,0,0,0.12); }
-        
-        .title-box { margin-bottom: 20px; }
-        .title-box h1 { font-size: 25px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
-        .title-box p { font-size: 13px; color: #16a34a; font-weight: 700; margin-top: 2px; }
-
+        .title-box h1 { font-size: 25px; font-weight: 900; color: #0f172a; }
+        .title-box p { font-size: 13px; color: #16a34a; font-weight: 800; margin-top: 2px; }
         .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; height: 56px; }
         .input-wrap:focus-within { border-color: #16a34a; background: #ffffff; box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12); }
         .input-icon-box { width: 34px; height: 34px; background: #dcfce7; color: #16a34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-        
         .prefix { font-weight: 800; color: #0f172a; font-size: 15px; border-right: 1.5px solid #cbd5e1; padding-right: 10px; }
         .input-wrap input { width: 100%; border: none; outline: none; background: transparent; font-size: 14px; font-weight: 700; color: #0f172a; }
-
-        .btn-register { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: #ffffff; border: none; padding: 15px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); margin-top: 8px; }
-        .btn-register:active { transform: scale(0.98); }
-
-        .footer-text { text-align: center; margin-top: 20px; font-size: 13px; font-weight: 600; color: #64748b; }
+        .btn-register { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: #ffffff; border: none; padding: 15px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); margin-top: 6px; }
+        .footer-text { text-align: center; margin-top: 18px; font-size: 13px; font-weight: 600; color: #64748b; }
         .footer-text a { color: #16a34a; font-weight: 800; text-decoration: none; margin-left: 4px; }
     </style>
 </head>
 <body>
     <div class="mobile-container">
         <div class="hero-header">
-            <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80" alt="AgroHarvest Smart Farming">
+            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80" alt="Harvester">
             <div class="hero-overlay">
-                <div class="brand-pill"><i class="fa-solid fa-seedling"></i> AgroHarvest</div>
-                <div class="lang-badge"><i class="fa-solid fa-globe"></i> ENG</div>
+                <div class="brand-pill"><i class="fa-solid fa-leaf"></i> AgroHarvest</div>
             </div>
         </div>
 
@@ -59,11 +46,11 @@
                     <p>✨ Claim ₹50 Instant Welcome Bonus</p>
                 </div>
 
-                <form id="regForm" onsubmit="handleRegister(event)">
+                <form id="regForm" onsubmit="handleRegister(event)" style="margin-top: 20px;">
                     <div class="input-wrap">
                         <div class="input-icon-box"><i class="fa-solid fa-phone"></i></div>
                         <span class="prefix">+91</span>
-                        <input type="tel" id="regPhone" placeholder="Enter Mobile Number" maxlength="10" required>
+                        <input type="tel" id="regPhone" placeholder="10 Digit Mobile Number" maxlength="10" required>
                     </div>
 
                     <div class="input-wrap">
@@ -72,8 +59,8 @@
                     </div>
 
                     <div class="input-wrap">
-                        <div class="input-icon-box"><i class="fa-solid fa-user-plus"></i></div>
-                        <input type="text" id="regRef" placeholder="Referral Code (Optional)">
+                        <div class="input-icon-box"><i class="fa-solid fa-user-tag"></i></div>
+                        <input type="text" id="regRef" placeholder="Referral Code (Compulsory)" required>
                     </div>
 
                     <button type="submit" id="regBtn" class="btn-register">Register & Get ₹50</button>
@@ -88,82 +75,91 @@
 
     <script>
         requireGuest();
-
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get('ref');
         if (refParam) document.getElementById('regRef').value = refParam;
+
+        function generateUniqueRefCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = 'AG-';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
 
         async function handleRegister(e) {
             e.preventDefault();
             const phone = document.getElementById('regPhone').value.trim();
             const password = document.getElementById('regPassword').value.trim();
-            const refBy = document.getElementById('regRef').value.trim();
+            const refBy = document.getElementById('regRef').value.trim().toUpperCase();
             const btn = document.getElementById('regBtn');
 
             const sb = getSupabase();
-            if (!sb) {
-                alert("Database connection initializing... Kripya 2 second baad dobara try karein.");
-                return;
-            }
+            if (!sb) return alert("Connecting database...");
 
-            if (phone.length !== 10 || isNaN(phone)) {
-                alert("Kripya 10 digit ka valid mobile number dalein!");
-                return;
-            }
-            if (password.length < 6) {
-                alert("Password kam se kam 6 characters ka hona chahiye!");
-                return;
-            }
+            if (phone.length !== 10 || isNaN(phone)) return alert("Valid 10 digit number enter karein!");
+            if (password.length < 6) return alert("Password kam se kam 6 digits ka hona chahiye!");
+            if (!refBy) return alert("Referral Code dalna aniwarya (compulsory) hai!");
 
             btn.disabled = true;
             btn.innerText = "Creating Account...";
 
             try {
-                const { data: existing, error: checkErr } = await sb
+                // Verify Sponsor Code Exists
+                const { data: sponsor, error: spErr } = await sb
                     .from('profiles')
-                    .select('id')
-                    .eq('phone', phone)
+                    .select('id, referral_code')
+                    .eq('referral_code', refBy)
                     .maybeSingle();
 
-                if (existing) {
-                    alert("Yeh number pehle se registered hai! Kripya Login karein.");
-                    window.location.href = "login.html";
+                if (!sponsor && refBy !== 'AG-ADMIN') {
+                    alert("Amanaya (Invalid) Referral Code! Kripya sahi code dalein.");
+                    btn.disabled = false;
+                    btn.innerText = "Register & Get ₹50";
                     return;
                 }
+
+                const myNewRefCode = generateUniqueRefCode();
 
                 const { data: newUser, error: regErr } = await sb
                     .from('profiles')
                     .insert([{
                         phone: phone,
                         password: password,
-                        referral_code: phone,
-                        referred_by: refBy || null,
+                        referral_code: myNewRefCode,
+                        referred_by: refBy,
                         balance: 50.00,
                         team_income: 0.00
                     }])
                     .select()
                     .single();
 
-                if (regErr) throw regErr;
+                if (regErr) {
+                    if (regErr.message.includes('unique') || regErr.message.includes('profiles_phone_key')) {
+                        throw new Error("Yeh mobile number pehle se registered hai!");
+                    }
+                    throw regErr;
+                }
 
                 await sb.from('transactions').insert([{
                     user_id: newUser.id,
                     type: 'bonus',
                     amount: 50.00,
-                    status: 'success',
                     details: 'Welcome Signup Bonus'
                 }]);
 
                 setSessionUser(newUser);
-                alert("✅ Registration Successful! ₹50 Bonus added.");
+                alert("🎉 Registration Successful! ₹50 Bonus added.");
                 window.location.replace("index.html");
 
             } catch (err) {
-                alert("Registration failed: " + err.message);
+                alert("Error: " + err.message);
                 btn.disabled = false;
                 btn.innerText = "Register & Get ₹50";
             }
         }
     </script>
 </body>
-</html>
+                                                        </html>
+                                                        
