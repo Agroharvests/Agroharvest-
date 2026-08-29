@@ -175,46 +175,49 @@
         }
 
         async function submitUtrRequest() {
-            const amt = parseFloat(document.getElementById('rechargeInput').value);
-            const utr = document.getElementById('utrNumberInput').value.trim();
-            const btn = document.getElementById('subUtrBtn');
+        async function submitUtrRequest() {
+    const amt = parseFloat(document.getElementById('rechargeInput').value);
+    const utr = document.getElementById('utrNumberInput').value.trim();
+    const btn = document.getElementById('subUtrBtn');
 
-            if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
-            if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number enter karein!");
+    if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
+    if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number enter karein!");
 
-            const sb = getSupabase();
-            if (!sb) return alert("Connecting database...");
+    const sb = getSupabase();
+    if (!sb) return alert("Connecting database...");
 
-            btn.disabled = true;
-            btn.innerText = "Submitting...";
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
 
-            try {
-                const { error } = await sb.from('recharges').insert([{
-                    user_id: activeUser.id,
-                    amount: amt,
-                    utr: utr,
-                    status: 'pending'
-                }]);
+    try {
+        // user_id aur phone dono insert ho rahe hain
+        const { error } = await sb.from('recharges').insert([{
+            user_id: activeUser.id,
+            phone: activeUser.phone,
+            amount: amt,
+            utr: utr,
+            status: 'pending'
+        }]);
 
-                if (error) {
-                    if (error.message.includes('unique') || error.message.includes('utr') || error.message.includes('recharges_utr_key')) {
-                        throw new Error("Yeh UTR number pehle se submit kiya ja chuka hai! Duplicate UTR allow nahi hai.");
-                    }
-                    throw error;
-                }
-
-                alert("✅ UTR Request Successfully Submit ho gayi!\nAdmin 5-10 minute me verify karke wallet mein balance add kar dega.");
-                document.getElementById('utrNumberInput').value = '';
-                loadRechargeHistory();
-
-            } catch (err) {
-                alert("Error: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Submit UTR for Verification";
+        if (error) {
+            if (error.message.includes('unique') || error.message.includes('utr') || error.message.includes('recharges_utr_key')) {
+                throw new Error("Yeh UTR number pehle se submit kiya ja chuka hai! Duplicate UTR allow nahi hai.");
             }
+            throw error;
         }
 
+        alert("✅ UTR Request Successfully Submit ho gayi!\nAdmin 5-10 minute me verify karke wallet mein balance add kar dega.");
+        document.getElementById('utrNumberInput').value = '';
+        loadRechargeHistory();
+
+    } catch (err) {
+        alert("Error: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit UTR for Verification";
+    }
+        }
+            
         async function loadRechargeHistory() {
             const sb = getSupabase();
             if (!sb) return;
