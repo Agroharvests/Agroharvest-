@@ -9,47 +9,102 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #f4fbf5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 14px; }
-        .card { width: 100%; max-width: 390px; background: #ffffff; border-radius: 28px; padding: 32px 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); text-align: center; }
-        .logo-box { width: 68px; height: 68px; background: #dcfce7; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; color: #16a34a; }
-        h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-        p.sub { font-size: 13px; color: #64748b; margin-bottom: 24px; }
-        .form-group { position: relative; margin-bottom: 14px; text-align: left; }
-        .form-group i { position: absolute; left: 16px; top: 16px; color: #94a3b8; font-size: 16px; }
-        .form-input { width: 100%; padding: 14px 14px 14px 44px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 14px; font-weight: 600; color: #0f172a; outline: none; background: #f8fafc; }
-        .form-input:focus { border-color: #16a34a; background: #ffffff; }
-        .btn-submit { width: 100%; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 10px; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3); }
-        .footer-link { margin-top: 20px; font-size: 13px; color: #64748b; font-weight: 600; }
-        .footer-link a { color: #16a34a; text-decoration: none; font-weight: 800; }
+        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
+        
+        .mobile-container { width: 100%; max-width: 430px; background: #ffffff; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+
+        .hero-header { height: 280px; width: 100%; position: relative; background: #166534; overflow: hidden; }
+        .hero-header img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%); display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 18px; }
+        
+        .lang-badge { background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px; }
+        .brand-pill { background: rgba(22, 163, 74, 0.95); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; color: white; display: flex; align-items: center; gap: 6px; }
+
+        .form-sheet { flex: 1; background: #ffffff; margin-top: -36px; border-radius: 36px 36px 0 0; padding: 32px 24px 20px; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 -10px 30px rgba(0,0,0,0.12); }
+        
+        .title-box { margin-bottom: 24px; }
+        .title-box h1 { font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+        .title-box p { font-size: 13px; color: #64748b; font-weight: 600; margin-top: 4px; }
+
+        .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; height: 58px; }
+        .input-wrap:focus-within { border-color: #16a34a; background: #ffffff; box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12); }
+        .input-icon-box { width: 36px; height: 36px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        
+        .prefix { font-weight: 800; color: #0f172a; font-size: 15px; border-right: 1.5px solid #cbd5e1; padding-right: 10px; }
+        .input-wrap input { width: 100%; border: none; outline: none; background: transparent; font-size: 15px; font-weight: 700; color: #0f172a; }
+
+        .terms-row { display: flex; align-items: center; gap: 8px; margin: 10px 4px 22px; font-size: 12px; font-weight: 600; color: #475569; }
+        .terms-row input { width: 16px; height: 16px; accent-color: #16a34a; }
+        .terms-row a { color: #16a34a; text-decoration: none; font-weight: 700; }
+
+        .btn-login { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: #ffffff; border: none; padding: 16px; border-radius: 18px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 8px 24px rgba(22, 163, 74, 0.35); }
+        .btn-login:active { transform: scale(0.98); }
+
+        .footer-text { text-align: center; margin-top: 24px; font-size: 13px; font-weight: 600; color: #64748b; }
+        .footer-text a { color: #16a34a; font-weight: 800; text-decoration: none; margin-left: 4px; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="logo-box"><i class="fa-solid fa-seedling"></i></div>
-        <h2>Welcome Back</h2>
-        <p class="sub">Login to your AgroHarvest Account</p>
-
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <i class="fa-solid fa-mobile-screen"></i>
-                <input type="tel" id="loginPhone" class="form-input" placeholder="10 Digit Mobile Number" maxlength="10" required>
+    <div class="mobile-container">
+        <div class="hero-header">
+            <img src="banner.png" alt="AgroHarvest Official Poster">
+            <div class="hero-overlay">
+                <div class="brand-pill"><i class="fa-solid fa-seedling"></i> AgroHarvest</div>
+                <div class="lang-badge"><i class="fa-solid fa-globe"></i> ENG</div>
             </div>
-            <div class="form-group">
-                <i class="fa-solid fa-lock"></i>
-                <input type="password" id="loginPassword" class="form-input" placeholder="Password" required>
-            </div>
-            <button type="submit" id="loginBtn" class="btn-submit">Login</button>
-        </form>
+        </div>
 
-        <div class="footer-link">
-            Don't have an account? <a href="register.html">Register</a>
+        <div class="form-sheet">
+            <div>
+                <div class="title-box">
+                    <h1>Welcome Back</h1>
+                    <p>Grow Smart, Harvest More</p>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="input-wrap">
+                        <div class="input-icon-box"><i class="fa-solid fa-phone"></i></div>
+                        <span class="prefix">+91</span>
+                        <input type="tel" id="loginPhone" placeholder="Enter Phone Number" maxlength="10" required>
+                    </div>
+
+                    <div class="input-wrap">
+                        <div class="input-icon-box"><i class="fa-solid fa-lock"></i></div>
+                        <input type="password" id="loginPassword" placeholder="Enter your Password" required>
+                        <i class="fa-regular fa-eye-slash" id="togglePass" onclick="togglePasswordVisibility()" style="color: #94a3b8; cursor: pointer;"></i>
+                    </div>
+
+                    <div class="terms-row">
+                        <input type="checkbox" id="termsCheck" checked required>
+                        <label for="termsCheck">By logging in you agree to the <a href="#">Terms & Conditions</a></label>
+                    </div>
+
+                    <button type="submit" id="loginBtn" class="btn-login">Login Now</button>
+                </form>
+            </div>
+
+            <div class="footer-text">
+                Don't have an account?<a href="register.html">Register</a>
+            </div>
         </div>
     </div>
 
     <script>
         requireGuest();
+
+        function togglePasswordVisibility() {
+            const passField = document.getElementById('loginPassword');
+            const icon = document.getElementById('togglePass');
+            if (passField.type === "password") {
+                passField.type = "text";
+                icon.className = "fa-regular fa-eye";
+            } else {
+                passField.type = "password";
+                icon.className = "fa-regular fa-eye-slash";
+            }
+        }
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -58,7 +113,7 @@
             const btn = document.getElementById('loginBtn');
 
             btn.disabled = true;
-            btn.innerText = "Verifying...";
+            btn.innerText = "Authenticating...";
 
             try {
                 const { data: user, error } = await supabase
@@ -71,7 +126,7 @@
                 if (error || !user) {
                     alert("Mobile number ya password galat hai!");
                     btn.disabled = false;
-                    btn.innerText = "Login";
+                    btn.innerText = "Login Now";
                     return;
                 }
 
@@ -81,7 +136,7 @@
             } catch (err) {
                 alert("Login failed: " + err.message);
                 btn.disabled = false;
-                btn.innerText = "Login";
+                btn.innerText = "Login Now";
             }
         }
     </script>
