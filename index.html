@@ -8,38 +8,36 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
-    <script src="banner.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
-        
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.15); }
+        body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
-        /* Top Brand Bar */
+        /* Top Bar */
         .brand-bar { padding: 18px 20px 14px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
         .logo-box { display: flex; align-items: center; gap: 10px; }
         .logo-circle { width: 38px; height: 38px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 18px; border: 1.5px solid #86efac; }
         .logo-text h2 { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
         .filter-btn { width: 38px; height: 38px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
 
-        /* Real HD Harvester Banner Card */
-        .hero-banner-box { margin: 14px 16px 16px; border-radius: 24px; overflow: hidden; position: relative; height: 165px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.2); border: 1.5px solid #e2e8f0; }
+        /* Real HD Harvester Banner */
+        .hero-banner-box { margin: 14px 16px 14px; border-radius: 24px; overflow: hidden; position: relative; height: 160px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.2); border: 1.5px solid #e2e8f0; }
         .hero-banner-box img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.85) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; color: white; }
-        .hero-banner-overlay h3 { font-size: 19px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 2px; }
+        .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.88) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; color: white; }
+        .hero-banner-overlay h3 { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 2px; }
         .hero-banner-overlay p { font-size: 12px; opacity: 0.95; font-weight: 600; }
 
-        /* Floating Wallet Balance Strip */
-        .balance-strip { margin: 0 16px 18px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
+        /* Wallet Strip */
+        .balance-strip { margin: 0 16px 16px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
         .balance-item p { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
         .balance-item h4 { font-size: 19px; font-weight: 900; color: #16a34a; }
 
-        /* 4 Quick Actions matching poster */
-        .actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px 20px; }
-        .act-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 6px 10px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.03); transition: transform 0.15s; }
+        /* Quick Actions */
+        .actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px 18px; }
+        .act-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 12px 6px 10px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.03); transition: transform 0.15s; }
         .act-btn:active { transform: scale(0.95); }
-        .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 8px; }
+        .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 6px; }
         .act-btn span { font-size: 11px; font-weight: 800; display: block; white-space: nowrap; }
 
         .icon-crop { background: #dcfce7; color: #16a34a; }
@@ -47,27 +45,49 @@
         .icon-withdraw { background: #dbeafe; color: #2563eb; }
         .icon-team { background: #f3e8ff; color: #9333ea; }
 
-        /* Available Plans Section */
+        /* Section Bar */
         .section-bar { padding: 0 18px 12px; display: flex; justify-content: space-between; align-items: center; }
         .section-bar h3 { font-size: 17px; font-weight: 900; color: #0f172a; }
-        .section-bar span { font-size: 12px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
+        .section-bar span { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
 
-        .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+        /* High Conversion Crop Plan Cards */
+        .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
         
-        /* Plan Item */
-        .plan-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease; }
-        .plan-item:active { transform: scale(0.98); border-color: #16a34a; }
-        
-        .plan-left { display: flex; align-items: center; gap: 14px; }
-        .plan-thumb-box { width: 54px; height: 54px; border-radius: 16px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
-        .plan-thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .plan-card-pro { background: #ffffff; border-radius: 24px; padding: 18px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
+        .plan-card-pro:active { transform: scale(0.985); }
 
-        .plan-meta h4 { font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
-        .plan-meta p { font-size: 12px; color: #64748b; font-weight: 700; }
+        /* Theme Variants */
+        .plan-green { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
+        .plan-gold { border-color: #fde68a; background: linear-gradient(180deg, #fefce8 0%, #ffffff 40%); }
+        .plan-diamond { border-color: #bae6fd; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
+
+        /* Badges */
+        .ribbon-badge { position: absolute; top: 0; right: 0; padding: 6px 14px; font-size: 11px; font-weight: 900; color: white; border-radius: 0 0 0 16px; letter-spacing: 0.3px; text-transform: uppercase; }
+        .ribbon-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3); }
+        .ribbon-gold { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
+        .ribbon-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3); }
+
+        /* Plan Top Info */
+        .plan-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
+        .plan-img-wrap { width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; border: 2px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .plan-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
         
-        .plan-right { text-align: right; }
-        .plan-price { font-size: 18px; font-weight: 900; color: #16a34a; }
-        .plan-days { font-size: 11px; font-weight: 700; color: #64748b; margin-top: 2px; display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+        .plan-title-block h4 { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
+        .plan-price-tag { font-size: 20px; font-weight: 900; }
+        .price-green { color: #16a34a; }
+        .price-gold { color: #d97706; }
+        .price-diamond { color: #0284c7; }
+
+        /* Metric Grid inside Card */
+        .plan-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px; margin-bottom: 14px; text-align: center; }
+        .stat-col p { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-col h5 { font-size: 14px; font-weight: 900; color: #0f172a; }
+
+        /* Action Buttons */
+        .btn-invest { width: 100%; border: none; padding: 13px; border-radius: 16px; font-size: 15px; font-weight: 900; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .btn-invest-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
+        .btn-invest-gold { background: linear-gradient(135deg, #b45309, #d97706); box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35); }
+        .btn-invest-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35); }
 
         /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
@@ -75,8 +95,7 @@
         .nav-item i { font-size: 19px; }
         .nav-item.active { color: #16a34a; }
 
-        /* Modal */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-card { background: white; width: 100%; max-width: 360px; border-radius: 24px; padding: 24px; text-align: center; }
         .ref-box { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: #16a34a; margin: 14px 0; word-break: break-all; }
         .btn-modal { width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; }
@@ -84,7 +103,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Logo Header -->
+        <!-- Top Brand Header -->
         <div class="brand-bar">
             <div class="logo-box">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
@@ -95,16 +114,16 @@
             <div class="filter-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
 
-        <!-- High-Res Harvester Hero Banner -->
+        <!-- Real Harvester Hero -->
         <div class="hero-banner-box">
-            <img class="hero-banner-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester Field">
+            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester Field">
             <div class="hero-banner-overlay">
                 <h3>Smart Farming Better Future</h3>
                 <p>High Yield & Guaranteed Daily Profit</p>
             </div>
         </div>
 
-        <!-- Wallet Strip -->
+        <!-- Balance Strip -->
         <div class="balance-strip">
             <div class="balance-item">
                 <p>Total Balance</p>
@@ -136,61 +155,109 @@
             </a>
         </div>
 
-        <!-- Available Plans Section -->
+        <!-- Available Plans Heading -->
         <div class="section-bar">
-            <h3>Available Plans</h3>
-            <span>30 Days Cycle</span>
+            <h3>Available Crop Plans</h3>
+            <span>30 Days Yield Cycle</span>
         </div>
 
         <div class="plans-box">
-            <!-- Green Plan -->
-            <div class="plan-item" onclick="buySeedPlan('Green Plan', 525, 125, 30)">
-                <div class="plan-left">
-                    <div class="plan-thumb-box">
-                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Green Plan">
+            <!-- 1. Green Plan -->
+            <div class="plan-card-pro plan-green">
+                <div class="ribbon-badge ribbon-green">★ 714% Return</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=400&q=80" alt="Green Seedlings">
                     </div>
-                    <div class="plan-meta">
+                    <div class="plan-title-block">
                         <h4>Green Plan</h4>
-                        <p>Daily Income ₹125</p>
+                        <div class="plan-price-tag price-green">₹525</div>
                     </div>
                 </div>
-                <div class="plan-right">
-                    <div class="plan-price">₹525</div>
-                    <div class="plan-days"><i class="fa-regular fa-clock"></i> 30 Days</div>
-                </div>
-                </div>
-                            <!-- Gold Plan -->
-            <div class="plan-item" onclick="buySeedPlan('Gold Plan', 1500, 375, 30)">
-                <div class="plan-left">
-                    <div class="plan-thumb-box">
-                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Gold Plan">
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Income</p>
+                        <h5 style="color: #16a34a;">₹125</h5>
                     </div>
-                    <div class="plan-meta">
+                    <div class="stat-col">
+                        <p>Total Return</p>
+                        <h5>₹3,750</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
+                </div>
+
+                <button onclick="buySeedPlan('Green Plan', 525, 125, 30)" class="btn-invest btn-invest-green">
+                    Invest ₹525 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+                        <!-- 2. Gold Plan -->
+            <div class="plan-card-pro plan-gold">
+                <div class="ribbon-badge ribbon-gold">👑 Most Popular</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80" alt="Golden Wheat Field">
+                    </div>
+                    <div class="plan-title-block">
                         <h4>Gold Plan</h4>
-                        <p>Daily Income ₹375</p>
+                        <div class="plan-price-tag price-gold">₹1,500</div>
                     </div>
                 </div>
-                <div class="plan-right">
-                    <div class="plan-price" style="color: #d97706;">₹1500</div>
-                    <div class="plan-days"><i class="fa-regular fa-clock"></i> 30 Days</div>
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Income</p>
+                        <h5 style="color: #d97706;">₹375</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Total Return</p>
+                        <h5>₹11,250</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
                 </div>
+
+                <button onclick="buySeedPlan('Gold Plan', 1500, 375, 30)" class="btn-invest btn-invest-gold">
+                    Invest ₹1,500 <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
 
-            <!-- Diamond Plan -->
-            <div class="plan-item" onclick="buySeedPlan('Diamond Plan', 3500, 970, 30)">
-                <div class="plan-left">
-                    <div class="plan-thumb-box">
-                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Diamond Plan">
+            <!-- 3. Diamond Plan -->
+            <div class="plan-card-pro plan-diamond">
+                <div class="ribbon-badge ribbon-diamond">💎 VIP Maximum Yield</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80" alt="Modern Grain Silo & Farm">
                     </div>
-                    <div class="plan-meta">
+                    <div class="plan-title-block">
                         <h4>Diamond Plan</h4>
-                        <p>Daily Income ₹970</p>
+                        <div class="plan-price-tag price-diamond">₹3,500</div>
                     </div>
                 </div>
-                <div class="plan-right">
-                    <div class="plan-price" style="color: #0284c7;">₹3500</div>
-                    <div class="plan-days"><i class="fa-regular fa-clock"></i> 30 Days</div>
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Income</p>
+                        <h5 style="color: #0284c7;">₹970</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Total Return</p>
+                        <h5>₹29,100</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
                 </div>
+
+                <button onclick="buySeedPlan('Diamond Plan', 3500, 970, 30)" class="btn-invest btn-invest-diamond">
+                    Invest ₹3,500 <i class="fa-solid fa-arrow-right"></i>
+                </button>
             </div>
         </div>
 
@@ -202,12 +269,12 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Invite Modal -->
+        <!-- Referral Modal -->
         <div id="inviteModal" class="modal">
             <div class="modal-card">
                 <i class="fa-solid fa-gift" style="font-size: 38px; color: #16a34a; margin-bottom: 8px;"></i>
-                <h3 style="font-size: 18px; font-weight: 900;">Invite & Earn 31%</h3>
-                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Earn Level 1 (27%), Level 2 (3%), Level 3 (1%) commission directly.</p>
+                <h3 style="font-size: 18px; font-weight: 900;">Invite & Earn 28%</h3>
+                <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Earn 25% L1, 2% L2, and 1% L3 direct commission instantly.</p>
                 <div id="refLinkText" class="ref-box">Generating...</div>
                 <button onclick="copyInvite()" class="btn-modal">Copy Link</button>
                 <button onclick="closeInviteModal()" style="margin-top: 12px; background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer;">Close</button>
@@ -269,8 +336,10 @@
                     return;
                 }
 
+                // Deduct balance
                 await sb.from('profiles').update({ balance: curBal - price }).eq('id', activeUser.id);
 
+                // Create Order (Database trigger automatically distributes 25% L1, 2% L2, 1% L3)
                 await sb.from('orders').insert([{
                     user_id: activeUser.id,
                     plan_name: title,
@@ -285,11 +354,10 @@
                     user_id: activeUser.id,
                     type: 'purchase',
                     amount: price,
-                    status: 'success',
                     details: `Activated ${title}`
                 }]);
 
-                alert(`🎉 ${title} successfully activate ho gaya!`);
+                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} profit credit hoga.`);
                 window.location.href = 'orders.html';
 
             } catch (err) {
@@ -299,7 +367,7 @@
 
         function openInviteModal() {
             const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            const fullUrl = `${currentPath}register.html?ref=${activeUser.phone}`;
+            const fullUrl = `${currentPath}register.html?ref=${activeUser.referral_code}`;
             document.getElementById('refLinkText').innerText = fullUrl;
             document.getElementById('inviteModal').style.display = 'flex';
         }
