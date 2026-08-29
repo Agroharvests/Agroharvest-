@@ -3,56 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>About AgroHarvest - Smart Agriculture</title>
+    <title>About AgroHarvest - Corporate Profile & Operations</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 40px; }
-        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; }
-        .hero { background: linear-gradient(135deg, #14532d, #16a34a); padding: 30px 20px; color: white; text-align: center; border-radius: 0 0 28px 28px; }
-        .card { background: white; margin: 16px; border-radius: 20px; padding: 20px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .feature-row { display: flex; gap: 14px; align-items: center; margin-bottom: 16px; }
-        .f-icon { width: 44px; height: 44px; background: #dcfce7; color: #16a34a; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 40px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
+
+        /* Top Bar */
+        .top-bar { background: #ffffff; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 50; }
+        .top-bar a { color: #0f172a; text-decoration: none; font-size: 18px; }
+        .corp-badge { background: #0f172a; color: #f8fafc; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: 0.5px; }
+
+        /* Industrial Factory & Executive Hero */
+        .hero-banner { height: 260px; width: 100%; position: relative; overflow: hidden; background: #064e3b; }
+        .hero-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; filter: brightness(0.88); }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,0.3) 0%, rgba(6,78,59,0.92) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 22px 20px; color: white; }
+        .hero-tag { background: rgba(254, 240, 138, 0.2); border: 1px solid #fef08a; color: #fef08a; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; width: fit-content; margin-bottom: 8px; }
+        .hero-overlay h2 { font-size: 23px; font-weight: 900; letter-spacing: -0.4px; line-height: 1.2; }
+        .hero-overlay p { font-size: 12px; opacity: 0.95; font-weight: 600; margin-top: 4px; }
+
+        /* Key Corporate Metrics */
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px 16px; margin-top: -24px; position: relative; z-index: 10; }
+        .metric-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 8px; text-align: center; box-shadow: 0 4px 18px rgba(0,0,0,0.06); }
+        .metric-card h4 { font-size: 16px; font-weight: 900; color: #15803d; }
+        .metric-card p { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 2px; }
+
+        /* Content Sections */
+        .section-card { background: white; margin: 14px 16px; border-radius: 22px; padding: 20px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .section-card h3 { font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
+        .section-subtitle { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 16px; }
+
+        .feature-block { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+        .f-icon-box { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        .f-meta h4 { font-size: 14px; font-weight: 900; color: #0f172a; margin-bottom: 3px; }
+        .f-meta p { font-size: 12px; color: #475569; font-weight: 600; line-height: 1.45; }
+
+        .icon-factory { background: #e0f2fe; color: #0284c7; }
+        .icon-vault { background: #dcfce7; color: #16a34a; }
+        .icon-tier { background: #fef3c7; color: #d97706; }
+
+        /* Trust Seals Box */
+        .trust-box { background: linear-gradient(135deg, #0f172a, #1e293b); border-radius: 20px; padding: 18px; color: white; margin: 0 16px 14px; border: 1.5px solid #334155; }
+        .trust-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+        .trust-item { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); padding: 10px; border-radius: 12px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="top-header">
-            <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
-            <span>About AgroHarvest</span>
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <a href="profile.html"><i class="fa-solid fa-arrow-left"></i></a>
+            <span style="font-weight: 800; font-size: 16px;">Corporate Profile</span>
+            <span class="corp-badge">ISO 9001</span>
         </div>
 
-        <div class="hero">
-            <i class="fa-solid fa-shield-halved" style="font-size: 44px; color: #fef08a; margin-bottom: 10px;"></i>
-            <h2 style="font-size: 22px; font-weight: 900;">Empowering Smart Farming</h2>
-            <p style="font-size: 12px; opacity: 0.9; margin-top: 4px;">Transparent, Certified & Guaranteed High-Yield Agriculture Ecosystem.</p>
+        <!-- Executive Hero with Processing Factory Backdrop -->
+        <div class="hero-banner">
+            <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80" alt="Industrial Agro Facility">
+            <div class="hero-overlay">
+                <div class="hero-tag"><i class="fa-solid fa-industry"></i> Industrial Agro Infrastructure</div>
+                <h2>AgroHarvest Global Infrastructure</h2>
+                <p>Mechanized Harvesters & Industrial Grain Processing</p>
+            </div>
         </div>
 
-        <div class="card">
-            <h3 style="font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 14px;">Why Trust AgroHarvest?</h3>
-            <div class="feature-row">
-                <div class="f-icon"><i class="fa-solid fa-tractor"></i></div>
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 800;">Real Agrotech Assets</h4>
-                    <p style="font-size: 12px; color: #64748b;">Daily yields are generated through mechanized harvesting and high-efficiency hybrid grain cultivation.</p>
+        <!-- Metrics Strip -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h4>50,000+</h4>
+                <p>Acres Managed</p>
+            </div>
+            <div class="metric-card">
+                <h4>₹12.5 Cr+</h4>
+                <p>Disbursed</p>
+            </div>
+            <div class="metric-card">
+                <h4>100%</h4>
+                <p>Automated</p>
+            </div>
+        </div>
+                <!-- Main Industrial & Operational Features -->
+        <div class="section-card">
+            <h3>Enterprise Operations</h3>
+            <p class="section-subtitle">How daily agricultural yields and returns are generated:</p>
+
+            <div class="feature-block">
+                <div class="f-icon-box icon-factory">
+                    <i class="fa-solid fa-wheat-awn-circle-exclamation"></i>
+                </div>
+                <div class="f-meta">
+                    <h4>High-Tech Processing Plants</h4>
+                    <p>AgroHarvest operates industrial grain silos and mechanized harvester fleets to ensure consistent daily crop realization.</p>
                 </div>
             </div>
-            <div class="feature-row">
-                <div class="f-icon"><i class="fa-solid fa-lock"></i></div>
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 800;">Instant & Secure Payouts</h4>
-                    <p style="font-size: 12px; color: #64748b;">Locked banking details ensure no unauthorized account modifications or payment misdirections.</p>
+
+            <div class="feature-block">
+                <div class="f-icon-box icon-vault">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="f-meta">
+                    <h4>Permanent Banking Lock</h4>
+                    <p>Accounts and IFSC codes are permanently secured upon linking to eliminate misrouting and ensure automated payouts.</p>
                 </div>
             </div>
-            <div class="feature-row" style="margin-bottom: 0;">
-                <div class="f-icon"><i class="fa-solid fa-users"></i></div>
-                <div>
-                    <h4 style="font-size: 14px; font-weight: 800;">3-Tier Transparent Affiliate</h4>
-                    <p style="font-size: 12px; color: #64748b;">Instant rewards: 25% on Level 1, 2% on Level 2, and 1% on Level 3 automatically credited.</p>
+
+            <div class="feature-block" style="margin-bottom: 0;">
+                <div class="f-icon-box icon-tier">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="f-meta">
+                    <h4>3-Tier Direct Affiliate Program</h4>
+                    <p>Direct commission structure: 25% on Level 1, 2% on Level 2, and 1% on Level 3 instantly credited to the user wallet.</p>
                 </div>
             </div>
+        </div>
+
+        <!-- Trust & Security Credentials -->
+        <div class="trust-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-size: 14px; font-weight: 900;">Compliance & System Standards</h4>
+                <i class="fa-solid fa-stamp" style="color: #fef08a; font-size: 20px;"></i>
+            </div>
+            <div class="trust-grid">
+                <div class="trust-item"><i class="fa-solid fa-lock" style="color: #4ade80;"></i> 256-Bit SSL Encrypted</div>
+                <div class="trust-item"><i class="fa-solid fa-robot" style="color: #38bdf8;"></i> 12 AM Auto Cron</div>
+                <div class="trust-item"><i class="fa-solid fa-fingerprint" style="color: #f472b6;"></i> Anti-Duplicate UTR</div>
+                <div class="trust-item"><i class="fa-solid fa-building-columns" style="color: #facc15;"></i> IMPS / UPI Settled</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 10px 20px; font-size: 11px; color: #94a3b8; font-weight: 700;">
+            © AgroHarvest Agrotech Infrastructure Ltd. All rights reserved.
         </div>
     </div>
 </body>
