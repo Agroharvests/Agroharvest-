@@ -5,166 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AgroHarvest - Withdraw Funds</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #f4fbf5; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .app-container { width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh; padding-bottom: 30px; position: relative; }
-        
-        .header { background: linear-gradient(135deg, #14532d, #16a34a); padding: 18px 16px; color: white; display: flex; align-items: center; justify-content: space-between; }
-        .header h1 { font-size: 17px; font-weight: 800; }
-        .back-btn { color: white; text-decoration: none; font-size: 18px; }
-
-        .content { padding: 18px 16px; }
-        .balance-info { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 18px; padding: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .balance-info p { font-size: 12px; color: #166534; font-weight: 700; }
-        .balance-info h2 { font-size: 20px; color: #15803d; font-weight: 800; }
-
-        .form-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 20px 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .input-group { margin-bottom: 14px; text-align: left; }
-        .input-group label { font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px; }
-        .input-box { width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 14px; font-weight: 700; color: #0f172a; outline: none; }
-        .input-box:focus { border-color: #16a34a; }
-
-        .notice-box { background: #fefce8; border: 1px solid #fef08a; border-radius: 12px; padding: 12px; margin: 16px 0; font-size: 11px; color: #854d0e; font-weight: 600; line-height: 1.5; }
-        .btn-submit { width: 100%; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 30px; }
+        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; }
+        .card { background: white; margin: 16px; border-radius: 20px; padding: 20px; border: 1.5px solid #e2e8f0; }
+        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 800; outline: none; margin-top: 6px; margin-bottom: 12px; }
+        .input-box:disabled { background: #f1f5f9; color: #475569; }
+        .summary-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px; margin: 14px 0; font-size: 13px; font-weight: 700; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .btn-submit { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="header">
-            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-            <h1>Withdraw Funds</h1>
-            <div style="width: 20px;"></div>
+        <div class="top-header">
+            <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
+            <span>Withdraw Funds</span>
         </div>
 
-        <div class="content">
-            <div class="balance-info">
-                <div>
-                    <p>AVAILABLE BALANCE</p>
-                    <h2 id="availBal">₹0.00</h2>
-                </div>
-                <i class="fa-solid fa-wallet" style="font-size: 28px; color: #16a34a;"></i>
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <span style="font-size: 13px; color: #64748b; font-weight: 700;">Withdrawable Balance</span>
+                <span id="availBal" style="font-size: 18px; font-weight: 900; color: #16a34a;">₹0.00</span>
             </div>
 
-            <div class="form-card">
-                <div class="input-group">
-                    <label>Withdrawal Amount (Min ₹150)</label>
-                    <input type="number" id="wAmount" class="input-box" placeholder="Amount (₹)">
-                </div>
+            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Withdrawal Amount (Min ₹150)</label>
+            <input type="number" id="withdrawAmt" class="input-box" placeholder="Enter amount" oninput="calculateBreakdown()">
 
-                <div class="input-group">
-                    <label>Account Holder Name</label>
-                    <input type="text" id="wName" class="input-box" placeholder="Name on Bank Account">
-                </div>
+            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Account Holder Name</label>
+            <input type="text" id="bankHolder" class="input-box" placeholder="Full Name as per Bank">
 
-                <div class="input-group">
-                    <label>Bank Name</label>
-                    <input type="text" id="wBank" class="input-box" placeholder="e.g. State Bank of India">
-                </div>
+            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Bank Account Number (Permanent Lock)</label>
+            <input type="text" id="bankAcc" class="input-box" placeholder="Account Number">
 
-                <div class="input-group">
-                    <label>Bank Account Number</label>
-                    <input type="text" id="wAcc" class="input-box" placeholder="Account Number">
-                </div>
+            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">IFSC Code</label>
+            <input type="text" id="bankIfsc" class="input-box" placeholder="e.g. SBIN0001234">
 
-                <div class="input-group">
-                    <label>IFSC Code</label>
-                    <input type="text" id="wIfsc" class="input-box" placeholder="e.g. SBIN0001234">
+            <div class="summary-box">
+                <div class="summary-row"><span>Withdrawal Fee (10%):</span><span id="feeText" style="color: #dc2626;">- ₹0.00</span></div>
+                <div class="summary-row" style="font-size: 15px; font-weight: 900; border-top: 1px solid #cbd5e1; padding-top: 6px;">
+                    <span>Net Payout Amount:</span><span id="finalAmtText" style="color: #16a34a;">₹0.00</span>
                 </div>
-
-                <div class="notice-box">
-                    <i class="fa-solid fa-circle-info"></i> Withdrawal rules:<br>
-                    • Minimum withdrawal ₹150.<br>
-                    • Daily timing: 09:00 AM to 06:00 PM.<br>
-                    • 10% processing fee applicable.
-                </div>
-
-                <button onclick="submitWithdraw()" id="wBtn" class="btn-submit">Confirm Withdrawal</button>
             </div>
+
+            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 14px;">
+                ⏰ Payout Time: 00:30 AM to 05:00 PM | Limit: 1 request per day.
+            </p>
+
+            <button onclick="handleWithdrawal()" id="wdBtn" class="btn-submit">Request Withdrawal</button>
         </div>
     </div>
 
     <script>
         const activeUser = requireAuth();
-        let userBalance = 0;
+        let isBankLocked = false;
 
         document.addEventListener("DOMContentLoaded", async () => {
-            const { data: prof } = await supabase.from('profiles').select('balance').eq('id', activeUser.id).single();
-            if (prof) {
-                userBalance = parseFloat(prof.balance || 0);
-                document.getElementById('availBal').innerText = "₹" + userBalance.toFixed(2);
+            const sb = getSupabase();
+            if (!sb) return;
+
+            const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).single();
+            if (prof) document.getElementById('availBal').innerText = "₹" + parseFloat(prof.balance || 0).toFixed(2);
+
+            // Fetch Existing Bank Details
+            const { data: bank } = await sb.from('bank_details').select('*').eq('user_id', activeUser.id).maybeSingle();
+            if (bank) {
+                isBankLocked = true;
+                document.getElementById('bankHolder').value = bank.holder_name;
+                document.getElementById('bankAcc').value = bank.account_number;
+                document.getElementById('bankIfsc').value = bank.ifsc_code;
+
+                document.getElementById('bankHolder').disabled = true;
+                document.getElementById('bankAcc').disabled = true;
+                document.getElementById('bankIfsc').disabled = true;
             }
         });
 
-        async function submitWithdraw() {
-            const amt = parseFloat(document.getElementById('wAmount').value);
-            const name = document.getElementById('wName').value.trim();
-            const bank = document.getElementById('wBank').value.trim();
-            const acc = document.getElementById('wAcc').value.trim();
-            const ifsc = document.getElementById('wIfsc').value.trim();
-            const btn = document.getElementById('wBtn');
+        function calculateBreakdown() {
+            const amt = parseFloat(document.getElementById('withdrawAmt').value) || 0;
+            const fee = amt * 0.10;
+            const finalPayout = amt - fee;
 
-            if (!amt || amt < 150) {
-                alert("Minimum withdrawal ₹150 hai!");
-                return;
+            document.getElementById('feeText').innerText = "- ₹" + fee.toFixed(2);
+            document.getElementById('finalAmtText').innerText = "₹" + (finalPayout > 0 ? finalPayout.toFixed(2) : "0.00");
+        }
+
+        function isWithinWithdrawalTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const curMinutes = hours * 60 + minutes;
+
+            const startMinutes = 0 * 60 + 30; // 00:30
+            const endMinutes = 17 * 60 + 0;   // 17:00 (05:00 PM)
+
+            return curMinutes >= startMinutes && curMinutes <= endMinutes;
+        }
+
+        async function handleWithdrawal() {
+            if (!isWithinWithdrawalTime()) {
+                return alert("Withdrawal ka samay 00:30 AM se 05:00 PM tak hai!");
             }
-            if (amt > userBalance) {
-                alert("Balance kam hai!");
-                return;
-            }
-            if (!name || !bank || !acc || !ifsc) {
-                alert("Kripya bank details poori bharein!");
-                return;
-            }
+
+            const amt = parseFloat(document.getElementById('withdrawAmt').value);
+            const holder = document.getElementById('bankHolder').value.trim();
+            const acc = document.getElementById('bankAcc').value.trim();
+            const ifsc = document.getElementById('bankIfsc').value.trim().toUpperCase();
+            const btn = document.getElementById('wdBtn');
+
+            if (!amt || amt < 150) return alert("Minimum withdrawal limit ₹150 hai!");
+            if (!holder || !acc || !ifsc) return alert("Kripya saari bank details fill karein!");
+
+            const sb = getSupabase();
+            if (!sb) return alert("Connecting database...");
 
             btn.disabled = true;
             btn.innerText = "Processing...";
 
             try {
-                // Deduct balance first
-                const { error: balErr } = await supabase
-                    .from('profiles')
-                    .update({ balance: userBalance - amt })
-                    .eq('id', activeUser.id);
-
-                if (balErr) throw balErr;
-
-                // Create withdrawal record
-                const { error: wErr } = await supabase
+                // Check 1 per day rule
+                const today = new Date().toISOString().split('T')[0];
+                const { data: todayWd } = await sb
                     .from('withdrawals')
-                    .insert([{
+                    .select('id')
+                    .eq('user_id', activeUser.id)
+                    .eq('request_date', today)
+                    .maybeSingle();
+
+                if (todayWd) throw new Error("Aap aaj ka 1 withdrawal request pehle hi submit kar chuke hain!");
+
+                // Check Balance
+                const { data: profile } = await sb.from('profiles').select('balance').eq('id', activeUser.id).single();
+                if (parseFloat(profile.balance || 0) < amt) throw new Error("Balance insufficient hai!");
+
+                // Permanent Lock Bank Account
+                if (!isBankLocked) {
+                    const { error: bErr } = await sb.from('bank_details').insert([{
                         user_id: activeUser.id,
-                        phone: activeUser.phone,
-                        amount: amt,
-                        holder_name: name,
-                        bank_name: bank,
-                        account_no: acc,
+                        account_number: acc,
                         ifsc_code: ifsc,
-                        status: 'pending'
+                        holder_name: holder
                     }]);
 
-                if (wErr) throw wErr;
+                    if (bErr) {
+                        if (bErr.message.includes('unique')) {
+                            throw new Error("Yeh Bank Account kisi aur user ID ke sath pehle se linked hai!");
+                        }
+                        throw bErr;
+                    }
+                }
 
-                // Passbook entry
-                await supabase.from('transactions').insert([{
+                const feeAmt = amt * 0.10;
+                const finalPayout = amt - feeAmt;
+
+                // Deduct Balance
+                await sb.from('profiles').update({ balance: profile.balance - amt }).eq('id', activeUser.id);
+
+                // Insert Withdrawal Request
+                await sb.from('withdrawals').insert([{
+                    user_id: activeUser.id,
+                    amount: amt,
+                    fee_amount: feeAmt,
+                    final_amount: finalPayout,
+                    account_number: acc,
+                    ifsc_code: ifsc,
+                    holder_name: holder,
+                    status: 'pending'
+                }]);
+
+                await sb.from('transactions').insert([{
                     user_id: activeUser.id,
                     type: 'withdraw',
                     amount: amt,
-                    status: 'pending',
-                    details: `Withdrawal request to ${bank}`
+                    details: `Requested ₹${amt} (Fee 10% - Net ₹${finalPayout.toFixed(2)})`
                 }]);
 
-                alert("✅ Withdrawal request submitted successfully! Funds bank me transfer ho jayenge.");
-                window.location.replace("profile.html");
+                alert("🎉 Withdrawal Request Submitted! 10% Fee deduct hokar net amount credit ho jayega.");
+                window.location.href = "index.html";
 
             } catch (err) {
-                alert("Withdrawal failed: " + err.message);
+                alert("Withdrawal Failed: " + err.message);
                 btn.disabled = false;
-                btn.innerText = "Confirm Withdrawal";
+                btn.innerText = "Request Withdrawal";
             }
         }
     </script>
