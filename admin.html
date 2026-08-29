@@ -36,6 +36,13 @@
 
         .item-row { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
         
+        /* Moderation Proof Items */
+        .proof-mod-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; }
+        .proof-thumb { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 1px solid #cbd5e1; flex-shrink: 0; cursor: pointer; }
+        .proof-info { flex: 1; min-width: 0; }
+        .proof-info-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .badge-proof-type { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; background: #e0f2fe; color: #0284c7; }
+
         .user-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 12px; }
         .user-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px; }
         .user-phone { font-size: 14px; font-weight: 900; color: #0f172a; }
@@ -46,7 +53,6 @@
         .u-stat span { color: #64748b; font-weight: 600; display: block; font-size: 10px; text-transform: uppercase; }
         .u-stat strong { font-weight: 900; color: #0f172a; font-size: 13px; }
         .u-stat strong.green { color: #16a34a; }
-
         .plan-pill { background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 2px 4px 2px 0; border: 1px solid #fde68a; }
     </style>
 </head>
@@ -55,7 +61,7 @@
         <div class="top-header">
             <div>
                 <h2>AgroHarvest Admin</h2>
-                <p style="font-size: 11px; opacity: 0.8;">Full Platform Master Control</p>
+                <p style="font-size: 11px; opacity: 0.8;">Platform Control & Moderation</p>
             </div>
             <button onclick="runDailyIncomeManually()" class="btn-midnight">Run 12 AM Income</button>
         </div>
@@ -127,6 +133,15 @@
             <div id="withdrawalsList">Loading...</div>
         </div>
 
+        <!-- Community Proofs Moderation Panel -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Community Proofs Moderation</h3>
+                <span id="proofsCountBadge" class="badge-count" style="background:#fee2e2; color:#dc2626;">0 Proofs</span>
+            </div>
+            <div id="adminProofsList">Loading proofs...</div>
+        </div>
+
         <!-- Master Users Directory -->
         <div class="card">
             <div class="card-header">
@@ -171,14 +186,14 @@
                     if (p9999) document.getElementById('btnToggle9999').innerText = `₹9,999: ${p9999.value === '1' ? 'OPEN ✅' : 'LOCKED 🔒'}`;
                 }
 
-                // 2. Fetch All Profiles (Direct flat query - safe & fast)
+                // 2. Fetch Profiles
                 const { data: users, error: uErr } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
                 if (uErr) throw uErr;
 
                 allProfilesMap = {};
                 (users || []).forEach(u => { allProfilesMap[u.id] = u; });
 
-                // 3. Fetch All Recharges, Withdrawals, Orders
+                // 3. Fetch Recharges, Withdrawals, Orders
                 const { data: allRecharges } = await sb.from('recharges').select('*').order('created_at', { ascending: false });
                 const { data: allWithdrawals } = await sb.from('withdrawals').select('*').order('created_at', { ascending: false });
                 const { data: allOrders } = await sb.from('orders').select('*');
@@ -196,7 +211,7 @@
                     rDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending recharge requests.</p>`;
                 } else {
                     rDiv.innerHTML = pendingRecharges.map(r => {
-                        const userPhone = allProfilesMap[r.user_id]?.phone || 'Unknown User';
+                        const userPhone = allProfilesMap[r.user_id]?.phone || r.phone || 'Unknown User';
                         return `
                             <div class="item-row">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -242,7 +257,10 @@
                     }).join('');
                 }
 
-                // 6. Update KPI Metrics
+                // 6. Load & Render Community Proofs for Moderation
+                await loadProofModerationList(sb);
+
+                // 7. Update KPI Metrics
                 document.getElementById('statTotalUsers').innerText = (users || []).length;
                 document.getElementById('statActivePlans').innerText = orders.filter(o => o.status === 'active').length;
 
@@ -252,7 +270,7 @@
                 const totalWd = withdrawals.filter(w => w.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
                 document.getElementById('statTotalWithdrawals').innerText = "₹" + totalWd.toFixed(0);
 
-                // 7. Aggregate User Investments & Downlines Directory
+                // 8. User Investments & Downlines Directory
                 allUsersData = (users || []).map(u => {
                     const userOrders = orders.filter(o => o.user_id === u.id);
                     const userActiveOrders = userOrders.filter(o => o.status === 'active');
@@ -276,9 +294,63 @@
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('rechargesList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
-                document.getElementById('withdrawalsList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
-                document.getElementById('usersDirectoryList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function loadProofModerationList(sb) {
+            const proofsContainer = document.getElementById('adminProofsList');
+            try {
+                const { data: proofs, error } = await sb.from('payment_proofs').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                document.getElementById('proofsCountBadge').innerText = `${(proofs || []).length} Proofs`;
+
+                if (!proofs || proofs.length === 0) {
+                    proofsContainer.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No community proofs found.</p>`;
+                    return;
+                }
+
+                proofsContainer.innerHTML = proofs.map(p => {
+                    const phone = p.phone || 'Unknown';
+                    const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : 'Recent';
+                    return `
+                        <div class="proof-mod-item">
+                            <a href="${p.image_url}" target="_blank">
+                                <img src="${p.image_url}" class="proof-thumb" alt="Proof">
+                            </a>
+                            <div class="proof-info">
+                                <div class="proof-info-top">
+                                    <strong style="font-size: 13px;">+91 ${phone}</strong>
+                                    <span class="badge-proof-type">${p.proof_type || 'bank'}</span>
+                                </div>
+                                <div style="font-size: 12px; color: #16a34a; font-weight: 800; margin-bottom: 2px;">₹${parseFloat(p.amount || 0).toFixed(0)}</div>
+                                <p style="font-size: 11px; color: #64748b; margin-bottom: 6px; word-break: break-all;">${p.caption || 'No caption'}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <small style="font-size: 10px; color: #94a3b8;">${dateStr}</small>
+                                    <button onclick="deleteCommunityProof('${p.id}')" class="btn-action btn-red" style="padding: 4px 10px; font-size: 11px;">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                proofsContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
+            }
+        }
+
+        async function deleteCommunityProof(id) {
+            if (!confirm("Kya aap sach me is screenshot proof ko delete karna chahte hain?")) return;
+            const sb = getSupabase();
+            try {
+                const { error } = await sb.from('payment_proofs').delete().eq('id', id);
+                if (error) throw error;
+                alert("🗑️ Screenshot Proof Deleted Successfully!");
+                loadProofModerationList(sb);
+            } catch (err) {
+                alert("Delete failed: " + err.message);
             }
         }
 
@@ -445,5 +517,4 @@
         }
     </script>
 </body>
-    </html>
-    
+</html>
