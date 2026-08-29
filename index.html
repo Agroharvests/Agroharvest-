@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Grow Smart, Harvest More</title>
+    <title>AgroHarvest - Smart Harvester & Yields</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
+    <script src="banner.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -16,21 +17,23 @@
         .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.15); }
 
         /* Top Brand Bar */
-        .brand-bar { padding: 18px 20px 14px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; }
+        .brand-bar { padding: 18px 20px 14px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
         .logo-box { display: flex; align-items: center; gap: 10px; }
         .logo-circle { width: 38px; height: 38px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 18px; border: 1.5px solid #86efac; }
         .logo-text h2 { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
-        .filter-btn { width: 38px; height: 38px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 15px; border: 1px solid #e2e8f0; }
+        .filter-btn { width: 38px; height: 38px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
 
-        /* Welcome Banner Card */
-        .welcome-card { margin: 12px 16px 16px; background: linear-gradient(135deg, #14532d, #16a34a); border-radius: 24px; padding: 22px 20px; color: #ffffff; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.25); }
-        .welcome-card::after { content: ''; position: absolute; right: -20px; bottom: -20px; width: 140px; height: 140px; background: rgba(255,255,255,0.08); border-radius: 50%; pointer-events: none; }
-        .welcome-card h3 { font-size: 19px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 4px; }
-        .welcome-card p { font-size: 12px; opacity: 0.9; font-weight: 600; margin-bottom: 16px; }
-        
-        .balance-strip { background: rgba(255,255,255,0.14); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); border-radius: 16px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
-        .balance-item p { font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.85; }
-        .balance-item h4 { font-size: 17px; font-weight: 900; margin-top: 1px; }
+        /* Real HD Harvester Banner Card */
+        .hero-banner-box { margin: 14px 16px 16px; border-radius: 24px; overflow: hidden; position: relative; height: 165px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.2); border: 1.5px solid #e2e8f0; }
+        .hero-banner-box img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.85) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; color: white; }
+        .hero-banner-overlay h3 { font-size: 19px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 2px; }
+        .hero-banner-overlay p { font-size: 12px; opacity: 0.95; font-weight: 600; }
+
+        /* Floating Wallet Balance Strip */
+        .balance-strip { margin: 0 16px 18px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
+        .balance-item p { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
+        .balance-item h4 { font-size: 19px; font-weight: 900; color: #16a34a; }
 
         /* 4 Quick Actions matching poster */
         .actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px 20px; }
@@ -47,20 +50,17 @@
         /* Available Plans Section */
         .section-bar { padding: 0 18px 12px; display: flex; justify-content: space-between; align-items: center; }
         .section-bar h3 { font-size: 17px; font-weight: 900; color: #0f172a; }
-        .section-bar span { font-size: 12px; font-weight: 800; color: #16a34a; }
+        .section-bar span { font-size: 12px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
 
         .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
         
-        /* Sleek Plan Cards from Mockup */
+        /* Plan Item */
         .plan-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.2s ease; }
         .plan-item:active { transform: scale(0.98); border-color: #16a34a; }
         
         .plan-left { display: flex; align-items: center; gap: 14px; }
-        .plan-avatar { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-        
-        .avatar-green { background: #dcfce7; color: #16a34a; }
-        .avatar-gold { background: #fef3c7; color: #d97706; }
-        .avatar-diamond { background: #e0f2fe; color: #0284c7; }
+        .plan-thumb-box { width: 54px; height: 54px; border-radius: 16px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0; }
+        .plan-thumb-box img { width: 100%; height: 100%; object-fit: cover; }
 
         .plan-meta h4 { font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
         .plan-meta p { font-size: 12px; color: #64748b; font-weight: 700; }
@@ -95,23 +95,28 @@
             <div class="filter-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
 
-        <!-- Welcome Banner Card -->
-        <div class="welcome-card">
-            <h3>Welcome to AgroHarvest</h3>
-            <p>Grow Smart, Harvest More</p>
-            <div class="balance-strip">
-                <div class="balance-item">
-                    <p>Total Balance</p>
-                    <h4 id="totalBalText">₹0.00</h4>
-                </div>
-                <div class="balance-item" style="text-align: right;">
-                    <p>Team Income</p>
-                    <h4 id="teamIncText">₹0.00</h4>
-                </div>
+        <!-- High-Res Harvester Hero Banner -->
+        <div class="hero-banner-box">
+            <img class="hero-banner-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester Field">
+            <div class="hero-banner-overlay">
+                <h3>Smart Farming Better Future</h3>
+                <p>High Yield & Guaranteed Daily Profit</p>
             </div>
         </div>
 
-        <!-- 4 Quick Actions (Crop Plans, Daily Income, Withdraw, My Team) -->
+        <!-- Wallet Strip -->
+        <div class="balance-strip">
+            <div class="balance-item">
+                <p>Total Balance</p>
+                <h4 id="totalBalText">₹0.00</h4>
+            </div>
+            <div class="balance-item" style="text-align: right;">
+                <p>Team Income</p>
+                <h4 id="teamIncText">₹0.00</h4>
+            </div>
+        </div>
+
+        <!-- 4 Quick Actions -->
         <div class="actions-row">
             <a href="orders.html" class="act-btn">
                 <div class="act-icon icon-crop"><i class="fa-solid fa-seedling"></i></div>
@@ -134,15 +139,15 @@
         <!-- Available Plans Section -->
         <div class="section-bar">
             <h3>Available Plans</h3>
-            <span>30 Days Yield</span>
+            <span>30 Days Cycle</span>
         </div>
 
         <div class="plans-box">
             <!-- Green Plan -->
             <div class="plan-item" onclick="buySeedPlan('Green Plan', 525, 125, 30)">
                 <div class="plan-left">
-                    <div class="plan-avatar avatar-green">
-                        <i class="fa-solid fa-seedling"></i>
+                    <div class="plan-thumb-box">
+                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Green Plan">
                     </div>
                     <div class="plan-meta">
                         <h4>Green Plan</h4>
@@ -153,12 +158,12 @@
                     <div class="plan-price">₹525</div>
                     <div class="plan-days"><i class="fa-regular fa-clock"></i> 30 Days</div>
                 </div>
-    </div>
-                                <!-- Gold Plan -->
+                </div>
+                            <!-- Gold Plan -->
             <div class="plan-item" onclick="buySeedPlan('Gold Plan', 1500, 375, 30)">
                 <div class="plan-left">
-                    <div class="plan-avatar avatar-gold">
-                        <i class="fa-solid fa-wheat-awn"></i>
+                    <div class="plan-thumb-box">
+                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Gold Plan">
                     </div>
                     <div class="plan-meta">
                         <h4>Gold Plan</h4>
@@ -174,8 +179,8 @@
             <!-- Diamond Plan -->
             <div class="plan-item" onclick="buySeedPlan('Diamond Plan', 3500, 970, 30)">
                 <div class="plan-left">
-                    <div class="plan-avatar avatar-diamond">
-                        <i class="fa-solid fa-gem"></i>
+                    <div class="plan-thumb-box">
+                        <img class="plan-crop-img" src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" alt="Diamond Plan">
                     </div>
                     <div class="plan-meta">
                         <h4>Diamond Plan</h4>
