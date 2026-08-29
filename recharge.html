@@ -10,7 +10,7 @@
     <script src="auth.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
         .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 40px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
@@ -18,22 +18,23 @@
         .card { background: white; margin: 16px; border-radius: 22px; padding: 20px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
 
         .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0 14px; }
-        .amount-pill { background: #f8fafc; border: 2px solid #e2e8f0; padding: 12px 6px; border-radius: 16px; font-weight: 900; text-align: center; cursor: pointer; color: #0f172a; font-size: 16px; transition: all 0.2s; }
-        .amount-pill.active { background: #dcfce7; border-color: #16a34a; color: #15803d; transform: scale(1.02); }
+        .amount-pill { background: #f8fafc; border: 2px solid #e2e8f0; padding: 12px 6px; border-radius: 16px; font-weight: 900; text-align: center; cursor: pointer; color: #0f172a; font-size: 16px; user-select: none; }
+        .amount-pill.active { background: #dcfce7; border-color: #16a34a; color: #15803d; }
 
         .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 800; outline: none; margin-bottom: 14px; color: #0f172a; }
         .input-box:focus { border-color: #16a34a; }
 
         .upi-apps-label { font-size: 13px; font-weight: 800; color: #334155; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
         .upi-apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-        .app-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .app-btn:active { transform: scale(0.95); }
-        .app-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        
+        .app-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; color: #0f172a; }
+        .app-btn:active { transform: scale(0.96); }
+        .app-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; pointer-events: none; }
         
         .icon-phonepe { background: #5f259f; color: white; }
         .icon-gpay { background: #ffffff; border: 1.5px solid #e2e8f0; color: #4285f4; font-weight: 900; }
         .icon-paytm { background: #00b9f1; color: white; }
-        .app-btn span { font-size: 11px; font-weight: 800; color: #0f172a; }
+        .app-btn span { font-size: 11px; font-weight: 800; pointer-events: none; }
 
         .upi-box { background: #f0fdf4; border: 1.5px dashed #16a34a; padding: 14px; border-radius: 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         .btn-copy { background: #16a34a; color: white; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; }
@@ -62,53 +63,53 @@
         <div class="card">
             <h3 style="font-size: 15px; font-weight: 900; color: #0f172a;">1. Select Amount</h3>
             <div class="quick-grid">
-                <div class="amount-pill active" onclick="setRechargeAmt(525, this)">₹525</div>
-                <div class="amount-pill" onclick="setRechargeAmt(1500, this)">₹1,500</div>
-                <div class="amount-pill" onclick="setRechargeAmt(3500, this)">₹3,500</div>
+                <button type="button" class="amount-pill active" onclick="setRechargeAmt(499, this)">₹499</button>
+                <button type="button" class="amount-pill" onclick="setRechargeAmt(1499, this)">₹1,499</button>
+                <button type="button" class="amount-pill" onclick="setRechargeAmt(2499, this)">₹2,499</button>
             </div>
 
-            <input type="number" id="rechargeInput" class="input-box" value="525" placeholder="Enter amount">
+            <input type="number" id="rechargeInput" class="input-box" value="499" placeholder="Enter amount" oninput="updateAppLinks()">
 
             <div class="upi-apps-label">
                 <span>2. Pay via UPI App</span>
                 <small style="color: #64748b; font-weight: 700;">Tap to Open</small>
             </div>
 
-            <!-- Direct App Launchers -->
+            <!-- Direct Functional Links -->
             <div class="upi-apps-grid">
-                <div class="app-btn" onclick="openUpiApp('phonepe')">
+                <a id="phonepeLink" href="#" class="app-btn">
                     <div class="app-icon icon-phonepe"><i class="fa-solid fa-mobile-screen-button"></i></div>
                     <span>PhonePe</span>
-                </div>
-                <div class="app-btn" onclick="openUpiApp('gpay')">
+                </a>
+                <a id="gpayLink" href="#" class="app-btn">
                     <div class="app-icon icon-gpay"><i class="fa-brands fa-google-pay" style="font-size: 26px;"></i></div>
                     <span>Google Pay</span>
-                </div>
-                <div class="app-btn" onclick="openUpiApp('paytm')">
+                </a>
+                <a id="paytmLink" href="#" class="app-btn">
                     <div class="app-icon icon-paytm"><i class="fa-solid fa-bolt"></i></div>
                     <span>Paytm</span>
-                </div>
+                </a>
             </div>
 
-            <!-- Dynamic Receiver UPI ID Display -->
+            <!-- Copy UPI ID -->
             <div class="upi-box">
                 <div>
                     <p style="font-size: 11px; color: #64748b; font-weight: 700;">Manual Transfer UPI ID</p>
                     <h4 id="adminUpiDisplay" style="font-size: 14px; font-weight: 900; color: #15803d;">agroharvest@upi</h4>
                 </div>
-                <button onclick="copyUpiId()" class="btn-copy">Copy</button>
+                <button type="button" onclick="copyUpiId()" class="btn-copy">Copy</button>
             </div>
 
             <h3 style="font-size: 14px; font-weight: 900; color: #0f172a; margin-bottom: 6px;">3. Enter 12-Digit UTR Number</h3>
-            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px;">Payment hone ke baad bank ka 12-digit UTR/Txn ID dalein:</p>
+            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 10px;">Payment hone ke baad mila 12-digit UTR/Txn ID dalein:</p>
 
-            <input type="text" id="utrNumberInput" class="input-box" placeholder="e.g. 423871928371" maxlength="16" required>
+            <input type="text" id="utrNumberInput" class="input-box" placeholder="e.g. 423871928371" maxlength="16">
 
-            <button onclick="submitUtrRequest()" id="subUtrBtn" class="btn-submit-utr">
+            <button type="button" onclick="submitUtrRequest()" id="subUtrBtn" class="btn-submit-utr">
                 Submit UTR for Verification
             </button>
-                </div>
-                            <!-- Recharge History -->
+        </div>
+                <!-- Recharge History -->
         <div class="history-card">
             <h3 style="font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <span>Recharge History</span>
@@ -121,28 +122,33 @@
     </div>
 
     <script>
-        const activeUser = requireAuth();
-        let targetUpiId = localStorage.getItem('agro_cached_upi') || "agroharvest@upi";
+        let currentUser = null;
+        try {
+            currentUser = requireAuth();
+        } catch (e) {
+            console.error(e);
+        }
+
+        let targetUpiId = "agroharvest@upi";
 
         document.addEventListener("DOMContentLoaded", async () => {
-            // Apply cached UPI immediately so user sees it without delay
-            document.getElementById('adminUpiDisplay').innerText = targetUpiId;
+            updateAppLinks();
 
             // Fetch live UPI from database
-            const sb = getSupabase();
-            if (sb) {
-                const { data, error } = await sb
-                    .from('settings')
-                    .select('value')
-                    .eq('key', 'upi_id')
-                    .maybeSingle();
-
-                if (data && data.value) {
-                    targetUpiId = data.value.trim();
-                    document.getElementById('adminUpiDisplay').innerText = targetUpiId;
-                    localStorage.setItem('agro_cached_upi', targetUpiId);
+            try {
+                const sb = getSupabase();
+                if (sb) {
+                    const { data } = await sb.from('settings').select('value').eq('key', 'upi_id').maybeSingle();
+                    if (data && data.value) {
+                        targetUpiId = data.value.trim();
+                        document.getElementById('adminUpiDisplay').innerText = targetUpiId;
+                        updateAppLinks();
+                    }
                 }
+            } catch (err) {
+                console.error("UPI fetch error:", err);
             }
+
             loadRechargeHistory();
         });
 
@@ -150,6 +156,21 @@
             document.getElementById('rechargeInput').value = val;
             document.querySelectorAll('.amount-pill').forEach(p => p.classList.remove('active'));
             el.classList.add('active');
+            updateAppLinks();
+        }
+
+        function updateAppLinks() {
+            const amt = parseFloat(document.getElementById('rechargeInput').value) || 499;
+            const phoneStr = currentUser?.phone || 'USER';
+            const note = `AgroHarvest Recharge UID ${phoneStr}`;
+            
+            const uri = `upi://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
+            const phonepeUri = `phonepe://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
+            const paytmUri = `paytmmp://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+            document.getElementById('phonepeLink').href = phonepeUri;
+            document.getElementById('gpayLink').href = uri;
+            document.getElementById('paytmLink').href = paytmUri;
         }
 
         function copyUpiId() {
@@ -158,102 +179,97 @@
             });
         }
 
-        function openUpiApp(appType) {
+        async function submitUtrRequest() {
             const amt = parseFloat(document.getElementById('rechargeInput').value);
+            const utr = document.getElementById('utrNumberInput').value.trim();
+            const btn = document.getElementById('subUtrBtn');
+
             if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
+            if (!utr || utr.length < 8) return alert("Kripya sahi 12-digit UTR number enter karein!");
 
-            const note = `AgroHarvest Recharge UID ${activeUser.phone}`;
-            let uri = `upi://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
+            if (!currentUser) return alert("Session expired! Dobara login karein.");
 
-            if (appType === 'phonepe') {
-                uri = `phonepe://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
-            } else if (appType === 'paytm') {
-                uri = `paytmmp://pay?pa=${encodeURIComponent(targetUpiId)}&pn=AgroHarvest&am=${amt}&cu=INR&tn=${encodeURIComponent(note)}`;
-            }
-
-            window.location.href = uri;
-        }
-
-        async function submitUtrRequest() {
-        async function submitUtrRequest() {
-    const amt = parseFloat(document.getElementById('rechargeInput').value);
-    const utr = document.getElementById('utrNumberInput').value.trim();
-    const btn = document.getElementById('subUtrBtn');
-
-    if (!amt || amt < 100) return alert("Minimum recharge amount ₹100 hai!");
-    if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number enter karein!");
-
-    const sb = getSupabase();
-    if (!sb) return alert("Connecting database...");
-
-    btn.disabled = true;
-    btn.innerText = "Submitting...";
-
-    try {
-        // user_id aur phone dono insert ho rahe hain
-        const { error } = await sb.from('recharges').insert([{
-            user_id: activeUser.id,
-            phone: activeUser.phone,
-            amount: amt,
-            utr: utr,
-            status: 'pending'
-        }]);
-
-        if (error) {
-            if (error.message.includes('unique') || error.message.includes('utr') || error.message.includes('recharges_utr_key')) {
-                throw new Error("Yeh UTR number pehle se submit kiya ja chuka hai! Duplicate UTR allow nahi hai.");
-            }
-            throw error;
-        }
-
-        alert("✅ UTR Request Successfully Submit ho gayi!\nAdmin 5-10 minute me verify karke wallet mein balance add kar dega.");
-        document.getElementById('utrNumberInput').value = '';
-        loadRechargeHistory();
-
-    } catch (err) {
-        alert("Error: " + err.message);
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "Submit UTR for Verification";
-    }
-        }
-            
-        async function loadRechargeHistory() {
             const sb = getSupabase();
-            if (!sb) return;
+            if (!sb) return alert("Connecting database...");
 
-            const { data: list } = await sb
-                .from('recharges')
-                .select('*')
-                .eq('user_id', activeUser.id)
-                .order('created_at', { ascending: false });
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
 
+            try {
+                const { error } = await sb.from('recharges').insert([{
+                    user_id: currentUser.id,
+                    phone: currentUser.phone,
+                    amount: amt,
+                    utr: utr,
+                    status: 'pending'
+                }]);
+
+                if (error) {
+                    if (error.message.includes('unique') || error.message.includes('utr')) {
+                        throw new Error("Yeh UTR pehle se submit kiya ja chuka hai!");
+                    }
+                    throw error;
+                }
+
+                alert("✅ UTR Request Successfully Submit ho gayi!\nAdmin verify karke wallet mein balance add kar dega.");
+                document.getElementById('utrNumberInput').value = '';
+                loadRechargeHistory();
+
+            } catch (err) {
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit UTR for Verification";
+            }
+        }
+
+        async function loadRechargeHistory() {
             const box = document.getElementById('rechargeHistoryList');
-            if (!list || list.length === 0) {
-                box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Abhi tak koi recharge submit nahi hua hai.</p>`;
+            if (!currentUser) {
+                box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Please login to view history.</p>`;
                 return;
             }
 
-            box.innerHTML = list.map(item => {
-                let badgeClass = 'badge-pending';
-                if (item.status === 'approved') badgeClass = 'badge-approved';
-                if (item.status === 'rejected') badgeClass = 'badge-rejected';
+            try {
+                const sb = getSupabase();
+                if (!sb) return;
 
-                const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Today';
+                const { data: list, error } = await sb
+                    .from('recharges')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
 
-                return `
-                    <div class="history-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <strong style="font-size: 14px; color: #0f172a;">₹${parseFloat(item.amount).toFixed(2)}</strong>
-                            <span class="badge-status ${badgeClass}">${item.status}</span>
+                if (error) throw error;
+
+                if (!list || list.length === 0) {
+                    box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Abhi tak koi recharge submit nahi hua hai.</p>`;
+                    return;
+                }
+
+                box.innerHTML = list.map(item => {
+                    let badgeClass = 'badge-pending';
+                    if (item.status === 'approved') badgeClass = 'badge-approved';
+                    if (item.status === 'rejected') badgeClass = 'badge-rejected';
+
+                    const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Today';
+
+                    return `
+                        <div class="history-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <strong style="font-size: 14px; color: #0f172a;">₹${parseFloat(item.amount).toFixed(2)}</strong>
+                                <span class="badge-status ${badgeClass}">${item.status}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
+                                <span>UTR: ${item.utr}</span>
+                                <span>${dateStr}</span>
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
-                            <span>UTR: ${item.utr}</span>
-                            <span>${dateStr}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch (err) {
+                box.innerHTML = `<p style="font-size: 12px; color: #ef4444; font-weight: 700; text-align: center; padding: 10px;">${err.message}</p>`;
+            }
         }
     </script>
 </body>
