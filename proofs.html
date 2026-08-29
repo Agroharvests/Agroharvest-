@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Live Withdrawal Proofs</title>
+    <title>AgroHarvest - Community Proofs Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
@@ -11,187 +11,211 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 80px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.15); }
+        body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
-        /* Top Header */
         .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; position: sticky; top: 0; z-index: 50; }
-        .live-pill { background: #fee2e2; color: #dc2626; font-size: 11px; font-weight: 900; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
-        .live-dot { width: 7px; height: 7px; background: #dc2626; border-radius: 50%; animation: blink 1s infinite alternate; }
-        @keyframes blink { 0% { opacity: 0.3; } 100% { opacity: 1; } }
+        .badge-live { font-size: 11px; background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 20px; font-weight: 900; display: flex; align-items: center; gap: 5px; }
+        .pulse-dot { width: 7px; height: 7px; background: #dc2626; border-radius: 50%; display: inline-block; }
 
-        /* Upload Card with Gallery Picker */
-        .upload-card { background: white; margin: 16px; border-radius: 22px; padding: 18px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
-        .upload-card h3 { font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-        .upload-card p { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 14px; }
+        /* Upload Card */
+        .upload-card { background: white; margin: 14px 16px; border-radius: 24px; padding: 18px; border: 1.5px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.03); }
+        .type-selector-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+        .type-pill { background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 9px 8px; border-radius: 12px; font-size: 11px; font-weight: 800; color: #475569; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+        .type-pill.active { background: #dcfce7; border-color: #16a34a; color: #15803d; box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15); }
 
-        .input-row { margin-bottom: 12px; }
-        .input-row label { font-size: 12px; font-weight: 800; color: #334155; display: block; margin-bottom: 4px; }
-        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 12px 14px; border-radius: 14px; font-size: 14px; font-weight: 700; outline: none; transition: 0.2s; }
-        .input-box:focus { border-color: #16a34a; background: #ffffff; }
+        .drop-zone { border: 2px dashed #16a34a; background: #f0fdf4; border-radius: 18px; padding: 18px 12px; text-align: center; cursor: pointer; margin-bottom: 12px; transition: all 0.2s; }
+        .drop-zone:active { transform: scale(0.98); }
+        .preview-img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; margin-top: 10px; display: none; border: 1px solid #cbd5e1; }
 
-        /* Photo Upload Dropzone */
-        .photo-picker-box { border: 2px dashed #16a34a; background: #f0fdf4; border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; position: relative; margin-bottom: 14px; transition: all 0.2s; }
-        .photo-picker-box:active { transform: scale(0.98); }
-        .photo-picker-box i { font-size: 28px; color: #16a34a; margin-bottom: 6px; }
-        .photo-picker-box span { font-size: 13px; font-weight: 800; color: #15803d; display: block; }
-        .photo-picker-box small { font-size: 11px; color: #64748b; font-weight: 600; }
-        .preview-thumb { width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; display: none; margin-top: 10px; border: 1px solid #bbf7d0; }
+        .input-row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; margin-bottom: 12px; }
+        .input-field { width: 100%; border: 1.5px solid #e2e8f0; padding: 11px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; outline: none; color: #0f172a; }
+        .input-field:focus { border-color: #16a34a; }
 
-        .btn-post { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3); }
-        .btn-post:disabled { opacity: 0.6; }
+        .btn-post { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 13px; border-radius: 14px; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); }
 
-        /* Community Feed Cards */
-        .feed-header { padding: 0 20px 10px; display: flex; justify-content: space-between; align-items: center; }
-        .feed-header h4 { font-size: 16px; font-weight: 900; color: #0f172a; }
-        
-        .feed-list { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
-        .proof-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 22px; padding: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
-        .user-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .user-left { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 38px; height: 38px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; }
-        .user-meta strong { font-size: 13px; font-weight: 900; color: #0f172a; display: block; }
-        .user-meta span { font-size: 11px; color: #64748b; font-weight: 600; }
+        /* Feed Category Filter */
+        .filter-scroller { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 14px; scrollbar-width: none; }
+        .filter-scroller::-webkit-scrollbar { display: none; }
+        .filter-chip { background: white; border: 1.5px solid #e2e8f0; padding: 7px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; color: #64748b; white-space: nowrap; cursor: pointer; }
+        .filter-chip.active { background: #0f172a; color: white; border-color: #0f172a; }
 
-        .received-badge { background: #dcfce7; color: #15803d; font-size: 12px; font-weight: 900; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; border: 1px solid #86efac; }
-        
-        .proof-image-wrap { width: 100%; border-radius: 16px; overflow: hidden; margin: 10px 0; border: 1px solid #e2e8f0; background: #0f172a; }
-        .proof-img { width: 100%; max-height: 380px; object-fit: contain; display: block; background: #f8fafc; }
-        
-        .proof-caption { font-size: 13px; font-weight: 700; color: #334155; margin-top: 8px; line-height: 1.4; }
-        .social-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #64748b; font-weight: 700; }
-        .like-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 20px; cursor: pointer; color: #dc2626; display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 12px; }
+        /* Proof Item Cards */
+        .feed-container { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
+        .proof-post { background: white; border-radius: 22px; border: 1.5px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+        .post-header { padding: 14px 16px 10px; display: flex; justify-content: space-between; align-items: center; }
+        .user-block { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 38px; height: 38px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .badge-type { font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 8px; text-transform: uppercase; }
+        .type-bank { background: #dcfce7; color: #15803d; }
+        .type-referral { background: #f3e8ff; color: #7e22ce; }
+        .type-withdrawal { background: #dbeafe; color: #1d4ed8; }
+        .type-yield { background: #fef3c7; color: #b45309; }
+
+        .proof-image-box { width: 100%; background: #0f172a; max-height: 420px; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .proof-image-box img { width: 100%; max-height: 420px; object-fit: contain; }
+
+        .post-footer { padding: 12px 16px 14px; }
+        .post-caption { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 10px; line-height: 1.4; }
+        .post-actions { display: flex; justify-content: space-between; align-items: center; }
+        .like-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; color: #dc2626; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; }
+        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item.active { color: #16a34a; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Nav -->
         <div class="top-header">
-            <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
-            <span>Community Proofs</span>
-            <div class="live-pill"><span class="live-dot"></span> LIVE</div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
+                <span>Community Proofs</span>
+            </div>
+            <span class="badge-live"><span class="pulse-dot"></span> LIVE FEED</span>
         </div>
 
-        <!-- Gallery Upload Form -->
+        <!-- Multi-Category Upload Box -->
         <div class="upload-card">
-            <h3><i class="fa-solid fa-cloud-arrow-up" style="color: #16a34a;"></i> Post Withdrawal Proof</h3>
-            <p>Screenshot upload karein taaki sabhi members dekh sakein.</p>
+            <p style="font-size: 12px; font-weight: 800; color: #64748b; margin-bottom: 8px;">1. Select Proof Category:</p>
+            <div class="type-selector-grid">
+                <div class="type-pill active" onclick="selectProofType('bank', this)">
+                    <i class="fa-solid fa-building-columns"></i> Bank SMS / Credit
+                </div>
+                <div class="type-pill" onclick="selectProofType('referral', this)">
+                    <i class="fa-solid fa-users"></i> Referral Income
+                </div>
+                <div class="type-pill" onclick="selectProofType('withdrawal', this)">
+                    <i class="fa-solid fa-wallet"></i> Payout Record
+                </div>
+                <div class="type-pill" onclick="selectProofType('yield', this)">
+                    <i class="fa-solid fa-seedling"></i> Daily Harvest
+                </div>
+            </div>
+
+            <div class="drop-zone" onclick="document.getElementById('proofFileInput').click()">
+                <i class="fa-solid fa-camera" style="font-size: 24px; color: #16a34a; margin-bottom: 4px;"></i>
+                <p id="dropText" style="font-size: 13px; font-weight: 800; color: #15803d;">Tap to Upload Screenshot</p>
+                <img id="imagePreview" class="preview-img" alt="Preview">
+            </div>
+            <input type="file" id="proofFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
 
             <div class="input-row">
-                <label>Withdrawal Amount Received (₹)</label>
-                <input type="number" id="proofAmount" class="input-box" placeholder="e.g. 1500" required>
+                <input type="number" id="proofAmtInput" class="input-field" placeholder="Amount ₹ (e.g. 500)">
+                <input type="text" id="proofCaptionInput" class="input-field" placeholder="Message (e.g. Received in 5 mins!)">
             </div>
 
-            <!-- Direct File / Gallery Picker -->
-            <div class="photo-picker-box" onclick="document.getElementById('proofFileInput').click()">
-                <i class="fa-solid fa-camera"></i>
-                <span id="pickerLabel">Tap to Select Screenshot from Gallery</span>
-                <small>PNG, JPG, JPEG supported</small>
-                <input type="file" id="proofFileInput" accept="image/*" style="display: none;" onchange="handleFileSelected(event)">
-                <img id="previewImg" class="preview-thumb" alt="Preview">
-            </div>
-
-            <div class="input-row">
-                <label>Message / Caption (Optional)</label>
-                <input type="text" id="proofCaption" class="input-box" placeholder="e.g. Received my withdrawal in 10 mins! Thank you AgroHarvest.">
-            </div>
-
-            <button onclick="publishProof()" id="postBtn" class="btn-post">Post Screenshot Proof</button>
+            <button onclick="uploadPaymentProof()" id="postBtn" class="btn-post">
+                <i class="fa-solid fa-paper-plane"></i> Share Proof with Community
+            </button>
         </div>
 
-        <div class="feed-header">
-            <h4>Recent Member Payouts</h4>
-            <span id="totalProofsCount" style="font-size: 12px; font-weight: 800; color: #16a34a;">0 Proofs</span>
+        <!-- Filter Chips -->
+        <div class="filter-scroller">
+            <div class="filter-chip active" onclick="filterProofs('all', this)">🔥 All Proofs</div>
+            <div class="filter-chip" onclick="filterProofs('bank', this)">🏦 Bank SMS</div>
+            <div class="filter-chip" onclick="filterProofs('referral', this)">👥 Referral Rewards</div>
+            <div class="filter-chip" onclick="filterProofs('withdrawal', this)">💳 Payouts</div>
+            <div class="filter-chip" onclick="filterProofs('yield', this)">🌱 Harvest Yield</div>
         </div>
 
-        <!-- Live Feed Container -->
-        <div class="feed-list" id="feedContainer">
-            <div style="text-align: center; padding: 40px 20px; color: #94a3b8; font-weight: 700;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: #16a34a; margin-bottom: 10px;"></i>
-                <p>Loading member withdrawal proofs...</p>
-            </div>
+        <!-- Live Proofs Stream -->
+        <div class="feed-container" id="proofsFeed">
+            <p style="text-align: center; color: #94a3b8; font-weight: 700; padding: 20px;">Loading live proofs...</p>
+    </div>
+            <div class="bottom-nav">
+            <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+            <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
+            <a href="team.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Team</span></a>
+            <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
     </div>
-        <script>
+
+    <script>
         const activeUser = requireAuth();
-        let selectedBase64Image = null;
+        let selectedProofType = 'bank';
+        let base64Image = null;
+        let allProofsData = [];
+        let currentFilter = 'all';
 
         document.addEventListener("DOMContentLoaded", loadProofsFeed);
 
-        // Compress and convert gallery photo to base64
-        function handleFileSelected(event) {
-            const file = event.target.files[0];
+        function selectProofType(type, el) {
+            selectedProofType = type;
+            document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
             if (!file) return;
 
+            // Compress image to fast lightweight base64
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(evt) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    // Max width 800px for optimal speed
-                    const MAX_WIDTH = 800;
                     let width = img.width;
                     let height = img.height;
+                    const maxDim = 800;
 
-                    if (width > MAX_WIDTH) {
-                        height = Math.round((height * MAX_WIDTH) / width);
-                        width = MAX_WIDTH;
+                    if (width > height && width > maxDim) {
+                        height *= maxDim / width;
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width *= maxDim / height;
+                        height = maxDim;
                     }
 
                     canvas.width = width;
                     canvas.height = height;
+                    const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.7);
 
-                    selectedBase64Image = canvas.toDataURL('image/jpeg', 0.82);
-                    
-                    const preview = document.getElementById('previewImg');
-                    preview.src = selectedBase64Image;
-                    preview.style.display = 'block';
-                    document.getElementById('pickerLabel').innerText = "✅ Screenshot Selected (Tap to change)";
+                    const prev = document.getElementById('imagePreview');
+                    prev.src = base64Image;
+                    prev.style.display = 'block';
+                    document.getElementById('dropText').innerText = "Screenshot Selected (Tap to Change)";
                 };
-                img.src = e.target.result;
+                img.src = evt.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        async function publishProof() {
-            const amount = parseFloat(document.getElementById('proofAmount').value);
-            const caption = document.getElementById('proofCaption').value.trim();
+        async function uploadPaymentProof() {
+            if (!base64Image) return alert("Kripya pehle screenshot select karein!");
+
+            const amt = parseFloat(document.getElementById('proofAmtInput').value) || 0;
+            const caption = document.getElementById('proofCaptionInput').value.trim();
             const btn = document.getElementById('postBtn');
 
-            if (!amount || isNaN(amount) || amount <= 0) {
-                return alert("Kripya sahi withdrawal amount enter karein!");
-            }
-            if (!selectedBase64Image) {
-                return alert("Kripya gallery se payment screenshot select karein!");
-            }
-
             const sb = getSupabase();
-            if (!sb) return alert("Connecting database...");
+            if (!sb) return alert("Database connection error.");
 
             btn.disabled = true;
-            btn.innerText = "Uploading Proof...";
+            btn.innerText = "Publishing Proof...";
 
             try {
                 const { error } = await sb.from('payment_proofs').insert([{
                     user_id: activeUser.id,
-                    user_phone: activeUser.phone,
-                    proof_type: 'withdrawal',
-                    amount: amount,
-                    image_url: selectedBase64Image,
-                    caption: caption || 'Received my withdrawal on time! ✅'
+                    phone: activeUser.phone,
+                    image_url: base64Image,
+                    proof_type: selectedProofType,
+                    amount: amt,
+                    caption: caption || `Received ₹${amt} successfully!`,
+                    likes_count: 1
                 }]);
 
                 if (error) throw error;
 
-                alert("🎉 Screenshot Proof Successfully Post ho gaya!");
-                document.getElementById('proofAmount').value = '';
-                document.getElementById('proofCaption').value = '';
-                document.getElementById('previewImg').style.display = 'none';
-                document.getElementById('pickerLabel').innerText = "Tap to Select Screenshot from Gallery";
-                selectedBase64Image = null;
+                alert("🎉 Screenshot Community Feed par publish ho gaya!");
+                base64Image = null;
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('proofAmtInput').value = '';
+                document.getElementById('proofCaptionInput').value = '';
+                document.getElementById('dropText').innerText = "Tap to Upload Screenshot";
 
                 loadProofsFeed();
 
@@ -199,7 +223,7 @@
                 alert("Upload failed: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Post Screenshot Proof";
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Share Proof with Community';
             }
         }
 
@@ -207,77 +231,104 @@
             const sb = getSupabase();
             if (!sb) return;
 
-            const { data: proofs, error } = await sb
-                .from('payment_proofs')
-                .select('*')
-                .order('created_at', { ascending: false });
+            try {
+                const { data: proofs, error } = await sb
+                    .from('payment_proofs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            const feed = document.getElementById('feedContainer');
-            if (error || !proofs || proofs.length === 0) {
+                if (error) throw error;
+                allProofsData = proofs || [];
+                renderFeed(allProofsData);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function filterProofs(category, el) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            if (category === 'all') {
+                renderFeed(allProofsData);
+            } else {
+                renderFeed(allProofsData.filter(p => p.proof_type === category));
+            }
+        }
+
+        function renderFeed(list) {
+            const feed = document.getElementById('proofsFeed');
+            if (!list || list.length === 0) {
                 feed.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: #94a3b8; font-weight: 700;">
-                        <i class="fa-solid fa-receipt" style="font-size: 36px; color: #cbd5e1; margin-bottom: 10px;"></i>
-                        <p>Sabse pehla withdrawal screenshot aap post karein!</p>
+                    <div style="text-align: center; padding: 40px; background: white; border-radius: 20px; border: 1.5px dashed #cbd5e1;">
+                        <i class="fa-regular fa-image" style="font-size: 32px; color: #cbd5e1; margin-bottom: 8px;"></i>
+                        <p style="font-size: 13px; color: #94a3b8; font-weight: 700;">Is category mein abhi koi proof nahi hai. Sabse pehla post karein!</p>
                     </div>
                 `;
-                document.getElementById('totalProofsCount').innerText = "0 Proofs";
                 return;
             }
 
-            document.getElementById('totalProofsCount').innerText = `${proofs.length} Proofs`;
-
-            feed.innerHTML = proofs.map(p => {
-                const phoneStr = p.user_phone || "9999999999";
+            feed.innerHTML = list.map(p => {
+                const phoneStr = p.phone || "9999999999";
                 const maskedPhone = `+91 ${phoneStr.substring(0, 3)}****${phoneStr.substring(7)}`;
-                const timeAgo = formatTimeAgo(p.created_at);
+                const timeAgo = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : 'Recent';
+                
+                let badgeClass = 'type-bank';
+                let labelText = '🏦 Bank Credit';
+                if (p.proof_type === 'referral') { badgeClass = 'type-referral'; labelText = '👥 Referral Reward'; }
+                if (p.proof_type === 'withdrawal') { badgeClass = 'type-withdrawal'; labelText = '💳 Payout Record'; }
+                if (p.proof_type === 'yield') { badgeClass = 'type-yield'; labelText = '🌱 Daily Harvest'; }
+
+                const amountText = parseFloat(p.amount) > 0 ? `₹${parseFloat(p.amount).toFixed(0)}` : 'Verified';
 
                 return `
-                    <div class="proof-card">
-                        <div class="user-row">
-                            <div class="user-left">
-                                <div class="user-avatar"><i class="fa-solid fa-user-check"></i></div>
-                                <div class="user-meta">
-                                    <strong>${maskedPhone}</strong>
-                                    <span>${timeAgo}</span>
+                    <div class="proof-post">
+                        <div class="post-header">
+                            <div class="user-block">
+                                <div class="user-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div>
+                                    <strong style="font-size: 13px; color: #0f172a; display: block;">${maskedPhone}</strong>
+                                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">${timeAgo}</span>
                                 </div>
                             </div>
-                            <div class="received-badge">
-                                <i class="fa-solid fa-circle-check"></i> ₹${parseFloat(p.amount).toFixed(2)} Received
+                            <span class="badge-type ${badgeClass}">${labelText}</span>
+                        </div>
+
+                        <div class="proof-image-box">
+                            <img src="${p.image_url}" alt="Payment Proof">
+                        </div>
+
+                        <div class="post-footer">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <strong style="font-size: 16px; color: #16a34a; font-weight: 900;">${amountText}</strong>
+                                <span style="font-size: 11px; color: #15803d; font-weight: 800; background: #dcfce7; padding: 2px 8px; border-radius: 6px;">100% Guaranteed</span>
                             </div>
-                        </div>
-
-                        <div class="proof-image-wrap">
-                            <img src="${p.image_url}" class="proof-img" alt="Payment Proof" loading="lazy" onclick="window.open(this.src, '_blank')">
-                        </div>
-
-                        <div class="proof-caption">"${p.caption || 'Verified Withdrawal Payout'}"</div>
-
-                        <div class="social-bar">
-                            <button class="like-btn" onclick="toggleLike(this)"><i class="fa-solid fa-heart"></i> Verified</button>
-                            <span style="color: #16a34a; font-weight: 800;"><i class="fa-solid fa-shield-halved"></i> 100% Genuine</span>
+                            <p class="post-caption">${p.caption || ''}</p>
+                            <div class="post-actions">
+                                <button onclick="likePost('${p.id}', this)" class="like-btn">
+                                    <i class="fa-solid fa-heart"></i> <span class="like-num">${p.likes_count || 1}</span> Likes
+                                </button>
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">AgroHarvest Verified</span>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function formatTimeAgo(dateString) {
-            if (!dateString) return "Recently";
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffSeconds = Math.floor((now - date) / 1000);
+        async function likePost(id, btn) {
+            const numEl = btn.querySelector('.like-num');
+            let count = parseInt(numEl.innerText) + 1;
+            numEl.innerText = count;
+            btn.style.color = "#b91c1c";
+            btn.disabled = true;
 
-            if (diffSeconds < 60) return "Just now";
-            const diffMinutes = Math.floor(diffSeconds / 60);
-            if (diffMinutes < 60) return `${diffMinutes} mins ago`;
-            const diffHours = Math.floor(diffMinutes / 60);
-            if (diffHours < 24) return `${diffHours} hours ago`;
-            const diffDays = Math.floor(diffHours / 24);
-            return `${diffDays} days ago`;
-        }
-
-        function toggleLike(btn) {
-            btn.innerHTML = `<i class="fa-solid fa-heart" style="color: #dc2626;"></i> Liked!`;
+            const sb = getSupabase();
+            if (sb) {
+                await sb.from('payment_proofs').update({ likes_count: count }).eq('id', id);
+            }
         }
     </script>
 </body>
