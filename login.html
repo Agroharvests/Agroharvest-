@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AgroHarvest - Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
         
@@ -25,10 +25,10 @@
         .form-sheet { flex: 1; background: #ffffff; margin-top: -36px; border-radius: 36px 36px 0 0; padding: 32px 24px 20px; position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 -10px 30px rgba(0,0,0,0.12); }
         
         .title-box { margin-bottom: 24px; }
-        .title-box h1 { font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+        .title-box h1 { font-size: 26px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
         .title-box p { font-size: 13px; color: #64748b; font-weight: 600; margin-top: 4px; }
 
-        .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; height: 58px; }
+        .input-wrap { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 6px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; height: 58px; transition: all 0.2s; }
         .input-wrap:focus-within { border-color: #16a34a; background: #ffffff; box-shadow: 0 4px 20px rgba(22, 163, 74, 0.12); }
         .input-icon-box { width: 36px; height: 36px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
         
@@ -112,11 +112,17 @@
             const password = document.getElementById('loginPassword').value.trim();
             const btn = document.getElementById('loginBtn');
 
+            const sb = getSupabase();
+            if (!sb) {
+                alert("Database initializing... Dobara try karein.");
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Authenticating...";
 
             try {
-                const { data: user, error } = await supabase
+                const { data: user, error } = await sb
                     .from('profiles')
                     .select('*')
                     .eq('phone', phone)
