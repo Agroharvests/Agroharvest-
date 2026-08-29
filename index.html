@@ -429,27 +429,33 @@
             }
         }
 
-        async function loadDashboard() {
-            if (!activeUser) return;
+async function loadDashboard() {
+    if (!activeUser) return;
 
-            document.getElementById('totalBalText').innerText = "₹" + parseFloat(activeUser.balance || 0).toFixed(2);
-            document.getElementById('teamIncText').innerText = "₹" + parseFloat(activeUser.team_income || 0).toFixed(2);
+    const sb = getSupabase();
+    if (!sb) return;
 
-            const sb = getSupabase();
-            if (!sb) return;
+    // Automatic Daily Income Sync on App Open
+    try {
+        await sb.rpc('process_daily_crop_yields');
+    } catch (e) {
+        console.log("Daily income sync check:", e);
+    }
 
-            const { data: liveData } = await sb
-                .from('profiles')
-                .select('*')
-                .eq('id', activeUser.id)
-                .maybeSingle();
+    // Refresh wallet balance live
+    const { data: liveData } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', activeUser.id)
+        .maybeSingle();
 
-            if (liveData) {
-                setSessionUser(liveData);
-                document.getElementById('totalBalText').innerText = "₹" + parseFloat(liveData.balance || 0).toFixed(2);
-                document.getElementById('teamIncText').innerText = "₹" + parseFloat(liveData.team_income || 0).toFixed(2);
-            }
-        }
+    if (liveData) {
+        setSessionUser(liveData);
+        document.getElementById('totalBalText').innerText = "₹" + parseFloat(liveData.balance || 0).toFixed(2);
+        document.getElementById('teamIncText').innerText = "₹" + parseFloat(liveData.team_income || 0).toFixed(2);
+    }
+}
+        
 
         function tryBuyVipPlan(title, price, daily, days, key) {
             const isUnlocked = key === 'plan_4999_open' ? isPlan4999Unlocked : isPlan9999Unlocked;
