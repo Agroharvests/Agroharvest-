@@ -9,66 +9,97 @@
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 40px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
-        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; position: sticky; top: 0; z-index: 50; }
-        .card { background: white; margin: 16px; border-radius: 20px; padding: 20px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 14px; border-radius: 14px; font-size: 14px; font-weight: 800; outline: none; margin-top: 6px; margin-bottom: 12px; }
-        .input-box:disabled { background: #f1f5f9; color: #475569; }
-        .summary-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px; margin: 14px 0; font-size: 13px; font-weight: 700; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .btn-submit { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 15px; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 6px 18px rgba(22, 163, 74, 0.3); }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 50px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
-        /* History Styling */
+        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; position: sticky; top: 0; z-index: 50; }
+        .card { background: white; margin: 16px; border-radius: 24px; padding: 20px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
+
+        .bal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+        .bal-row p { font-size: 14px; font-weight: 800; color: #64748b; }
+        .bal-row h3 { font-size: 20px; font-weight: 900; color: #16a34a; }
+
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 800; color: #334155; margin-bottom: 6px; }
+        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 13px 14px; border-radius: 14px; font-size: 14px; font-weight: 700; outline: none; color: #0f172a; }
+        .input-box:focus { border-color: #16a34a; }
+        .input-box:disabled { background: #f1f5f9; color: #64748b; }
+
+        .fee-calc-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+        .calc-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; margin-bottom: 4px; }
+        .calc-row.final { font-size: 14px; font-weight: 900; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #cbd5e1; }
+
+        .rules-tag { font-size: 11px; color: #dc2626; font-weight: 700; line-height: 1.4; margin-bottom: 16px; }
+
+        .btn-withdraw { width: 100%; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 900; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3); }
+        .btn-withdraw:disabled { opacity: 0.6; cursor: not-allowed; }
+
         .history-card { background: white; margin: 0 16px 20px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; }
         .history-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
         .badge-status { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
-        .badge-pending { background: #fef3c7; color: #b45309; }
         .badge-approved { background: #dcfce7; color: #15803d; }
+        .badge-pending { background: #fef3c7; color: #b45309; }
         .badge-rejected { background: #fee2e2; color: #dc2626; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <div class="top-header">
-            <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
-            <span>Withdraw Funds</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
+                <span>Withdraw Funds</span>
+            </div>
+            <i class="fa-solid fa-shield-check" style="color: #16a34a;"></i>
         </div>
 
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <span style="font-size: 13px; color: #64748b; font-weight: 700;">Withdrawable Balance</span>
-                <span id="availBal" style="font-size: 18px; font-weight: 900; color: #16a34a;">₹0.00</span>
+            <div class="bal-row">
+                <p>Withdrawable Balance</p>
+                <h3 id="displayBal">₹0.00</h3>
             </div>
 
-            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Withdrawal Amount (Min ₹150)</label>
-            <input type="number" id="withdrawAmt" class="input-box" placeholder="Enter amount" oninput="calculateBreakdown()">
+            <div class="input-group">
+                <label>Withdrawal Amount (Min ₹150)</label>
+                <input type="number" id="wdAmount" class="input-box" placeholder="Enter amount" oninput="calculateNetPayout()">
+            </div>
 
-            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Account Holder Name</label>
-            <input type="text" id="bankHolder" class="input-box" placeholder="Full Name as per Bank">
+            <div class="input-group">
+                <label>Account Holder Name</label>
+                <input type="text" id="holderName" class="input-box" placeholder="Full Name as per Bank">
+            </div>
 
-            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">Bank Account Number (Permanent Lock)</label>
-            <input type="text" id="bankAcc" class="input-box" placeholder="Account Number">
+            <div class="input-group">
+                <label>Bank Account Number (Permanent Lock)</label>
+                <input type="text" id="accNumber" class="input-box" placeholder="Account Number">
+            </div>
 
-            <label style="font-size: 12px; font-weight: 800; color: #0f172a;">IFSC Code</label>
-            <input type="text" id="bankIfsc" class="input-box" placeholder="e.g. SBIN0001234">
+            <div class="input-group">
+                <label>IFSC Code</label>
+                <input type="text" id="ifscCode" class="input-box" placeholder="e.g. SBIN0001234" style="text-transform: uppercase;">
+            </div>
 
-            <div class="summary-box">
-                <div class="summary-row"><span>Withdrawal Fee (10%):</span><span id="feeText" style="color: #dc2626;">- ₹0.00</span></div>
-                <div class="summary-row" style="font-size: 15px; font-weight: 900; border-top: 1px solid #cbd5e1; padding-top: 6px;">
-                    <span>Net Payout Amount:</span><span id="finalAmtText" style="color: #16a34a;">₹0.00</span>
+            <div class="fee-calc-box">
+                <div class="calc-row">
+                    <span style="color: #64748b;">Withdrawal Fee (10%):</span>
+                    <span id="feeDisplay" style="color: #dc2626;">- ₹0.00</span>
+                </div>
+                <div class="calc-row final">
+                    <span style="color: #0f172a;">Net Payout Amount:</span>
+                    <span id="netPayoutDisplay" style="color: #16a34a;">₹0.00</span>
                 </div>
             </div>
 
-            <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 14px;">
+            <div class="rules-tag">
                 ⏰ Payout Time: 00:30 AM to 05:00 PM | Limit: 1 request per day.
-            </p>
+            </div>
 
-            <button onclick="handleWithdrawal()" id="wdBtn" class="btn-submit">Request Withdrawal</button>
+            <button onclick="submitWithdrawalRequest()" id="btnSubmitWd" class="btn-withdraw">
+                Confirm Bank Withdrawal
+            </button>
         </div>
-                <!-- Live Withdrawal History Container -->
+                <!-- Withdrawal History Section -->
         <div class="history-card">
             <h3 style="font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <span>Withdrawal History</span>
@@ -82,169 +113,170 @@
 
     <script>
         const activeUser = requireAuth();
-        let isBankLocked = false;
+        let userCurrentBalance = 0;
 
         document.addEventListener("DOMContentLoaded", async () => {
-            await loadUserData();
+            await loadUserProfileAndBank();
             await loadWithdrawalHistory();
         });
 
-        async function loadUserData() {
+        async function loadUserProfileAndBank() {
+            if (!activeUser) return;
             const sb = getSupabase();
             if (!sb) return;
 
-            const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).single();
-            if (prof) document.getElementById('availBal').innerText = "₹" + parseFloat(prof.balance || 0).toFixed(2);
+            try {
+                const { data: profile, error } = await sb
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', activeUser.id)
+                    .single();
 
-            const { data: bank } = await sb.from('bank_details').select('*').eq('user_id', activeUser.id).maybeSingle();
-            if (bank) {
-                isBankLocked = true;
-                document.getElementById('bankHolder').value = bank.holder_name;
-                document.getElementById('bankAcc').value = bank.account_number;
-                document.getElementById('bankIfsc').value = bank.ifsc_code;
+                if (error) throw error;
 
-                document.getElementById('bankHolder').disabled = true;
-                document.getElementById('bankAcc').disabled = true;
-                document.getElementById('bankIfsc').disabled = true;
+                userCurrentBalance = parseFloat(profile.balance || 0);
+                document.getElementById('displayBal').innerText = "₹" + userCurrentBalance.toFixed(2);
+
+                // Auto-fill saved bank details if available
+                if (profile.holder_name) document.getElementById('holderName').value = profile.holder_name;
+                if (profile.account_number) {
+                    const accInput = document.getElementById('accNumber');
+                    accInput.value = profile.account_number;
+                    accInput.disabled = true; // Lock bank account after first save
+                }
+                if (profile.ifsc_code) document.getElementById('ifscCode').value = profile.ifsc_code;
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function calculateNetPayout() {
+            const amt = parseFloat(document.getElementById('wdAmount').value) || 0;
+            const fee = Math.round(amt * 0.10 * 100) / 100;
+            const net = Math.max(0, amt - fee);
+
+            document.getElementById('feeDisplay').innerText = `- ₹${fee.toFixed(2)}`;
+            document.getElementById('netPayoutDisplay').innerText = `₹${net.toFixed(2)}`;
+        }
+
+        async function submitWithdrawalRequest() {
+            const amt = parseFloat(document.getElementById('wdAmount').value);
+            const name = document.getElementById('holderName').value.trim();
+            const acc = document.getElementById('accNumber').value.trim();
+            const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
+            const btn = document.getElementById('btnSubmitWd');
+
+            if (isNaN(amt) || amt < 150) return alert("Minimum withdrawal amount ₹150 hai!");
+            if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
+            if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
+            if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
+            if (!ifsc || ifsc.length < 6) return alert("Kripya sahi IFSC Code dalein!");
+
+            const sb = getSupabase();
+            if (!sb) return alert("Database connection error.");
+
+            btn.disabled = true;
+            btn.innerText = "Processing Request...";
+
+            try {
+                const feeAmt = Math.round(amt * 0.10 * 100) / 100;
+                const finalAmt = amt - feeAmt;
+                const remainingBal = userCurrentBalance - amt;
+
+                // 1. Deduct balance from user profile & save bank details permanently
+                const { error: pErr } = await sb.from('profiles').update({
+                    balance: remainingBal,
+                    holder_name: name,
+                    account_number: acc,
+                    ifsc_code: ifsc
+                }).eq('id', activeUser.id);
+
+                if (pErr) throw pErr;
+
+                // 2. Insert into withdrawals table
+                const { error: wErr } = await sb.from('withdrawals').insert([{
+                    user_id: activeUser.id,
+                    phone: activeUser.phone,
+                    amount: amt,
+                    fee_amount: feeAmt,
+                    final_amount: finalAmt,
+                    holder_name: name,
+                    account_number: acc,
+                    ifsc_code: ifsc,
+                    status: 'pending'
+                }]);
+
+                if (wErr) throw wErr;
+
+                // 3. Log transaction
+                await sb.from('transactions').insert([{
+                    user_id: activeUser.id,
+                    type: 'withdrawal',
+                    amount: amt,
+                    details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
+                }]);
+
+                alert(`✅ ₹${amt} ka withdrawal successfully submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} aapke bank account me transfer kar diya jayega.`);
+                
+                document.getElementById('wdAmount').value = '';
+                calculateNetPayout();
+                await loadUserProfileAndBank();
+                await loadWithdrawalHistory();
+
+            } catch (err) {
+                alert("Withdrawal Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Confirm Bank Withdrawal";
             }
         }
 
         async function loadWithdrawalHistory() {
+            const box = document.getElementById('wdHistoryList');
             const sb = getSupabase();
             if (!sb) return;
 
-            const { data: list } = await sb
-                .from('withdrawals')
-                .select('*')
-                .eq('user_id', activeUser.id)
-                .order('created_at', { ascending: false });
-
-            const box = document.getElementById('wdHistoryList');
-            if (!list || list.length === 0) {
-                box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Abhi tak koi withdrawal request nahi lagayi gayi.</p>`;
-                return;
-            }
-
-            box.innerHTML = list.map(item => {
-                let badgeClass = 'badge-pending';
-                if (item.status === 'approved') badgeClass = 'badge-approved';
-                if (item.status === 'rejected') badgeClass = 'badge-rejected';
-
-                const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Today';
-
-                return `
-                    <div class="history-item">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <strong style="font-size: 14px; color: #0f172a;">₹${parseFloat(item.amount).toFixed(2)}</strong>
-                            <span class="badge-status ${badgeClass}">${item.status}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
-                            <span>Net Payout: ₹${parseFloat(item.final_amount).toFixed(2)} (Fee: ₹${parseFloat(item.fee_amount).toFixed(2)})</span>
-                            <span>${dateStr}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function calculateBreakdown() {
-            const amt = parseFloat(document.getElementById('withdrawAmt').value) || 0;
-            const fee = amt * 0.10;
-            const finalPayout = amt - fee;
-
-            document.getElementById('feeText').innerText = "- ₹" + fee.toFixed(2);
-            document.getElementById('finalAmtText').innerText = "₹" + (finalPayout > 0 ? finalPayout.toFixed(2) : "0.00");
-        }
-
-        function isWithinWithdrawalTime() {
-            const now = new Date();
-            const curMinutes = now.getHours() * 60 + now.getMinutes();
-            return curMinutes >= 30 && curMinutes <= 1020; // 00:30 to 17:00 IST
-        }
-
-        async function handleWithdrawal() {
-            if (!isWithinWithdrawalTime()) {
-                return alert("Withdrawal ka samay 00:30 AM se 05:00 PM tak hai!");
-            }
-
-            const amt = parseFloat(document.getElementById('withdrawAmt').value);
-            const holder = document.getElementById('bankHolder').value.trim();
-            const acc = document.getElementById('bankAcc').value.trim();
-            const ifsc = document.getElementById('bankIfsc').value.trim().toUpperCase();
-            const btn = document.getElementById('wdBtn');
-
-            if (!amt || amt < 150) return alert("Minimum withdrawal limit ₹150 hai!");
-            if (!holder || !acc || !ifsc) return alert("Kripya saari bank details fill karein!");
-
-            const sb = getSupabase();
-            if (!sb) return alert("Connecting database...");
-
-            btn.disabled = true;
-            btn.innerText = "Processing...";
-
             try {
-                const today = new Date().toISOString().split('T')[0];
-                const { data: todayWd } = await sb
+                const { data: list, error } = await sb
                     .from('withdrawals')
-                    .select('id')
+                    .select('*')
                     .eq('user_id', activeUser.id)
-                    .eq('request_date', today)
-                    .maybeSingle();
+                    .order('created_at', { ascending: false });
 
-                if (todayWd) throw new Error("Aap aaj ka 1 withdrawal request pehle hi submit kar chuke hain!");
+                if (error) throw error;
 
-                const { data: profile } = await sb.from('profiles').select('balance').eq('id', activeUser.id).single();
-                if (parseFloat(profile.balance || 0) < amt) throw new Error("Balance insufficient hai!");
-
-                if (!isBankLocked) {
-                    const { error: bErr } = await sb.from('bank_details').insert([{
-                        user_id: activeUser.id,
-                        account_number: acc,
-                        ifsc_code: ifsc,
-                        holder_name: holder
-                    }]);
-
-                    if (bErr) {
-                        if (bErr.message.includes('unique')) throw new Error("Yeh Bank Account kisi aur user ID ke sath linked hai!");
-                        throw bErr;
-                    }
+                if (!list || list.length === 0) {
+                    box.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Koi withdrawal record nahi hai.</p>`;
+                    return;
                 }
 
-                const feeAmt = amt * 0.10;
-                const finalPayout = amt - feeAmt;
+                box.innerHTML = list.map(item => {
+                    let badgeClass = 'badge-pending';
+                    if (item.status === 'approved') badgeClass = 'badge-approved';
+                    if (item.status === 'rejected') badgeClass = 'badge-rejected';
 
-                await sb.from('profiles').update({ balance: profile.balance - amt }).eq('id', activeUser.id);
+                    const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Recent';
 
-                await sb.from('withdrawals').insert([{
-                    user_id: activeUser.id,
-                    amount: amt,
-                    fee_amount: feeAmt,
-                    final_amount: finalPayout,
-                    account_number: acc,
-                    ifsc_code: ifsc,
-                    holder_name: holder,
-                    status: 'pending'
-                }]);
-
-                await sb.from('transactions').insert([{
-                    user_id: activeUser.id,
-                    type: 'withdraw',
-                    amount: amt,
-                    details: `Withdrawal Requested: ₹${amt} (Net ₹${finalPayout.toFixed(2)})`
-                }]);
-
-                alert("🎉 Withdrawal Request Submitted!");
-                document.getElementById('withdrawAmt').value = '';
-                await loadUserData();
-                await loadWithdrawalHistory();
+                    return `
+                        <div class="history-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <strong style="font-size: 14px; color: #0f172a;">Req: ₹${parseFloat(item.amount).toFixed(2)}</strong>
+                                <span class="badge-status ${badgeClass}">${item.status}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
+                                <span>Net: ₹${parseFloat(item.final_amount || item.amount).toFixed(2)} (A/C: ${item.account_number ? item.account_number.slice(-4) : '****'})</span>
+                                <span>${dateStr}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
 
             } catch (err) {
-                alert("Withdrawal Failed: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Request Withdrawal";
+                box.innerHTML = `<p style="font-size: 12px; color: #ef4444; font-weight: 700; text-align: center; padding: 10px;">${err.message}</p>`;
             }
         }
     </script>
 </body>
-</html>
+    </html>
+    
