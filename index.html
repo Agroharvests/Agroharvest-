@@ -14,26 +14,22 @@
         body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
         .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
 
-        /* Top Bar */
         .brand-bar { padding: 18px 20px 14px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
         .logo-box { display: flex; align-items: center; gap: 10px; }
         .logo-circle { width: 38px; height: 38px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 18px; border: 1.5px solid #86efac; }
         .logo-text h2 { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
         .filter-btn { width: 38px; height: 38px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
 
-        /* Real HD Harvester Banner */
         .hero-banner-box { margin: 14px 16px 14px; border-radius: 24px; overflow: hidden; position: relative; height: 160px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.2); border: 1.5px solid #e2e8f0; }
         .hero-banner-box img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
         .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.88) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; color: white; }
         .hero-banner-overlay h3 { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 2px; }
         .hero-banner-overlay p { font-size: 12px; opacity: 0.95; font-weight: 600; }
 
-        /* Wallet Strip */
         .balance-strip { margin: 0 16px 16px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
         .balance-item p { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
         .balance-item h4 { font-size: 19px; font-weight: 900; color: #16a34a; }
 
-        /* Quick Actions */
         .actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px 18px; }
         .act-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 12px 6px 10px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.03); transition: transform 0.15s; }
         .act-btn:active { transform: scale(0.95); }
@@ -45,12 +41,10 @@
         .icon-withdraw { background: #dbeafe; color: #2563eb; }
         .icon-team { background: #f3e8ff; color: #9333ea; }
 
-        /* Section Bar */
         .section-bar { padding: 0 18px 12px; display: flex; justify-content: space-between; align-items: center; }
         .section-bar h3 { font-size: 17px; font-weight: 900; color: #0f172a; }
         .section-bar span { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
 
-        /* Plans */
         .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
         .plan-card-pro { background: #ffffff; border-radius: 24px; padding: 18px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
         .plan-card-pro:active { transform: scale(0.985); }
@@ -58,11 +52,14 @@
         .plan-green { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
         .plan-gold { border-color: #fde68a; background: linear-gradient(180deg, #fefce8 0%, #ffffff 40%); }
         .plan-diamond { border-color: #bae6fd; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
+        .plan-platinum { border-color: #e9d5ff; background: linear-gradient(180deg, #faf5ff 0%, #ffffff 40%); }
+        .plan-royal { border-color: #fed7aa; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 40%); }
 
         .ribbon-badge { position: absolute; top: 0; right: 0; padding: 6px 14px; font-size: 11px; font-weight: 900; color: white; border-radius: 0 0 0 16px; letter-spacing: 0.3px; text-transform: uppercase; }
-        .ribbon-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3); }
-        .ribbon-gold { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
-        .ribbon-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3); }
+        .ribbon-green { background: linear-gradient(135deg, #15803d, #16a34a); }
+        .ribbon-gold { background: linear-gradient(135deg, #b45309, #f59e0b); }
+        .ribbon-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); }
+        .ribbon-locked { background: linear-gradient(135deg, #475569, #64748b); }
 
         .plan-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
         .plan-img-wrap { width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; border: 2px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
@@ -70,9 +67,6 @@
         
         .plan-title-block h4 { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
         .plan-price-tag { font-size: 20px; font-weight: 900; }
-        .price-green { color: #16a34a; }
-        .price-gold { color: #d97706; }
-        .price-diamond { color: #0284c7; }
 
         .plan-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px; margin-bottom: 14px; text-align: center; }
         .stat-col p { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
@@ -82,29 +76,21 @@
         .btn-invest-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
         .btn-invest-gold { background: linear-gradient(135deg, #b45309, #d97706); box-shadow: 0 6px 18px rgba(217, 119, 6, 0.35); }
         .btn-invest-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35); }
+        .btn-invest-purple { background: linear-gradient(135deg, #7e22ce, #9333ea); box-shadow: 0 6px 18px rgba(147, 51, 234, 0.35); }
+        .btn-invest-orange { background: linear-gradient(135deg, #c2410c, #ea580c); box-shadow: 0 6px 18px rgba(234, 88, 12, 0.35); }
+        .btn-invest-locked { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
 
-        /* Social Share Modal System */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(11, 19, 41, 0.75); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-sheet { background: #ffffff; width: 100%; max-width: 380px; border-radius: 28px; padding: 24px 20px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: sheetUp 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes sheetUp { from { transform: translateY(30px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-        .modal-gift-icon { width: 62px; height: 62px; background: #dcfce7; color: #16a34a; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; border: 2px solid #bbf7d0; box-shadow: 0 8px 18px rgba(22, 163, 74, 0.2); }
+        .modal-sheet { background: #ffffff; width: 100%; max-width: 380px; border-radius: 28px; padding: 24px 20px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-gift-icon { width: 62px; height: 62px; background: #dcfce7; color: #16a34a; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; border: 2px solid #bbf7d0; }
         .ref-box-pro { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: #15803d; margin: 14px 0; word-break: break-all; }
-
-        /* Social Buttons Grid */
         .social-share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 16px; }
-        .social-btn { border: none; padding: 12px 6px; border-radius: 16px; color: white; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.15s; }
-        .social-btn:active { transform: scale(0.95); }
-        .social-btn i { font-size: 22px; }
-
-        .btn-whatsapp { background: #25d366; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35); }
-        .btn-telegram { background: #0088cc; box-shadow: 0 4px 14px rgba(0, 136, 204, 0.35); }
-        .btn-facebook { background: #1877f2; box-shadow: 0 4px 14px rgba(24, 119, 242, 0.35); }
-
+        .social-btn { border: none; padding: 12px 6px; border-radius: 16px; color: white; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .btn-whatsapp { background: #25d366; }
+        .btn-telegram { background: #0088cc; }
+        .btn-facebook { background: #1877f2; }
         .btn-copy-main { width: 100%; background: #0f172a; color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-close-modal { width: 100%; background: transparent; border: none; color: #64748b; font-weight: 800; font-size: 13px; margin-top: 10px; cursor: pointer; padding: 6px; }
 
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item i { font-size: 19px; }
@@ -113,7 +99,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Header -->
         <div class="brand-bar">
             <div class="logo-box">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
@@ -124,16 +109,14 @@
             <div class="filter-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
 
-        <!-- Hero -->
         <div class="hero-banner-box">
-            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester Field">
+            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester">
             <div class="hero-banner-overlay">
                 <h3>Smart Farming Better Future</h3>
                 <p>High Yield & Guaranteed Daily Profit</p>
             </div>
         </div>
 
-        <!-- Wallet Strip -->
         <div class="balance-strip">
             <div class="balance-item">
                 <p>Total Balance</p>
@@ -145,7 +128,6 @@
             </div>
         </div>
 
-        <!-- 4 Actions -->
         <div class="actions-row">
             <a href="orders.html" class="act-btn">
                 <div class="act-icon icon-crop"><i class="fa-solid fa-seedling"></i></div>
@@ -165,34 +147,33 @@
             </a>
         </div>
 
-        <!-- Available Plans -->
         <div class="section-bar">
             <h3>Available Crop Plans</h3>
             <span>30 Days Yield Cycle</span>
         </div>
 
         <div class="plans-box">
-            <!-- 1. Green Plan -->
+            <!-- 1. Green Plan (₹499 -> ₹130 Daily) -->
             <div class="plan-card-pro plan-green">
-                <div class="ribbon-badge ribbon-green">★ 714% Return</div>
+                <div class="ribbon-badge ribbon-green">★ 781% Yield</div>
                 <div class="plan-head">
                     <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=400&q=80" alt="Green Seedlings">
+                        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=400&q=80" alt="Green Starter">
                     </div>
                     <div class="plan-title-block">
-                        <h4>Green Plan</h4>
-                        <div class="plan-price-tag price-green">₹525</div>
+                        <h4>Green Starter</h4>
+                        <div class="plan-price-tag" style="color: #16a34a;">₹499</div>
                     </div>
                 </div>
 
                 <div class="plan-stats-grid">
                     <div class="stat-col">
-                        <p>Daily Income</p>
-                        <h5 style="color: #16a34a;">₹125</h5>
+                        <p>Daily Yield</p>
+                        <h5 style="color: #16a34a;">₹130</h5>
                     </div>
                     <div class="stat-col">
-                        <p>Total Return</p>
-                        <h5>₹3,750</h5>
+                        <p>Total Yield</p>
+                        <h5>₹3,900</h5>
                     </div>
                     <div class="stat-col">
                         <p>Duration</p>
@@ -200,64 +181,32 @@
                     </div>
                 </div>
 
-                <button onclick="buySeedPlan('Green Plan', 525, 125, 30)" class="btn-invest btn-invest-green">
-                    Invest ₹525 <i class="fa-solid fa-arrow-right"></i>
-                </button>
-    </div>
-                <!-- 2. Gold Plan -->
-            <div class="plan-card-pro plan-gold">
-                <div class="ribbon-badge ribbon-gold">👑 Most Popular</div>
-                <div class="plan-head">
-                    <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80" alt="Golden Wheat Field">
-                    </div>
-                    <div class="plan-title-block">
-                        <h4>Gold Plan</h4>
-                        <div class="plan-price-tag price-gold">₹1,500</div>
-                    </div>
-                </div>
-
-                <div class="plan-stats-grid">
-                    <div class="stat-col">
-                        <p>Daily Income</p>
-                        <h5 style="color: #d97706;">₹375</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Total Return</p>
-                        <h5>₹11,250</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Duration</p>
-                        <h5>30 Days</h5>
-                    </div>
-                </div>
-
-                <button onclick="buySeedPlan('Gold Plan', 1500, 375, 30)" class="btn-invest btn-invest-gold">
-                    Invest ₹1,500 <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="buySeedPlan('Green Starter', 499, 130, 30)" class="btn-invest btn-invest-green">
+                    Invest ₹499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- 3. Diamond Plan -->
-            <div class="plan-card-pro plan-diamond">
-                <div class="ribbon-badge ribbon-diamond">💎 VIP Maximum Yield</div>
+            <!-- 2. Gold Plan (₹1499 -> ₹390 Daily) -->
+            <div class="plan-card-pro plan-gold">
+                <div class="ribbon-badge ribbon-gold">👑 Popular</div>
                 <div class="plan-head">
                     <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80" alt="Modern Grain Silo & Farm">
+                        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80" alt="Gold Harvest">
                     </div>
                     <div class="plan-title-block">
-                        <h4>Diamond Plan</h4>
-                        <div class="plan-price-tag price-diamond">₹3,500</div>
+                        <h4>Gold Harvest</h4>
+                        <div class="plan-price-tag" style="color: #d97706;">₹1,499</div>
                     </div>
                 </div>
 
                 <div class="plan-stats-grid">
                     <div class="stat-col">
-                        <p>Daily Income</p>
-                        <h5 style="color: #0284c7;">₹970</h5>
+                        <p>Daily Yield</p>
+                        <h5 style="color: #d97706;">₹390</h5>
                     </div>
                     <div class="stat-col">
-                        <p>Total Return</p>
-                        <h5>₹29,100</h5>
+                        <p>Total Yield</p>
+                        <h5>₹11,700</h5>
                     </div>
                     <div class="stat-col">
                         <p>Duration</p>
@@ -265,13 +214,111 @@
                     </div>
                 </div>
 
-                <button onclick="buySeedPlan('Diamond Plan', 3500, 970, 30)" class="btn-invest btn-invest-diamond">
-                    Invest ₹3,500 <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 30)" class="btn-invest btn-invest-gold">
+                    Invest ₹1,499 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- 3. Diamond Plan (₹2499 -> ₹710 Daily) -->
+            <div class="plan-card-pro plan-diamond">
+                <div class="ribbon-badge ribbon-diamond">💎 High Yield</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80" alt="Diamond Silo">
+                    </div>
+                    <div class="plan-title-block">
+                        <h4>Diamond Crop</h4>
+                        <div class="plan-price-tag" style="color: #0284c7;">₹2,499</div>
+                    </div>
+                </div>
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Yield</p>
+                        <h5 style="color: #0284c7;">₹710</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Total Yield</p>
+                        <h5>₹21,300</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
+                </div>
+
+                <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 30)" class="btn-invest btn-invest-diamond">
+                    Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                </div>
+                            <!-- 4. Premium VIP 1 (₹4999 -> ₹1250 Daily - Upcoming / Dynamic) -->
+            <div class="plan-card-pro plan-platinum">
+                <div id="badge4999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=400&q=80" alt="Platinum Agro">
+                    </div>
+                    <div class="plan-title-block">
+                        <h4>Platinum Agro</h4>
+                        <div class="plan-price-tag" style="color: #9333ea;">₹4,999</div>
+                    </div>
+                </div>
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Yield</p>
+                        <h5 style="color: #9333ea;">₹1,250</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Total Yield</p>
+                        <h5>₹37,500</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
+                </div>
+
+                <button id="btnPlan4999" onclick="tryBuyVipPlan('Platinum Agro', 4999, 1250, 30, 'plan_4999_open')" class="btn-invest btn-invest-locked">
+                    <i class="fa-solid fa-lock"></i> Upcoming Soon
+                </button>
+            </div>
+
+            <!-- 5. Premium VIP 2 (₹9999 -> ₹2990 Daily - Upcoming / Dynamic) -->
+            <div class="plan-card-pro plan-royal">
+                <div id="badge9999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+                <div class="plan-head">
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80" alt="Royal Empire">
+                    </div>
+                    <div class="plan-title-block">
+                        <h4>Royal Empire</h4>
+                        <div class="plan-price-tag" style="color: #ea580c;">₹9,999</div>
+                    </div>
+                </div>
+
+                <div class="plan-stats-grid">
+                    <div class="stat-col">
+                        <p>Daily Yield</p>
+                        <h5 style="color: #ea580c;">₹2,990</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Total Yield</p>
+                        <h5>₹89,700</h5>
+                    </div>
+                    <div class="stat-col">
+                        <p>Duration</p>
+                        <h5>30 Days</h5>
+                    </div>
+                </div>
+
+                <button id="btnPlan9999" onclick="tryBuyVipPlan('Royal Empire', 9999, 2990, 30, 'plan_9999_open')" class="btn-invest btn-invest-locked">
+                    <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
         </div>
 
-        <!-- Bottom Navigation Bar -->
+        <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
@@ -279,7 +326,7 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Smooth Social Sharing Modal -->
+        <!-- Referral Modal -->
         <div id="inviteModal" class="modal-overlay" onclick="closeInviteModal(event)">
             <div class="modal-sheet" onclick="event.stopPropagation()">
                 <div class="modal-gift-icon">
@@ -290,7 +337,6 @@
 
                 <div id="refLinkText" class="ref-box-pro">Generating your link...</div>
 
-                <!-- 1-Click Social Sharing Buttons -->
                 <div class="social-share-grid">
                     <button onclick="shareViaWhatsApp()" class="social-btn btn-whatsapp">
                         <i class="fa-brands fa-whatsapp"></i>
@@ -309,7 +355,7 @@
                 <button onclick="copyInvite()" class="btn-copy-main">
                     <i class="fa-regular fa-copy"></i> Copy Referral Link
                 </button>
-                <button onclick="closeInviteModal()" class="btn-close-modal">Close</button>
+                <button onclick="closeInviteModal()" style="width:100%; background:transparent; border:none; color:#64748b; font-weight:800; margin-top:10px; cursor:pointer;">Close</button>
             </div>
         </div>
     </div>
@@ -317,10 +363,42 @@
     <script>
         const activeUser = requireAuth();
         let fullReferralLink = "";
+        let isPlan4999Unlocked = false;
+        let isPlan9999Unlocked = false;
 
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             loadDashboard();
+            await checkVipPlanStatus();
         });
+
+        async function checkVipPlanStatus() {
+            const sb = getSupabase();
+            if (!sb) return;
+
+            const { data: sData } = await sb.from('settings').select('*');
+            if (sData) {
+                const p4999 = sData.find(s => s.key === 'plan_4999_open');
+                const p9999 = sData.find(s => s.key === 'plan_9999_open');
+
+                if (p4999 && p4999.value === '1') {
+                    isPlan4999Unlocked = true;
+                    document.getElementById('badge4999').className = "ribbon-badge ribbon-green";
+                    document.getElementById('badge4999').innerText = "★ VIP Active";
+                    const btn1 = document.getElementById('btnPlan4999');
+                    btn1.className = "btn-invest btn-invest-purple";
+                    btn1.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                }
+
+                if (p9999 && p9999.value === '1') {
+                    isPlan9999Unlocked = true;
+                    document.getElementById('badge9999').className = "ribbon-badge ribbon-gold";
+                    document.getElementById('badge9999').innerText = "👑 VIP Active";
+                    const btn2 = document.getElementById('btnPlan9999');
+                    btn2.className = "btn-invest btn-invest-orange";
+                    btn2.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                }
+            }
+        }
 
         async function loadDashboard() {
             if (!activeUser) return;
@@ -344,14 +422,19 @@
             }
         }
 
+        function tryBuyVipPlan(title, price, daily, days, key) {
+            const isUnlocked = key === 'plan_4999_open' ? isPlan4999Unlocked : isPlan9999Unlocked;
+            if (!isUnlocked) {
+                return alert(`🔒 Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh khareeda ja sakega.`);
+            }
+            buySeedPlan(title, price, daily, days);
+        }
+
         async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" activate karna chahte hain?`)) return;
 
             const sb = getSupabase();
-            if (!sb) {
-                alert("Database connecting... Kripya dobara try karein.");
-                return;
-            }
+            if (!sb) return alert("Database connecting... Kripya dobara try karein.");
 
             try {
                 const { data: userProfile, error: uErr } = await sb
@@ -392,7 +475,7 @@
                 window.location.href = 'orders.html';
 
             } catch (err) {
-                alert("Plan khareedne me error: " + err.message);
+                alert("Plan purchase failed: " + err.message);
             }
         }
 
@@ -404,7 +487,7 @@
         }
 
         function closeInviteModal(event) {
-            if (event && event.target.id !== 'inviteModal' && !event.target.classList.contains('btn-close-modal')) return;
+            if (event && event.target.id !== 'inviteModal' && !event.target.closest('button')) return;
             document.getElementById('inviteModal').style.display = 'none';
         }
 
@@ -431,4 +514,4 @@
     </script>
 </body>
     </html>
-                
+                    
