@@ -3,56 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - My Team</title>
+    <title>AgroHarvest - My Team Network</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; }
-        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
+
+        /* Top Header */
+        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; position: sticky; top: 0; z-index: 50; }
+        .ref-pill { font-size: 12px; background: #dcfce7; color: #15803d; padding: 5px 12px; border-radius: 10px; font-weight: 900; border: 1px solid #86efac; }
+
+        /* Tier Counter Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 16px; }
-        .stat-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; text-align: center; }
-        .stat-card h4 { font-size: 17px; font-weight: 900; color: #16a34a; margin-top: 4px; }
-        .stat-card p { font-size: 11px; font-weight: 700; color: #64748b; }
-        .section-bar { padding: 0 18px 10px; font-size: 15px; font-weight: 900; color: #0f172a; }
-        .list-box { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
-        .comm-item { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; }
+        .stat-card { background: white; border: 2px solid #e2e8f0; border-radius: 20px; padding: 14px 8px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
+        .stat-card.active { border-color: #16a34a; background: #f0fdf4; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.15); }
+        .stat-card p { font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        .stat-card.active p { color: #15803d; }
+        .stat-card h4 { font-size: 20px; font-weight: 900; color: #0f172a; margin-top: 2px; }
+        .stat-card.active h4 { color: #16a34a; }
+
+        /* Total Income Banner */
+        .team-banner { margin: 0 16px 16px; background: linear-gradient(135deg, #14532d, #16a34a); border-radius: 20px; padding: 18px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.25); }
+        .team-banner p { font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.9; }
+        .team-banner h3 { font-size: 22px; font-weight: 900; margin-top: 2px; }
+        .team-banner-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.18); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        /* Level Filter Bar */
+        .tab-bar { padding: 0 16px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .tab-bar h3 { font-size: 16px; font-weight: 900; color: #0f172a; }
+        .tab-badge { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 10px; }
+
+        /* Member Directory Cards */
+        .members-box { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+        .member-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.02); }
+        
+        .m-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .m-left { display: flex; align-items: center; gap: 10px; }
+        .m-avatar { width: 40px; height: 40px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .m-meta strong { font-size: 14px; font-weight: 900; color: #0f172a; display: block; }
+        .m-meta span { font-size: 11px; color: #64748b; font-weight: 600; }
+        
+        .level-tag { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 8px; text-transform: uppercase; }
+        .tag-l1 { background: #dcfce7; color: #15803d; }
+        .tag-l2 { background: #fef3c7; color: #b45309; }
+        .tag-l3 { background: #e0f2fe; color: #0284c7; }
+
+        .m-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px 12px; font-size: 12px; }
+        .m-stat span { color: #64748b; font-weight: 700; font-size: 10px; text-transform: uppercase; display: block; }
+        .m-stat strong { font-weight: 900; color: #0f172a; font-size: 13px; }
+        .m-stat strong.green { color: #16a34a; }
+
+        /* Passbook Section */
+        .passbook-box { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+        .comm-item { background: white; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .nav-item i { font-size: 19px; }
         .nav-item.active { color: #16a34a; }
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Top Nav -->
         <div class="top-header">
-            <span>Team & Referral Rewards</span>
-            <span id="myRefBadge" style="font-size: 12px; background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 10px;">CODE</span>
+            <span>Team Network</span>
+            <span id="myRefBadge" class="ref-pill">CODE: ...</span>
         </div>
 
+        <!-- Team Income Strip -->
+        <div class="team-banner">
+            <div>
+                <p>Total Team Commission</p>
+                <h3 id="totalTeamIncome">₹0.00</h3>
+            </div>
+            <div class="team-banner-icon">
+                <i class="fa-solid fa-users-gear"></i>
+            </div>
+        </div>
+
+        <!-- 3-Tier Selectable Tabs -->
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card active" onclick="switchLevelTab(1, this)">
                 <p>Level 1 (25%)</p>
                 <h4 id="l1Count">0</h4>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="switchLevelTab(2, this)">
                 <p>Level 2 (2%)</p>
                 <h4 id="l2Count">0</h4>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" onclick="switchLevelTab(3, this)">
                 <p>Level 3 (1%)</p>
                 <h4 id="l3Count">0</h4>
             </div>
         </div>
 
-        <div class="section-bar">Commission Passbook</div>
-        <div class="list-box" id="commissionList">
-            <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading Team Activity...</div>
+        <!-- Members Section -->
+        <div class="tab-bar">
+            <h3 id="currentLevelHeading">Level 1 Direct Members</h3>
+            <span id="levelMemberCountBadge" class="tab-badge">0 Members</span>
         </div>
 
+        <div class="members-box" id="membersListContainer">
+            <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading team tree...</div>
+        </div>
+
+        <!-- Commission History Section -->
+        <div class="tab-bar">
+            <h3>Commission Passbook</h3>
+            <span style="font-size: 11px; font-weight: 700; color: #64748b;">Live Transactions</span>
+        </div>
+
+        <div class="passbook-box" id="commissionList">
+            <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading passbook...</div>
+        </div>
+
+        <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
@@ -60,45 +132,152 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
     </div>
-
-    <script>
+        <script>
         const activeUser = requireAuth();
+        let currentTabLevel = 1;
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            document.getElementById('myRefBadge').innerText = activeUser.referral_code;
+        let level1Users = [];
+        let level2Users = [];
+        let level3Users = [];
+        let allOrders = [];
+        let allCommissions = [];
+
+        document.addEventListener("DOMContentLoaded", initTeamData);
+
+        async function initTeamData() {
+            if (!activeUser) return;
+            document.getElementById('myRefBadge').innerText = "REF: " + activeUser.referral_code;
 
             const sb = getSupabase();
             if (!sb) return;
 
-            // Count Level 1 Members
-            const { data: l1 } = await sb.from('profiles').select('id, referral_code').eq('referred_by', activeUser.referral_code);
-            const l1Members = l1 || [];
-            document.getElementById('l1Count').innerText = l1Members.length;
+            // 1. Fetch Live User Profile for Total Commission
+            const { data: prof } = await sb.from('profiles').select('team_income').eq('id', activeUser.id).single();
+            if (prof) {
+                document.getElementById('totalTeamIncome').innerText = "₹" + parseFloat(prof.team_income || 0).toFixed(2);
+            }
 
-            // Load Commission Logs
-            const { data: comms } = await sb
-                .from('transactions')
-                .select('*')
-                .eq('user_id', activeUser.id)
-                .eq('type', 'commission')
-                .order('created_at', { ascending: false });
+            // 2. Fetch All Profiles to Build Downline Tree
+            const { data: allProfiles } = await sb.from('profiles').select('*');
+            const { data: orders } = await sb.from('orders').select('*');
+            const { data: comms } = await sb.from('transactions').select('*').eq('user_id', activeUser.id).eq('type', 'commission').order('created_at', { ascending: false });
 
-            const list = document.getElementById('commissionList');
-            if (!comms || comms.length === 0) {
-                list.innerHTML = `<div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Abhi tak koi team commission nahi mila hai.</div>`;
+            allOrders = orders || [];
+            allCommissions = comms || [];
+
+            // Level 1: Direct Referrals
+            level1Users = (allProfiles || []).filter(u => u.referred_by === activeUser.referral_code);
+
+            // Level 2: Sponsored by Level 1
+            const l1Codes = level1Users.map(u => u.referral_code);
+            level2Users = (allProfiles || []).filter(u => l1Codes.includes(u.referred_by));
+
+            // Level 3: Sponsored by Level 2
+            const l2Codes = level2Users.map(u => u.referral_code);
+            level3Users = (allProfiles || []).filter(u => l2Codes.includes(u.referred_by));
+
+            document.getElementById('l1Count').innerText = level1Users.length;
+            document.getElementById('l2Count').innerText = level2Users.length;
+            document.getElementById('l3Count').innerText = level3Users.length;
+
+            renderMembersList(1);
+            renderCommissionPassbook(allCommissions);
+        }
+
+        function switchLevelTab(level, el) {
+            currentTabLevel = level;
+            document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+
+            const headingText = level === 1 ? 'Level 1 (25%) Direct Members' : (level === 2 ? 'Level 2 (2%) Sub Members' : 'Level 3 (1%) Sub Members');
+            document.getElementById('currentLevelHeading').innerText = headingText;
+
+            renderMembersList(level);
+        }
+
+        function renderMembersList(level) {
+            const list = level === 1 ? level1Users : (level === 2 ? level2Users : level3Users);
+            const container = document.getElementById('membersListContainer');
+            document.getElementById('levelMemberCountBadge').innerText = `${list.length} Members`;
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700; background: white; border-radius: 18px; border: 1.5px dashed #cbd5e1;">
+                        <i class="fa-solid fa-user-plus" style="font-size: 26px; color: #cbd5e1; margin-bottom: 8px;"></i>
+                        <p>Is level par abhi tak koi member nahi hai.</p>
+                    </div>
+                `;
                 return;
             }
 
-            list.innerHTML = comms.map(c => `
-                <div class="comm-item">
-                    <div>
-                        <h4 style="font-size: 14px; font-weight: 800; color: #0f172a;">Level ${c.level} Commission</h4>
-                        <p style="font-size: 11px; color: #64748b; margin-top: 2px;">${c.details}</p>
+            container.innerHTML = list.map(m => {
+                const phoneStr = m.phone || "9999999999";
+                const maskedPhone = `+91 ${phoneStr.substring(0, 3)}****${phoneStr.substring(7)}`;
+                const regDate = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'Recent';
+
+                // Find Active Plan of this member
+                const mOrders = allOrders.filter(o => o.user_id === m.id && o.status === 'active');
+                const activePlanName = mOrders.length > 0 ? mOrders[0].plan_name + ` (₹${mOrders[0].price})` : "No Active Plan";
+                
+                // Calculate Total Commission earned from this user
+                const commEarned = allCommissions
+                    .filter(c => c.from_user_id === m.id)
+                    .reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+
+                const tagClass = level === 1 ? 'tag-l1' : (level === 2 ? 'tag-l2' : 'tag-l3');
+
+                return `
+                    <div class="member-card">
+                        <div class="m-header">
+                            <div class="m-left">
+                                <div class="m-avatar"><i class="fa-solid fa-user-check"></i></div>
+                                <div class="m-meta">
+                                    <strong>${maskedPhone}</strong>
+                                    <span>Joined: ${regDate} | Ref: ${m.referral_code}</span>
+                                </div>
+                            </div>
+                            <span class="level-tag ${tagClass}">Level ${level}</span>
+                        </div>
+
+                        <div class="m-details-grid">
+                            <div class="m-stat">
+                                <span>Active Plan</span>
+                                <strong style="color: #0284c7;">${activePlanName}</strong>
+                            </div>
+                            <div class="m-stat" style="text-align: right;">
+                                <span>Commission Received</span>
+                                <strong class="green">+ ₹${commEarned.toFixed(2)}</strong>
+                            </div>
+                        </div>
                     </div>
-                    <div style="font-size: 16px; font-weight: 900; color: #16a34a;">+ ₹${parseFloat(c.amount).toFixed(2)}</div>
-                </div>
-            `).join('');
-        });
+                `;
+            }).join('');
+        }
+
+        function renderCommissionPassbook(comms) {
+            const list = document.getElementById('commissionList');
+            if (!comms || comms.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700; background: white; border-radius: 18px; border: 1.5px dashed #cbd5e1;">
+                        Abhi tak koi team commission record nahi hua hai.
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = comms.map(c => {
+                const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN') : 'Recent';
+                return `
+                    <div class="comm-item">
+                        <div>
+                            <h4 style="font-size: 14px; font-weight: 800; color: #0f172a;">Level ${c.level || 1} Referral Reward</h4>
+                            <p style="font-size: 11px; color: #64748b; margin-top: 2px;">${c.details} • ${dateStr}</p>
+                        </div>
+                        <div style="font-size: 16px; font-weight: 900; color: #16a34a;">+ ₹${parseFloat(c.amount).toFixed(2)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
     </script>
 </body>
 </html>
