@@ -16,7 +16,7 @@
         
         .top-header { background: #0f172a; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 20px 20px; }
         .top-header h2 { font-size: 18px; font-weight: 900; }
-        .btn-midnight { background: #eab308; color: #0f172a; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3); }
+        .btn-midnight { background: #eab308; color: #0f172a; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 14px; }
         .kpi-box { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 14px; }
@@ -46,7 +46,6 @@
         .u-stat span { color: #64748b; font-weight: 600; display: block; font-size: 10px; text-transform: uppercase; }
         .u-stat strong { font-weight: 900; color: #0f172a; font-size: 13px; }
         .u-stat strong.green { color: #16a34a; }
-        .u-stat strong.blue { color: #2563eb; }
 
         .plan-pill { background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 2px 4px 2px 0; border: 1px solid #fde68a; }
     </style>
@@ -56,7 +55,7 @@
         <div class="top-header">
             <div>
                 <h2>AgroHarvest Admin</h2>
-                <p style="font-size: 11px; opacity: 0.8;">Full Platform Control</p>
+                <p style="font-size: 11px; opacity: 0.8;">Full Platform Master Control</p>
             </div>
             <button onclick="runDailyIncomeManually()" class="btn-midnight">Run 12 AM Income</button>
         </div>
@@ -80,17 +79,28 @@
             </div>
         </div>
 
-        <!-- 1. Dynamic UPI Control -->
+        <!-- Dynamic UPI Control -->
         <div class="card">
             <div class="card-header">
                 <h3>Update Receiver UPI ID</h3>
-                <span id="currentUpiBadge" class="badge-count">Loading...</span>
+                <span id="currentUpiBadge" class="badge-count">...</span>
             </div>
             <input type="text" id="adminNewUpi" class="input-box" placeholder="Enter new UPI ID (e.g. paytmqr@paytm)">
             <button onclick="updateUpi()" class="btn-action btn-green" style="width: 100%;">Save New UPI</button>
         </div>
 
-        <!-- 2. Manual User Balance Adjust -->
+        <!-- VIP Premium Plans Toggle -->
+        <div class="card">
+            <div class="card-header">
+                <h3>VIP Premium Plans Control</h3>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="toggleVipPlan('plan_4999_open')" id="btnToggle4999" class="btn-action btn-green" style="flex: 1;">Toggle ₹4,999 Plan</button>
+                <button onclick="toggleVipPlan('plan_9999_open')" id="btnToggle9999" class="btn-action btn-green" style="flex: 1;">Toggle ₹9,999 Plan</button>
+            </div>
+        </div>
+
+        <!-- Manual Balance Adjust -->
         <div class="card">
             <div class="card-header">
                 <h3>Manual Balance Adjustment</h3>
@@ -99,7 +109,7 @@
             <input type="number" id="adjustAmt" class="input-box" placeholder="Amount (+ to Add, - to Deduct)">
             <button onclick="adjustUserBalance()" class="btn-action btn-green" style="width: 100%;">Apply Balance Change</button>
         </div>
-                <!-- 3. Pending Recharges (With Unique UTR) -->
+                <!-- Pending Recharges List -->
         <div class="card">
             <div class="card-header">
                 <h3>Pending Recharges</h3>
@@ -108,7 +118,7 @@
             <div id="rechargesList">Loading...</div>
         </div>
 
-        <!-- 4. Pending Withdrawals -->
+        <!-- Pending Withdrawals List -->
         <div class="card">
             <div class="card-header">
                 <h3>Pending Withdrawals</h3>
@@ -117,7 +127,7 @@
             <div id="withdrawalsList">Loading...</div>
         </div>
 
-        <!-- 5. Master User Directory (Plans, Downlines & Total Withdrawn) -->
+        <!-- Master Users Directory -->
         <div class="card">
             <div class="card-header">
                 <h3>User Investments & Downlines</h3>
@@ -135,104 +145,141 @@
         }
 
         let allUsersData = [];
+        let allProfilesMap = {};
 
         document.addEventListener("DOMContentLoaded", loadAdminDashboard);
 
         async function loadAdminDashboard() {
             const sb = getSupabase();
-            if (!sb) return;
-
-            // 1. Fetch Current UPI
-            const { data: upiData } = await sb.from('settings').select('value').eq('key', 'upi_id').maybeSingle();
-            if (upiData) {
-                document.getElementById('currentUpiBadge').innerText = upiData.value;
-                document.getElementById('adminNewUpi').value = upiData.value;
+            if (!sb) {
+                alert("Database connection error. Refresh karein.");
+                return;
             }
 
-            // 2. Fetch Pending Recharges
-            const { data: rList } = await sb.from('recharges').select('*, profiles(phone)').eq('status', 'pending').order('created_at', { ascending: false });
-            const rDiv = document.getElementById('rechargesList');
-            document.getElementById('rechargePendingCount').innerText = rList ? rList.length : 0;
-            if (!rList || rList.length === 0) {
-                rDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending recharge requests.</p>`;
-            } else {
-                rDiv.innerHTML = rList.map(r => `
-                    <div class="item-row">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="font-size: 14px;">+91 ${r.profiles?.phone || 'User'}</strong>
-                            <strong style="font-size: 15px; color: #16a34a;">₹${r.amount}</strong>
-                        </div>
-                        <div style="font-size: 12px; color: #0284c7; font-weight: 800; margin: 4px 0;">UTR: ${r.utr}</div>
-                        <div style="margin-top: 8px; display: flex; gap: 8px;">
-                            <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-action btn-green" style="flex:1;">Approve</button>
-                            <button onclick="rejectRecharge('${r.id}')" class="btn-action btn-red" style="flex:1;">Reject</button>
-                        </div>
-                    </div>
-                `).join('');
+            try {
+                // 1. Fetch System Settings
+                const { data: sList } = await sb.from('settings').select('*');
+                if (sList) {
+                    const upiSetting = sList.find(s => s.key === 'upi_id');
+                    if (upiSetting) {
+                        document.getElementById('currentUpiBadge').innerText = upiSetting.value;
+                        document.getElementById('adminNewUpi').value = upiSetting.value;
+                    }
+                    const p4999 = sList.find(s => s.key === 'plan_4999_open');
+                    const p9999 = sList.find(s => s.key === 'plan_9999_open');
+                    if (p4999) document.getElementById('btnToggle4999').innerText = `₹4,999: ${p4999.value === '1' ? 'OPEN ✅' : 'LOCKED 🔒'}`;
+                    if (p9999) document.getElementById('btnToggle9999').innerText = `₹9,999: ${p9999.value === '1' ? 'OPEN ✅' : 'LOCKED 🔒'}`;
+                }
+
+                // 2. Fetch All Profiles (Direct flat query - safe & fast)
+                const { data: users, error: uErr } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+                if (uErr) throw uErr;
+
+                allProfilesMap = {};
+                (users || []).forEach(u => { allProfilesMap[u.id] = u; });
+
+                // 3. Fetch All Recharges, Withdrawals, Orders
+                const { data: allRecharges } = await sb.from('recharges').select('*').order('created_at', { ascending: false });
+                const { data: allWithdrawals } = await sb.from('withdrawals').select('*').order('created_at', { ascending: false });
+                const { data: allOrders } = await sb.from('orders').select('*');
+
+                const recharges = allRecharges || [];
+                const withdrawals = allWithdrawals || [];
+                const orders = allOrders || [];
+
+                // 4. Render Pending Recharges
+                const pendingRecharges = recharges.filter(r => r.status === 'pending');
+                document.getElementById('rechargePendingCount').innerText = pendingRecharges.length;
+                const rDiv = document.getElementById('rechargesList');
+
+                if (pendingRecharges.length === 0) {
+                    rDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending recharge requests.</p>`;
+                } else {
+                    rDiv.innerHTML = pendingRecharges.map(r => {
+                        const userPhone = allProfilesMap[r.user_id]?.phone || 'Unknown User';
+                        return `
+                            <div class="item-row">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong style="font-size: 14px;">+91 ${userPhone}</strong>
+                                    <strong style="font-size: 15px; color: #16a34a;">₹${r.amount}</strong>
+                                </div>
+                                <div style="font-size: 12px; color: #0284c7; font-weight: 800; margin: 4px 0;">UTR: ${r.utr}</div>
+                                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                                    <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-action btn-green" style="flex:1;">Approve</button>
+                                    <button onclick="rejectRecharge('${r.id}')" class="btn-action btn-red" style="flex:1;">Reject</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // 5. Render Pending Withdrawals
+                const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending');
+                document.getElementById('withdrawPendingCount').innerText = pendingWithdrawals.length;
+                const wDiv = document.getElementById('withdrawalsList');
+
+                if (pendingWithdrawals.length === 0) {
+                    wDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending withdrawal requests.</p>`;
+                } else {
+                    wDiv.innerHTML = pendingWithdrawals.map(w => {
+                        const userPhone = allProfilesMap[w.user_id]?.phone || 'Unknown User';
+                        return `
+                            <div class="item-row">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong style="font-size: 14px;">+91 ${userPhone}</strong>
+                                    <strong style="font-size: 15px; color: #dc2626;">Net: ₹${w.final_amount}</strong>
+                                </div>
+                                <p style="font-size: 11px; color: #64748b; font-weight: 700; margin: 4px 0;">
+                                    Req: ₹${w.amount} | 10% Fee: ₹${w.fee_amount}<br>
+                                    Bank: <b>${w.holder_name}</b> | Acc: <b>${w.account_number}</b> | IFSC: <b>${w.ifsc_code}</b>
+                                </p>
+                                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                                    <button onclick="approveWithdrawal('${w.id}')" class="btn-action btn-green" style="flex:1;">Mark Paid</button>
+                                    <button onclick="rejectWithdrawal('${w.id}', '${w.user_id}', ${w.amount})" class="btn-action btn-red" style="flex:1;">Reject & Refund</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                // 6. Update KPI Metrics
+                document.getElementById('statTotalUsers').innerText = (users || []).length;
+                document.getElementById('statActivePlans').innerText = orders.filter(o => o.status === 'active').length;
+
+                const totalRec = recharges.filter(r => r.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
+                document.getElementById('statTotalRecharges').innerText = "₹" + totalRec.toFixed(0);
+
+                const totalWd = withdrawals.filter(w => w.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
+                document.getElementById('statTotalWithdrawals').innerText = "₹" + totalWd.toFixed(0);
+
+                // 7. Aggregate User Investments & Downlines Directory
+                allUsersData = (users || []).map(u => {
+                    const userOrders = orders.filter(o => o.user_id === u.id);
+                    const userActiveOrders = userOrders.filter(o => o.status === 'active');
+                    const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || 0), 0);
+
+                    const userWithdrawals = withdrawals.filter(w => w.user_id === u.id && w.status === 'approved');
+                    const totalWithdrawn = userWithdrawals.reduce((acc, w) => acc + parseFloat(w.amount || 0), 0);
+
+                    const downlineCount = (users || []).filter(sub => sub.referred_by === u.referral_code && sub.id !== u.id).length;
+
+                    return {
+                        ...u,
+                        activeOrders: userActiveOrders,
+                        totalInvested: totalInvested,
+                        totalWithdrawn: totalWithdrawn,
+                        downlineCount: downlineCount
+                    };
+                });
+
+                renderUsersDirectory(allUsersData);
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('rechargesList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
+                document.getElementById('withdrawalsList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
+                document.getElementById('usersDirectoryList').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
             }
-
-            // 3. Fetch Pending Withdrawals
-            const { data: wList } = await sb.from('withdrawals').select('*, profiles(phone)').eq('status', 'pending').order('created_at', { ascending: false });
-            const wDiv = document.getElementById('withdrawalsList');
-            document.getElementById('withdrawPendingCount').innerText = wList ? wList.length : 0;
-            if (!wList || wList.length === 0) {
-                wDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending withdrawal requests.</p>`;
-            } else {
-                wDiv.innerHTML = wList.map(w => `
-                    <div class="item-row">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="font-size: 14px;">+91 ${w.profiles?.phone || 'User'}</strong>
-                            <strong style="font-size: 15px; color: #dc2626;">Net: ₹${w.final_amount}</strong>
-                        </div>
-                        <p style="font-size: 11px; color: #64748b; font-weight: 700; margin: 4px 0;">
-                            Req: ₹${w.amount} | 10% Fee: ₹${w.fee_amount}<br>
-                            Bank: <b>${w.holder_name}</b> | Acc: <b>${w.account_number}</b> | IFSC: <b>${w.ifsc_code}</b>
-                        </p>
-                        <div style="margin-top: 8px; display: flex; gap: 8px;">
-                            <button onclick="approveWithdrawal('${w.id}')" class="btn-action btn-green" style="flex:1;">Mark Paid</button>
-                            <button onclick="rejectWithdrawal('${w.id}', '${w.user_id}', ${w.amount})" class="btn-action btn-red" style="flex:1;">Reject & Refund</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            // 4. Fetch Full User List With Orders, Downlines & Withdrawals
-            const { data: users } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-            const { data: orders } = await sb.from('orders').select('*');
-            const { data: withdrawals } = await sb.from('withdrawals').select('*');
-            const { data: recharges } = await sb.from('recharges').select('*').eq('status', 'approved');
-
-            // Quick Stats Calculation
-            document.getElementById('statTotalUsers').innerText = users ? users.length : 0;
-            document.getElementById('statActivePlans').innerText = orders ? orders.filter(o => o.status === 'active').length : 0;
-            
-            const totalRec = (recharges || []).reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
-            document.getElementById('statTotalRecharges').innerText = "₹" + totalRec.toFixed(0);
-
-            const totalWd = (withdrawals || []).filter(w => w.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
-            document.getElementById('statTotalWithdrawals').innerText = "₹" + totalWd.toFixed(0);
-
-            // Aggregate Per User Data
-            allUsersData = (users || []).map(u => {
-                const userOrders = (orders || []).filter(o => o.user_id === u.id);
-                const userActiveOrders = userOrders.filter(o => o.status === 'active');
-                const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || 0), 0);
-
-                const userWithdrawals = (withdrawals || []).filter(w => w.user_id === u.id && w.status === 'approved');
-                const totalWithdrawn = userWithdrawals.reduce((acc, w) => acc + parseFloat(w.amount || 0), 0);
-
-                const downlineCount = (users || []).filter(sub => sub.referred_by === u.referral_code).length;
-
-                return {
-                    ...u,
-                    activeOrders: userActiveOrders,
-                    totalInvested: totalInvested,
-                    totalWithdrawn: totalWithdrawn,
-                    downlineCount: downlineCount
-                };
-            });
-
-            renderUsersDirectory(allUsersData);
         }
 
         function renderUsersDirectory(list) {
@@ -269,8 +316,8 @@
                                 <strong style="color: #dc2626;">₹${u.totalWithdrawn.toFixed(2)}</strong>
                             </div>
                             <div class="u-stat">
-                                <span>Team Members (L1)</span>
-                                <strong class="blue">${u.downlineCount} Downlines</strong>
+                                <span>Team (L1 Downlines)</span>
+                                <strong style="color: #0284c7;">${u.downlineCount} Members</strong>
                             </div>
                             <div class="u-stat">
                                 <span>Total Investment</span>
@@ -290,7 +337,7 @@
         function filterUserList() {
             const query = document.getElementById('searchUser').value.trim().toLowerCase();
             const filtered = allUsersData.filter(u => 
-                u.phone.toLowerCase().includes(query) || 
+                (u.phone && u.phone.toLowerCase().includes(query)) || 
                 (u.referral_code && u.referral_code.toLowerCase().includes(query)) ||
                 (u.referred_by && u.referred_by.toLowerCase().includes(query))
             );
@@ -303,6 +350,17 @@
             const sb = getSupabase();
             await sb.from('settings').upsert({ key: 'upi_id', value: upi });
             alert("✅ UPI ID Updated Successfully!");
+            loadAdminDashboard();
+        }
+
+        async function toggleVipPlan(planKey) {
+            const sb = getSupabase();
+            const { data } = await sb.from('settings').select('value').eq('key', planKey).maybeSingle();
+            const currentVal = data ? data.value : '0';
+            const newVal = currentVal === '1' ? '0' : '1';
+            
+            await sb.from('settings').upsert({ key: planKey, value: newVal });
+            alert(`Plan status changed to: ${newVal === '1' ? 'OPEN / UNLOCKED ✅' : 'LOCKED / UPCOMING 🔒'}`);
             loadAdminDashboard();
         }
 
@@ -385,28 +443,7 @@
             alert("🎉 12:00 AM Daily Income Engine Executed Successfully!");
             loadAdminDashboard();
         }
-            <!-- VIP Plan Control Switch in admin.html -->
-<div class="card">
-    <div class="card-header">
-        <h3>VIP Premium Plans Control</h3>
-    </div>
-    <div style="display: flex; gap: 10px; margin-top: 8px;">
-        <button onclick="toggleVipPlan('plan_4999_open')" class="btn-action btn-green" style="flex: 1;">Toggle ₹4,999 Plan</button>
-        <button onclick="toggleVipPlan('plan_9999_open')" class="btn-action btn-green" style="flex: 1;">Toggle ₹9,999 Plan</button>
-    </div>
-</div>
-
-<script>
-async function toggleVipPlan(planKey) {
-    const sb = getSupabase();
-    const { data } = await sb.from('settings').select('value').eq('key', planKey).maybeSingle();
-    const currentVal = data ? data.value : '0';
-    const newVal = currentVal === '1' ? '0' : '1';
-    
-    await sb.from('settings').upsert({ key: planKey, value: newVal });
-    alert(`Plan status changed to: ${newVal === '1' ? 'OPEN / UNLOCKED ✅' : 'LOCKED / UPCOMING 🔒'}`);
-}
-
     </script>
 </body>
-</html>
+    </html>
+    
