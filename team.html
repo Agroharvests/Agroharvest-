@@ -3,81 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Referral Team</title>
+    <title>AgroHarvest - My Team</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
     <script src="auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #f4fbf5; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .app-container { width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh; padding-bottom: 90px; position: relative; }
-
-        .header { background: linear-gradient(135deg, #14532d, #16a34a); padding: 18px 16px; color: white; display: flex; align-items: center; justify-content: space-between; }
-        .header h1 { font-size: 17px; font-weight: 800; }
-        .back-btn { color: white; text-decoration: none; font-size: 18px; }
-
-        .content { padding: 16px; }
-        .invite-banner { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 20px; padding: 18px; text-align: center; margin-bottom: 18px; }
-        .invite-banner h2 { font-size: 18px; font-weight: 800; color: #15803d; margin-bottom: 4px; }
-        .invite-banner p { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 14px; }
-        .link-box { background: white; border: 1px dashed #16a34a; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #16a34a; word-break: break-all; margin-bottom: 12px; }
-        .btn-copy { width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; }
-
-        .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .level-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; text-align: center; }
-        .level-card h4 { font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
-        .level-card p.rate { font-size: 11px; font-weight: 800; color: #16a34a; margin-bottom: 6px; }
-        .level-card h3 { font-size: 16px; font-weight: 800; color: #0f172a; }
-
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 440px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 8px 0; z-index: 100; }
-        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; }
+        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 16px; }
+        .stat-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; text-align: center; }
+        .stat-card h4 { font-size: 17px; font-weight: 900; color: #16a34a; margin-top: 4px; }
+        .stat-card p { font-size: 11px; font-weight: 700; color: #64748b; }
+        .section-bar { padding: 0 18px 10px; font-size: 15px; font-weight: 900; color: #0f172a; }
+        .list-box { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+        .comm-item { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100; }
+        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item.active { color: #16a34a; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="header">
-            <a href="index.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
-            <h1>Referral Team</h1>
-            <div style="width: 20px;"></div>
+        <div class="top-header">
+            <span>Team & Referral Rewards</span>
+            <span id="myRefBadge" style="font-size: 12px; background: #dcfce7; color: #16a34a; padding: 4px 10px; border-radius: 10px;">CODE</span>
         </div>
 
-        <div class="content">
-            <div class="invite-banner">
-                <h2>Invite Friends & Earn 31%</h2>
-                <p>Level 1 (27%) + Level 2 (3%) + Level 3 (1%)</p>
-                <div class="link-box" id="teamRefLink">Generating...</div>
-                <button class="btn-copy" onclick="copyTeamLink()">Copy Invite Link</button>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <p>Level 1 (25%)</p>
+                <h4 id="l1Count">0</h4>
             </div>
+            <div class="stat-card">
+                <p>Level 2 (2%)</p>
+                <h4 id="l2Count">0</h4>
+            </div>
+            <div class="stat-card">
+                <p>Level 3 (1%)</p>
+                <h4 id="l3Count">0</h4>
+            </div>
+        </div>
 
-            <div class="level-grid">
-                <div class="level-card">
-                    <h4>Level 1</h4>
-                    <p class="rate">27% Rebate</p>
-                    <h3 id="l1Count">0</h3>
-                    <span style="font-size: 10px; color:#64748b;">Members</span>
-                </div>
-                <div class="level-card">
-                    <h4>Level 2</h4>
-                    <p class="rate">3% Rebate</p>
-                    <h3 id="l2Count">0</h3>
-                    <span style="font-size: 10px; color:#64748b;">Members</span>
-                </div>
-                <div class="level-card">
-                    <h4>Level 3</h4>
-                    <p class="rate">1% Rebate</p>
-                    <h3 id="l3Count">0</h3>
-                    <span style="font-size: 10px; color:#64748b;">Members</span>
-                </div>
-            </div>
+        <div class="section-bar">Commission Passbook</div>
+        <div class="list-box" id="commissionList">
+            <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading Team Activity...</div>
         </div>
 
         <div class="bottom-nav">
             <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a href="orders.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i><span>Seeds</span></a>
+            <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
             <a href="team.html" class="nav-item active"><i class="fa-solid fa-users"></i><span>Team</span></a>
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
@@ -86,33 +64,41 @@
     <script>
         const activeUser = requireAuth();
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            const fullUrl = `${currentPath}register.html?ref=${activeUser.phone}`;
-            document.getElementById('teamRefLink').innerText = fullUrl;
-            loadTeamCounts();
-        });
+        document.addEventListener("DOMContentLoaded", async () => {
+            document.getElementById('myRefBadge').innerText = activeUser.referral_code;
 
-        function copyTeamLink() {
-            const txt = document.getElementById('teamRefLink').innerText;
-            navigator.clipboard.writeText(txt).then(() => {
-                alert("Invite link copied!");
-            });
-        }
+            const sb = getSupabase();
+            if (!sb) return;
 
-        async function loadTeamCounts() {
-            try {
-                // Level 1 members
-                const { count: l1 } = await supabase
-                    .from('profiles')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('referred_by', activeUser.phone);
+            // Count Level 1 Members
+            const { data: l1 } = await sb.from('profiles').select('id, referral_code').eq('referred_by', activeUser.referral_code);
+            const l1Members = l1 || [];
+            document.getElementById('l1Count').innerText = l1Members.length;
 
-                document.getElementById('l1Count').innerText = l1 || 0;
-            } catch (e) {
-                console.error(e);
+            // Load Commission Logs
+            const { data: comms } = await sb
+                .from('transactions')
+                .select('*')
+                .eq('user_id', activeUser.id)
+                .eq('type', 'commission')
+                .order('created_at', { ascending: false });
+
+            const list = document.getElementById('commissionList');
+            if (!comms || comms.length === 0) {
+                list.innerHTML = `<div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Abhi tak koi team commission nahi mila hai.</div>`;
+                return;
             }
-        }
+
+            list.innerHTML = comms.map(c => `
+                <div class="comm-item">
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 800; color: #0f172a;">Level ${c.level} Commission</h4>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 2px;">${c.details}</p>
+                    </div>
+                    <div style="font-size: 16px; font-weight: 900; color: #16a34a;">+ ₹${parseFloat(c.amount).toFixed(2)}</div>
+                </div>
+            `).join('');
+        });
     </script>
 </body>
 </html>
