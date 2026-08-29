@@ -437,13 +437,14 @@ async function buySeedPlan(title, price, daily, days) {
     if (!sb) return alert("Database connecting... Kripya dobara try karein.");
 
     try {
+        // 1. Check live balance from Supabase
         const { data: userProfile, error: uErr } = await sb
             .from('profiles')
-            .select('balance')
+            .select('balance, id, phone')
             .eq('id', activeUser.id)
             .single();
 
-        if (uErr || !userProfile) throw new Error("Balance check failed.");
+        if (uErr || !userProfile) throw new Error("Balance check failed: " + (uErr?.message || "User not found"));
 
         const curBal = parseFloat(userProfile.balance || 0);
         if (curBal < price) {
@@ -452,11 +453,17 @@ async function buySeedPlan(title, price, daily, days) {
             return;
         }
 
-        // Deduct balance
-        await sb.from('profiles').update({ balance: curBal - price }).eq('id', activeUser.id);
+        // 2. Deduct Balance
+        const newBal = curBal - price;
+        const { error: updErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', activeUser.id);
+        if (updErr) throw updErr;
 
-        // Insert Order with both user_id and phone
-        const newOrder = {
+        // Update local session
+        activeUser.balance = newBal;
+        setSessionUser(activeUser);
+
+        // 3. Insert Order with exact fields
+        const orderPayload = {
             user_id: activeUser.id,
             phone: activeUser.phone,
             plan_name: title,
@@ -467,9 +474,10 @@ async function buySeedPlan(title, price, daily, days) {
             status: 'active'
         };
 
-        const { error: ordErr } = await sb.from('orders').insert([newOrder]);
-        if (ordErr) throw ordErr;
+        const { error: ordErr } = await sb.from('orders').insert([orderPayload]);
+        if (ordErr) throw new Error("Order insert failed: " + ordErr.message);
 
+        // 4. Log User Purchase Transaction
         await sb.from('transactions').insert([{
             user_id: activeUser.id,
             type: 'purchase',
@@ -477,13 +485,25 @@ async function buySeedPlan(title, price, daily, days) {
             details: `Activated ${title}`
         }]);
 
+        // 5. Trigger Multi-tier Commission Distribution (25% L1, 2% L2, 1% L3)
+        try {
+            await sb.rpc('distribute_plan_commission', {
+                buyer_id: activeUser.id,
+                buyer_phone: activeUser.phone,
+                plan_price: price,
+                plan_title: title
+            });
+        } catch (commErr) {
+            console.warn("Commission distribution notice:", commErr);
+        }
+
         alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} profit credit hoga.`);
         window.location.href = 'orders.html';
 
     } catch (err) {
-        alert("Plan purchase failed: " + err.message);
+        alert("Purchase Error: " + err.message);
     }
-}
+            }
         
 
         function openInviteModal() {
