@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroHarvest - Payment Proofs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 30px; }
+        .top-header { background: #ffffff; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 17px; }
+        .upload-card { background: white; margin: 16px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; }
+        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 700; outline: none; margin-top: 6px; margin-bottom: 10px; }
+        .feed-card { background: white; margin: 0 16px 14px; border-radius: 20px; padding: 14px; border: 1.5px solid #e2e8f0; }
+        .feed-img { width: 100%; height: 200px; object-fit: cover; border-radius: 14px; margin-top: 8px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="top-header">
+            <a href="index.html" style="color: #0f172a; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i></a>
+            <span>Community Proofs</span>
+            <span></span>
+        </div>
+
+        <div class="upload-card">
+            <h4 style="font-size: 15px; font-weight: 900; margin-bottom: 8px;">Share Payment Proof</h4>
+            <input type="number" id="proofAmt" class="input-box" placeholder="Amount (e.g. 1000)">
+            <input type="text" id="proofImgUrl" class="input-box" placeholder="Screenshot Image URL (e.g. Imgur link)">
+            <input type="text" id="proofCap" class="input-box" placeholder="Caption (e.g. Got my withdrawal!)">
+            <button onclick="submitProof()" class="btn-submit" style="width: 100%; background: #16a34a; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">Post Proof</button>
+        </div>
+
+        <div id="proofFeed">
+            <div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Loading Proofs...</div>
+        </div>
+    </div>
+
+    <script>
+        const activeUser = requireAuth();
+
+        document.addEventListener("DOMContentLoaded", loadProofs);
+
+        async function loadProofs() {
+            const sb = getSupabase();
+            if (!sb) return;
+
+            const { data: proofs } = await sb.from('payment_proofs').select('*').order('created_at', { ascending: false });
+            const feed = document.getElementById('proofFeed');
+
+            if (!proofs || proofs.length === 0) {
+                feed.innerHTML = `<div style="text-align: center; padding: 30px; color: #94a3b8; font-weight: 700;">Sabse pehla payment proof aap share karein!</div>`;
+                return;
+            }
+
+            feed.innerHTML = proofs.map(p => `
+                <div class="feed-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 800; font-size: 14px; color: #0f172a;">User: ${p.user_phone.substring(0, 3)}****${p.user_phone.substring(7)}</span>
+                        <span style="background: #dcfce7; color: #16a34a; font-weight: 900; padding: 2px 8px; border-radius: 8px; font-size: 12px;">₹${p.amount} Received</span>
+                    </div>
+                    <img src="${p.image_url}" class="feed-img" onerror="this.src='https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=400&q=80'">
+                    <p style="font-size: 12px; color: #475569; font-weight: 700; margin-top: 8px;">"${p.caption || 'Verified Payment'}"</p>
+                </div>
+            `).join('');
+        }
+
+        async function submitProof() {
+            const amt = parseFloat(document.getElementById('proofAmt').value);
+            const imgUrl = document.getElementById('proofImgUrl').value.trim();
+            const cap = document.getElementById('proofCap').value.trim();
+
+            if (!amt || !imgUrl) return alert("Amount aur Screenshot URL dalein!");
+
+            const sb = getSupabase();
+            if (!sb) return;
+
+            await sb.from('payment_proofs').insert([{
+                user_id: activeUser.id,
+                user_phone: activeUser.phone,
+                proof_type: 'withdrawal',
+                amount: amt,
+                image_url: imgUrl,
+                caption: cap
+            }]);
+
+            alert("Payment Proof Posted!");
+            loadProofs();
+        }
+    </script>
+</body>
+</html>
