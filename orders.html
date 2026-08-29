@@ -79,85 +79,79 @@
 
         document.addEventListener("DOMContentLoaded", loadUserOrders);
 
-        async function loadUserOrders() {
+         async function loadUserOrders() {
     if (!activeUser) return;
-
     const sb = getSupabase();
     const container = document.getElementById('ordersListContainer');
 
-    if (!sb) {
-        container.innerHTML = `<p style="text-align:center; padding:30px; color:#ef4444; font-weight:700;">Database connection error.</p>`;
-        return;
-    }
-
     try {
-        // Direct query targeting user_id
-        const { data: userOrders, error } = await sb
+        // 1. Fetch User Active Orders
+        const { data: userOrders } = await sb
             .from('orders')
             .select('*')
-            .or(`user_id.eq.${activeUser.id},phone.eq.${activeUser.phone}`)
+            .eq('user_id', activeUser.id)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        // 2. Fetch Daily Income Transactions
+        const { data: incomeLogs } = await sb
+            .from('transactions')
+            .select('*')
+            .eq('user_id', activeUser.id)
+            .eq('type', 'income')
+            .order('created_at', { ascending: false });
 
-        if (!userOrders || userOrders.length === 0) {
-            document.getElementById('activeCountBadge').innerText = "0 ACTIVE";
-            document.getElementById('totalDailyIncomeText').innerText = "₹0.00 / day";
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px 20px; background: white; border-radius: 20px; border: 1.5px dashed #cbd5e1; margin-top: 10px;">
-                    <i class="fa-solid fa-seedling" style="font-size: 36px; color: #cbd5e1; margin-bottom: 12px;"></i>
-                    <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Koi Plan Active Nahi Hai</h4>
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">Abhi koi crop plan buy karein aur daily return payein.</p>
-                    <a href="index.html" style="background: #16a34a; color: white; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 800; font-size: 13px; display: inline-block;">View Plans</a>
-                </div>
-            `;
-            return;
-        }
-
-        const activeOrders = userOrders.filter(o => o.status === 'active');
+        const activeOrders = (userOrders || []).filter(o => o.status === 'active');
         const totalDaily = activeOrders.reduce((sum, o) => sum + parseFloat(o.daily_income || 0), 0);
 
         document.getElementById('activeCountBadge').innerText = `${activeOrders.length} ACTIVE`;
         document.getElementById('totalDailyIncomeText').innerText = `₹${totalDaily.toFixed(2)} / day`;
 
-        container.innerHTML = userOrders.map(o => {
-            const isActive = o.status === 'active';
-            const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'Recent';
-            const daysLeft = o.days_remaining !== undefined ? o.days_remaining : (o.validity_days || 30);
-
-            return `
-                <div class="order-card">
-                    <div class="order-head">
-                        <div>
-                            <div class="order-title">${o.plan_name}</div>
-                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Planted on: ${dateStr}</span>
-                        </div>
-                        <span class="badge-status ${isActive ? 'badge-active' : 'badge-completed'}">${o.status}</span>
-                    </div>
-
-                    <div class="order-stats-grid">
-                        <div class="stat-item">
-                            <span>Plan Price</span>
-                            <strong>₹${parseFloat(o.price).toFixed(0)}</strong>
-                        </div>
-                        <div class="stat-item">
-                            <span>Daily Yield</span>
-                            <strong style="color: #16a34a;">₹${parseFloat(o.daily_income).toFixed(0)}</strong>
-                        </div>
-                        <div class="stat-item">
-                            <span>Days Left</span>
-                            <strong style="color: #0284c7;">${daysLeft} Days</strong>
-                        </div>
-                    </div>
+        // Render Active Crops
+        let htmlContent = (userOrders || []).map(o => `
+            <div class="order-card" style="background:white; border-radius:18px; padding:16px; margin-bottom:12px; border:1.5px solid #e2e8f0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <strong style="font-size:15px; color:#0f172a;">${o.plan_name}</strong>
+                    <span style="font-size:11px; font-weight:800; background:#dcfce7; color:#15803d; padding:3px 8px; border-radius:6px;">${o.status}</span>
                 </div>
-            `;
-        }).join('');
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; text-align:center; background:#f8fafc; padding:10px; border-radius:12px;">
+                    <div><span style="font-size:10px; color:#64748b; font-weight:700;">Price</span><h5 style="font-size:13px; font-weight:900;">₹${o.price}</h5></div>
+                    <div><span style="font-size:10px; color:#64748b; font-weight:700;">Daily Return</span><h5 style="font-size:13px; font-weight:900; color:#16a34a;">+₹${o.daily_income}</h5></div>
+                    <div><span style="font-size:10px; color:#64748b; font-weight:700;">Days Left</span><h5 style="font-size:13px; font-weight:900; color:#0284c7;">${o.days_remaining} Days</h5></div>
+                </div>
+            </div>
+        `).join('');
+
+        // Render Daily Income History Passbook
+        htmlContent += `
+            <div style="margin-top:24px; margin-bottom:12px;">
+                <h4 style="font-size:15px; font-weight:900; color:#0f172a;">Daily Harvest Credit History</h4>
+            </div>
+        `;
+
+        if (!incomeLogs || incomeLogs.length === 0) {
+            htmlContent += `<p style="font-size:12px; color:#94a3b8; font-weight:700; text-align:center; padding:16px;">Abhi tak koi daily return credit nahi hua hai.</p>`;
+        } else {
+            htmlContent += incomeLogs.map(log => {
+                const dateStr = log.created_at ? new Date(log.created_at).toLocaleDateString('en-IN') : 'Recent';
+                return `
+                    <div style="background:white; border-radius:14px; padding:12px 14px; margin-bottom:8px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong style="font-size:13px; color:#0f172a; display:block;">${log.details}</strong>
+                            <span style="font-size:11px; color:#64748b; font-weight:600;">${dateStr}</span>
+                        </div>
+                        <strong style="font-size:15px; color:#16a34a; font-weight:900;">+₹${parseFloat(log.amount).toFixed(2)}</strong>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        container.innerHTML = htmlContent;
 
     } catch (err) {
-        container.innerHTML = `<p style="text-align:center; padding:30px; color:#ef4444; font-weight:700;">Error: ${err.message}</p>`;
+        container.innerHTML = `<p style="color:#ef4444; text-align:center; padding:20px;">Error: ${err.message}</p>`;
     }
-                                       }
-                                                                                                      
+                                                                            }
+        
     </script>
 </body>
 </html>
