@@ -29,7 +29,7 @@
         .badge-active { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .badge-completed { background: #f1f5f9; color: #64748b; }
 
-        .order-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px; text-align: center; margin-bottom: 10px; }
+        .order-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px; text-align: center; }
         .stat-item span { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block; margin-bottom: 2px; }
         .stat-item strong { font-size: 14px; font-weight: 900; color: #0f172a; }
 
@@ -85,20 +85,25 @@
             const container = document.getElementById('ordersListContainer');
 
             if (!sb) {
-                container.innerHTML = `<p style="text-align:center; padding:30px; color:#ef4444; font-weight:700;">Database connection error. Refresh karein.</p>`;
+                container.innerHTML = `<p style="text-align:center; padding:30px; color:#ef4444; font-weight:700;">Database connection error.</p>`;
                 return;
             }
 
             try {
-                const { data: orders, error } = await sb
+                // Fetch all orders and match by ID or Phone
+                const { data: allOrders, error } = await sb
                     .from('orders')
                     .select('*')
-                    .eq('user_id', activeUser.id)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                if (!orders || orders.length === 0) {
+                const userOrders = (allOrders || []).filter(o => 
+                    o.user_id === activeUser.id || 
+                    (o.phone && o.phone === activeUser.phone)
+                );
+
+                if (userOrders.length === 0) {
                     document.getElementById('activeCountBadge').innerText = "0 ACTIVE";
                     document.getElementById('totalDailyIncomeText').innerText = "₹0.00 / day";
                     container.innerHTML = `
@@ -112,16 +117,16 @@
                     return;
                 }
 
-                const activeOrders = orders.filter(o => o.status === 'active');
+                const activeOrders = userOrders.filter(o => o.status === 'active');
                 const totalDaily = activeOrders.reduce((sum, o) => sum + parseFloat(o.daily_income || 0), 0);
 
                 document.getElementById('activeCountBadge').innerText = `${activeOrders.length} ACTIVE`;
                 document.getElementById('totalDailyIncomeText').innerText = `₹${totalDaily.toFixed(2)} / day`;
 
-                container.innerHTML = orders.map(o => {
+                container.innerHTML = userOrders.map(o => {
                     const isActive = o.status === 'active';
                     const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'Recent';
-                    const daysLeft = o.days_remaining !== undefined ? o.days_remaining : o.validity_days;
+                    const daysLeft = o.days_remaining !== undefined ? o.days_remaining : (o.validity_days || 30);
 
                     return `
                         <div class="order-card">
