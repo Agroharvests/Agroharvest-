@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Smart Agro Investments</title>
+    <title>AgroHarvest - Smart Farming Better Future</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -14,7 +14,6 @@
         body { background: #f4fbf5; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
         .app-container { width: 100%; max-width: 440px; background: #ffffff; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.06); }
 
-        /* Brand Top Header */
         .top-header { background: linear-gradient(135deg, #14532d, #16a34a); padding: 22px 18px 26px; border-radius: 0 0 26px 26px; color: white; }
         .brand-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
         .user-profile { display: flex; align-items: center; gap: 12px; }
@@ -23,22 +22,20 @@
         .user-details p { font-size: 11px; opacity: 0.85; font-weight: 600; }
         .brand-badge { background: #fef08a; color: #854d0e; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
 
-        /* Wallet Card */
         .wallet-card { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.25); border-radius: 18px; padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; }
         .wallet-item:first-child { border-right: 1px solid rgba(255,255,255,0.2); }
         .wallet-item p { font-size: 11px; opacity: 0.9; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
         .wallet-item h2 { font-size: 21px; font-weight: 800; }
 
-        /* Hero Banner */
-        .hero-banner { margin: 16px 16px 8px; border-radius: 20px; overflow: hidden; position: relative; height: 130px; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.15); }
-        .hero-banner img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,83,45,0.85) 0%, rgba(22,163,74,0.4) 100%); display: flex; flex-direction: column; justify-content: center; padding: 16px; color: white; }
+        /* Poster Image Hero Banner */
+        .hero-banner { margin: 16px 16px 8px; border-radius: 20px; overflow: hidden; position: relative; height: 140px; box-shadow: 0 8px 20px rgba(22, 163, 74, 0.15); }
+        .hero-banner img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(20,83,45,0.85) 0%, rgba(22,163,74,0.3) 100%); display: flex; flex-direction: column; justify-content: center; padding: 16px; color: white; }
         .hero-overlay h2 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
-        .hero-overlay p { font-size: 11px; opacity: 0.95; font-weight: 600; max-width: 210px; }
+        .hero-overlay p { font-size: 11px; opacity: 0.95; font-weight: 600; max-width: 230px; }
 
-        /* Quick Action Grid */
         .action-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 14px 16px; }
-        .action-btn { background: #ffffff; border-radius: 16px; padding: 12px 6px; text-align: center; text-decoration: none; color: #1e293b; box-shadow: 0 4px 14px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; transition: transform 0.15s; }
+        .action-btn { background: #ffffff; border-radius: 16px; padding: 12px 6px; text-align: center; text-decoration: none; color: #1e293b; box-shadow: 0 4px 14px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; }
         .action-btn:active { transform: scale(0.95); }
         .action-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 6px; }
         .action-btn span { font-size: 11px; font-weight: 700; display: block; }
@@ -49,40 +46,34 @@
         .icon-invite { background: #f3e8ff; color: #9333ea; }
         .icon-online { background: #e0f2fe; color: #0284c7; }
 
-        /* Section Title */
         .section-header { padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; }
         .section-header h2 { font-size: 17px; font-weight: 800; color: #0f172a; }
         .section-header span { font-size: 12px; color: #16a34a; font-weight: 700; }
 
-        /* Seed Plan Cards */
         .plans-list { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
         .plan-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 16px; box-shadow: 0 4px 18px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
         .plan-tag { position: absolute; top: 0; right: 0; background: linear-gradient(135deg, #16a34a, #15803d); color: white; font-size: 10px; font-weight: 800; padding: 5px 14px; border-radius: 0 0 0 14px; text-transform: uppercase; }
-        .plan-tag.best { background: linear-gradient(135deg, #0284c7, #0369a1); }
-        .plan-tag.vip { background: linear-gradient(135deg, #d97706, #b45309); }
+        .plan-tag.gold { background: linear-gradient(135deg, #d97706, #b45309); }
+        .plan-tag.diamond { background: linear-gradient(135deg, #0284c7, #0369a1); }
 
         .plan-main { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
-        .plan-img-wrap { width: 105px; height: 105px; border-radius: 16px; overflow: hidden; position: relative; flex-shrink: 0; }
+        .plan-img-wrap { width: 95px; height: 95px; border-radius: 16px; overflow: hidden; position: relative; flex-shrink: 0; }
         .plan-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .plan-limit { position: absolute; top: 6px; left: 6px; font-size: 9px; font-weight: 800; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 6px; }
 
         .plan-info { flex: 1; }
-        .plan-title { font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .plan-title { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
         .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 13px; }
         .info-row span.label { color: #64748b; font-weight: 600; }
         .info-row span.val { font-weight: 800; color: #0f172a; }
         .info-row span.val.green { color: #16a34a; }
 
         .btn-buy { width: 100%; background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none; padding: 13px; border-radius: 14px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25); }
-        .btn-buy:active { transform: scale(0.98); }
 
-        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 440px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 8px 0; z-index: 100; box-shadow: 0 -4px 18px rgba(0,0,0,0.04); }
         .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 10px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .nav-item i { font-size: 18px; }
         .nav-item.active { color: #16a34a; }
 
-        /* Modals */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
         .modal-card { background: white; width: 100%; max-width: 360px; border-radius: 22px; padding: 24px; text-align: center; }
         .ref-box { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 800; color: #16a34a; margin: 14px 0; word-break: break-all; }
@@ -91,7 +82,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Header -->
         <div class="top-header">
             <div class="brand-row">
                 <div class="user-profile">
@@ -104,7 +94,6 @@
                 <div class="brand-badge"><i class="fa-solid fa-shield-halved"></i> AgroHarvest</div>
             </div>
 
-            <!-- Balance Card -->
             <div class="wallet-card">
                 <div class="wallet-item">
                     <p>Total Balance</p>
@@ -117,16 +106,15 @@
             </div>
         </div>
 
-        <!-- Hero Banner with High Quality Agri Imagery -->
+        <!-- Poster Hero Banner -->
         <div class="hero-banner">
-            <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80" alt="AgroHarvest Crop Field">
+            <img src="banner.png" alt="AgroHarvest Smart Farming">
             <div class="hero-overlay">
-                <h2>AgroHarvest Pro</h2>
-                <p>Smart agriculture fund delivering daily high yields directly to wallet.</p>
+                <h2>Smart Farming</h2>
+                <p>Better Farming, Better Life & Daily Guaranteed Yields.</p>
             </div>
         </div>
 
-        <!-- Quick Action Grid -->
         <div class="action-grid">
             <a href="recharge.html" class="action-btn">
                 <div class="action-icon icon-recharge"><i class="fa-solid fa-wallet"></i></div>
@@ -138,7 +126,7 @@
             </a>
             <a href="orders.html" class="action-btn">
                 <div class="action-icon icon-orders"><i class="fa-solid fa-boxes-stacked"></i></div>
-                <span>My Seeds</span>
+                <span>Crop Plans</span>
             </a>
             <div onclick="openInviteModal()" class="action-btn" style="cursor: pointer;">
                 <div class="action-icon icon-invite"><i class="fa-solid fa-share-nodes"></i></div>
@@ -146,83 +134,77 @@
             </div>
             <a href="https://t.me/Earnflowseeds" target="_blank" class="action-btn">
                 <div class="action-icon icon-online"><i class="fa-brands fa-telegram"></i></div>
-                <span>Online</span>
+                <span>Support</span>
             </a>
         </div>
 
-        <!-- Section Header -->
         <div class="section-header">
-            <h2>Certified Seed Plans</h2>
-            <span>Daily Profit</span>
+            <h2>Available Crop Plans</h2>
+            <span>30 Days Cycle</span>
         </div>
 
-        <!-- Plan List -->
         <div class="plans-list">
-            <!-- Plan 1: Maize Seed -->
+            <!-- Plan 1: Green Plan -->
             <div class="plan-card">
-                <div class="plan-tag">★ Popular</div>
+                <div class="plan-tag">★ High Yield</div>
                 <div class="plan-main">
                     <div class="plan-img-wrap">
-                        <span class="plan-limit">Limit 0/10</span>
-                        <img src="https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=400&q=80" alt="Maize Seed">
+                        <img src="banner.png" alt="Green Plan">
                     </div>
                     <div class="plan-info">
-                        <div class="plan-title">Hybrid Maize Seed</div>
+                        <div class="plan-title">Green Plan</div>
                         <div class="info-row"><span class="label">Price</span><span class="val green">₹525</span></div>
                         <div class="info-row"><span class="label">Daily</span><span class="val green">₹125</span></div>
-                        <div class="info-row"><span class="label">Total</span><span class="val">₹18,750</span></div>
-                        <div class="info-row"><span class="label">Cycle</span><span class="val">150 Days</span></div>
+                        <div class="info-row"><span class="label">Total</span><span class="val">₹3,750</span></div>
+                        <div class="info-row"><span class="label">Cycle</span><span class="val">30 Days</span></div>
                     </div>
                 </div>
-                <button onclick="buySeedPlan('Hybrid Maize Seed', 525, 125, 150)" class="btn-buy">
-                    Invest Now <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="buySeedPlan('Green Plan', 525, 125, 30)" class="btn-buy">
+                    Invest ₹525 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- Plan 2: Wheat Seed -->
+            <!-- Plan 2: Gold Plan -->
             <div class="plan-card">
-                <div class="plan-tag best">👑 Best Value</div>
+                <div class="plan-tag gold">👑 Better Profit</div>
                 <div class="plan-main">
                     <div class="plan-img-wrap">
-                        <span class="plan-limit">Limit 0/5</span>
-                        <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=400&q=80" alt="Wheat Seed">
+                        <img src="banner.png" alt="Gold Plan">
                     </div>
                     <div class="plan-info">
-                        <div class="plan-title">Golden Wheat Seed</div>
+                        <div class="plan-title">Gold Plan</div>
                         <div class="info-row"><span class="label">Price</span><span class="val green">₹1,500</span></div>
                         <div class="info-row"><span class="label">Daily</span><span class="val green">₹375</span></div>
-                        <div class="info-row"><span class="label">Total</span><span class="val">₹56,250</span></div>
-                        <div class="info-row"><span class="label">Cycle</span><span class="val">150 Days</span></div>
+                        <div class="info-row"><span class="label">Total</span><span class="val">₹11,250</span></div>
+                        <div class="info-row"><span class="label">Cycle</span><span class="val">30 Days</span></div>
                     </div>
                 </div>
-                <button onclick="buySeedPlan('Golden Wheat Seed', 1500, 375, 150)" class="btn-buy" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
-                    Invest Now <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="buySeedPlan('Gold Plan', 1500, 375, 30)" class="btn-buy" style="background: linear-gradient(135deg, #d97706, #b45309);">
+                    Invest ₹1,500 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- Plan 3: Paddy Hybrid Seed -->
+            <!-- Plan 3: Diamond Plan -->
             <div class="plan-card">
-                <div class="plan-tag vip">🔥 High Yield</div>
+                <div class="plan-tag diamond">🔥 Secure & Trusted</div>
                 <div class="plan-main">
                     <div class="plan-img-wrap">
-                        <span class="plan-limit">Limit 0/3</span>
-                        <img src="https://images.unsplash.com/photo-1536657464919-892534f60d6e?auto=format&fit=crop&w=400&q=80" alt="Paddy Hybrid Seed">
+                        <img src="banner.png" alt="Diamond Plan">
                     </div>
                     <div class="plan-info">
-                        <div class="plan-title">Paddy Hybrid Seed</div>
+                        <div class="plan-title">Diamond Plan</div>
                         <div class="info-row"><span class="label">Price</span><span class="val green">₹3,500</span></div>
-                        <div class="info-row"><span class="label">Daily</span><span class="val green">₹920</span></div>
-                        <div class="info-row"><span class="label">Total</span><span class="val">₹1,38,000</span></div>
-                        <div class="info-row"><span class="label">Cycle</span><span class="val">150 Days</span></div>
+                        <div class="info-row"><span class="label">Daily</span><span class="val green">₹970</span></div>
+                        <div class="info-row"><span class="label">Total</span><span class="val">₹29,100</span></div>
+                        <div class="info-row"><span class="label">Cycle</span><span class="val">30 Days</span></div>
                     </div>
                 </div>
-                <button onclick="buySeedPlan('Paddy Hybrid Seed', 3500, 920, 150)" class="btn-buy" style="background: linear-gradient(135deg, #d97706, #b45309);">
-                    Invest Now <i class="fa-solid fa-arrow-right"></i>
+                <button onclick="buySeedPlan('Diamond Plan', 3500, 970, 30)" class="btn-buy" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                    Invest ₹3,500 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i><span>Seeds</span></a>
@@ -230,7 +212,6 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Referral Modal -->
         <div id="inviteModal" class="modal">
             <div class="modal-card">
                 <i class="fa-solid fa-gift" style="font-size: 40px; color: #16a34a; margin-bottom: 10px;"></i>
@@ -258,7 +239,6 @@
             document.getElementById('totalBalText').innerText = "₹" + parseFloat(activeUser.balance || 0).toFixed(2);
             document.getElementById('teamIncText').innerText = "₹" + parseFloat(activeUser.team_income || 0).toFixed(2);
 
-            // Fetch live balance sync
             const { data: liveData } = await supabase
                 .from('profiles')
                 .select('*')
@@ -291,13 +271,11 @@
                     return;
                 }
 
-                // Deduct Balance
                 await supabase
                     .from('profiles')
                     .update({ balance: curBal - price })
                     .eq('id', activeUser.id);
 
-                // Add Order
                 await supabase
                     .from('orders')
                     .insert([{
@@ -310,7 +288,6 @@
                         status: 'active'
                     }]);
 
-                // Record Transaction
                 await supabase
                     .from('transactions')
                     .insert([{
@@ -334,4 +311,20 @@
             const fullUrl = `${currentPath}register.html?ref=${activeUser.phone}`;
             document.getElementById('refLinkText').innerText = fullUrl;
             document.getElementById('inviteModal').style.display = 'flex';
-   
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').style.display = 'none';
+        }
+
+        function copyInvite() {
+            const txt = document.getElementById('refLinkText').innerText;
+            navigator.clipboard.writeText(txt).then(() => {
+                alert("Referral link copied!");
+                closeInviteModal();
+            });
+        }
+    </script>
+</body>
+        </html>
+    
