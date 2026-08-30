@@ -343,86 +343,98 @@
     </div>
         </div>
                 <script>
-    // Supabase Configuration
-    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+// Supabase Configuration (Configured with your Project Credentials)
+const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
-    let supabaseClient = null;
-    function getSupabase() {
-        if (!supabaseClient && window.supabase) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-        return supabaseClient;
+let supabaseClient = null;
+function getSupabase() {
+    if (!supabaseClient && window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    return supabaseClient;
+}
+
+let allUsersList = [];
+let allOrdersList = [];
+
+async function loadAdminDashboard() {
+    const sb = getSupabase();
+    if (!sb) {
+        console.error("Supabase client initialize nahi hua!");
+        return;
     }
 
-    let allUsersList = [];
-    let allOrdersList = [];
+    try {
+        // 1. Fetch live UPI from settings
+        const { data: upiSetting } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
+        if (upiSetting && upiSetting.value) {
+            document.getElementById('currentUpiBadge').innerText = upiSetting.value;
+            document.getElementById('targetUpiInput').value = upiSetting.value;
+        } else {
+            document.getElementById('currentUpiBadge').innerText = "5326807Q1@mairtel";
+            document.getElementById('targetUpiInput').value = "5326807Q1@mairtel";
+        }
 
-    async function loadAdminDashboard() {
-        const sb = getSupabase();
-        if (!sb) return;
+        // 2. Fetch all profiles (Fallback to 'users' table if 'profiles' is empty)
+        let { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+        if (!profiles || profiles.length === 0) {
+            const res = await sb.from('users').select('*').order('created_at', { ascending: false });
+            profiles = res.data || [];
+        }
+        allUsersList = profiles;
+        document.getElementById('statTotalUsers').innerText = allUsersList.length;
+        document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
 
-        try {
-            // 1. Fetch live UPI from settings
-            const { data: upiSetting } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
-            if (upiSetting && upiSetting.value) {
-                document.getElementById('currentUpiBadge').innerText = upiSetting.value;
-                document.getElementById('targetUpiInput').value = upiSetting.value;
-            } else {
-                document.getElementById('currentUpiBadge').innerText = "5326807Q1@mairtel";
-                document.getElementById('targetUpiInput').value = "5326807Q1@mairtel";
-            }
+        // 3. Fetch all orders (Fallback to 'investments' table if 'orders' is empty)
+        let { data: orders } = await sb.from('orders').select('*');
+        if (!orders || orders.length === 0) {
+            const resOrders = await sb.from('investments').select('*');
+            orders = resOrders.data || [];
+        }
+        allOrdersList = orders;
+        document.getElementById('statActivePlans').innerText = allOrdersList.length;
 
-            // 2. Fetch all profiles
-            const { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-            allUsersList = profiles || [];
-            document.getElementById('statTotalUsers').innerText = allUsersList.length;
-            document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
+        // 4. Fetch Approved Recharges Sum
+        const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
+        const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+        document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
 
-            // 3. Fetch all orders (active plans)
-            const { data: orders } = await sb.from('orders').select('*');
-            allOrdersList = orders || [];
-            document.getElementById('statActivePlans').innerText = allOrdersList.length;
+        // 5. Fetch Approved Withdrawals Sum
+        const { data: approvedWithdrawals } = await sb.from('withdrawals').select('amount').eq('status', 'approved');
+        const totalWith = (approvedWithdrawals || []).reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
+        document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
 
-            // 4. Fetch Approved Recharges Sum
-            const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
-            const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
-            document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
-
-            // 5. Fetch Approved Withdrawals Sum
-            const { data: approvedWithdrawals } = await sb.from('withdrawals').select('amount').eq('status', 'approved');
-            const totalWith = (approvedWithdrawals || []).reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
-            document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
-
-            // 6. Fetch Pending Recharges List
-            const { data: pendingRecharges } = await sb.from('recharges').select('*').eq('status', 'pending');
-            const recContainer = document.getElementById('pendingRechargesContainer');
-            document.getElementById('rechargeCountBadge').innerText = pendingRecharges ? pendingRecharges.length : 0;
-            if (!pendingRecharges || pendingRecharges.length === 0) {
-                recContainer.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>`;
-            } else {
-                recContainer.innerHTML = pendingRecharges.map(r => `
-                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <strong>📱 ${r.phone}</strong>
-                            <strong style="color:#16a34a;">₹${r.amount}</strong>
-                        </div>
-                        <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr}</b></div>
-                        <div style="display:flex; gap:6px; margin-top:6px;">
-                            <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-green-main" style="padding:6px; font-size:11px;">Approve</button>
-                            <button onclick="rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:6px; font-size:11px;">Reject</button>
-                        </div>
+        // 6. Fetch Pending Recharges List
+        const { data: pendingRecharges } = await sb.from('recharges').select('*').eq('status', 'pending');
+        const recContainer = document.getElementById('pendingRechargesContainer');
+        document.getElementById('rechargeCountBadge').innerText = pendingRecharges ? pendingRecharges.length : 0;
+        if (!pendingRecharges || pendingRecharges.length === 0) {
+            recContainer.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>`;
+        } else {
+            recContainer.innerHTML = pendingRecharges.map(r => `
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>📱 ${r.phone}</strong>
+                        <strong style="color:#16a34a;">₹${r.amount}</strong>
                     </div>
-                `).join('');
-            }
-
-            // 7. Render Detailed User Cards
-            renderUserDetailedCards(allUsersList);
-
-        } catch (err) {
-            console.error("Admin dashboard load notice:", err);
+                    <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr}</b></div>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-green-main" style="padding:6px; font-size:11px;">Approve</button>
+                        <button onclick="rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:6px; font-size:11px;">Reject</button>
+                    </div>
+                </div>
+            `).join('');
         }
+
+        // 7. Render Detailed User Cards
+        renderUserDetailedCards(allUsersList);
+
+    } catch (err) {
+        console.error("Admin dashboard load notice:", err);
     }
+}
+                    
 
     // Render User Investments & Downlines Box (Matching Original UI Exactly)
     function renderUserDetailedCards(users) {
