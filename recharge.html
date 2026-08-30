@@ -332,7 +332,7 @@
             <div class="upi-copy-container">
                 <div style="text-align: left;">
                     <span style="font-size: 10px; color: #64748b; font-weight: 700; display: block;">OFFICIAL UPI ID</span>
-                    <strong id="adminUpiDisplay">paytmqr@paytm</strong>
+                    <strong id="adminUpiDisplay">5326807Q1@mairtel</strong>
                 </div>
                 <button type="button" onclick="copyUpiId()" class="btn-copy-action">
                     <i class="fa-solid fa-copy"></i> Copy
@@ -373,34 +373,78 @@
 
         <span class="section-label">Recent Recharge History</span>
         <div id="rechargeHistoryList">
-            <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Koi recharge history nahi hai.</p>
+            <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Loading history...</p>
         </div>
     </div>
 </div>
 <script>
+    // Configured with exact Supabase credentials
+    const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
+
+    let supabaseClient = null;
+    function getSupabase() {
+        if (!supabaseClient && window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+        return supabaseClient;
+    }
+
     let activeUser = null;
-    let targetUpiId = "paytmqr@paytm";
+    let targetUpiId = "5326807Q1@mairtel";
     let targetUpiName = "AgroHarvest Official";
     let base64Screenshot = "";
 
-    // Safe User Session Fetch
     function getStoredUser() {
         try {
             const raw = localStorage.getItem('agro_user') || sessionStorage.getItem('agro_user');
             if (raw) return JSON.parse(raw);
         } catch (e) {
-            console.error("Session parse error", e);
+            console.error("Session fetch error:", e);
         }
         return null;
     }
 
-    // Instant Render - Page blocks nahi hoga
-    function renderPage() {
+    async function initRechargePage() {
         activeUser = getStoredUser();
         if (activeUser && activeUser.balance !== undefined) {
-            document.getElementById('userLiveBalance').innerText = '₹' + parseFloat(activeUser.balance || 0).toFixed(2);
+            const balElem = document.getElementById('userLiveBalance');
+            if (balElem) balElem.innerText = '₹' + parseFloat(activeUser.balance || 0).toFixed(2);
         }
+
+        const sb = getSupabase();
+        if (sb) {
+            try {
+                // 1. Live Receiver UPI Fetch
+                const { data: settingData } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
+                if (settingData && settingData.value) {
+                    targetUpiId = settingData.value.trim();
+                } else {
+                    const { data: activeUpi } = await sb.from('upi_accounts').select('*').eq('is_active', true).maybeSingle();
+                    if (activeUpi && activeUpi.upi_id) {
+                        targetUpiId = activeUpi.upi_id.trim();
+                        targetUpiName = activeUpi.holder_name || "AgroHarvest Official";
+                    }
+                }
+
+                // 2. Live User Balance Fetch
+                if (activeUser && activeUser.id) {
+                    const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).maybeSingle();
+                    if (prof && prof.balance !== undefined) {
+                        const balElem = document.getElementById('userLiveBalance');
+                        if (balElem) balElem.innerText = '₹' + parseFloat(prof.balance || 0).toFixed(2);
+                    }
+                }
+            } catch (err) {
+                console.warn("UPI Sync Notice:", err);
+            }
+        }
+
+        const upiDisplay = document.getElementById('adminUpiDisplay');
+        if (upiDisplay) upiDisplay.innerText = targetUpiId;
+        
         updateDynamicPaymentQR();
+        loadRechargeHistory();
     }
 
     function setRechargeAmt(val, el) {
@@ -426,7 +470,7 @@
 
     function copyUpiId() {
         navigator.clipboard.writeText(targetUpiId).then(() => {
-            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nKripya apne UPI app me jakar paste karein.`);
+            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nAb kisi bhi UPI app me jakar 'Pay to UPI ID' par payment complete karein.`);
         }).catch(() => {
             alert(`UPI ID: ${targetUpiId}`);
         });
@@ -440,7 +484,7 @@
         const standardUrl = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
 
         navigator.clipboard.writeText(cleanUpi).then(() => {
-            alert(`✅ UPI Copied: ${cleanUpi}\nOpening ${appName}... Agar direct load na ho to app me jakar 'Pay to UPI' par payment karein.`);
+            alert(`✅ UPI Copied: ${cleanUpi}\nOpening ${appName}... Agar payment load na ho to 'Pay to UPI' me paste karein.`);
             window.location.href = standardUrl;
         }).catch(() => {
             window.location.href = standardUrl;
@@ -494,38 +538,73 @@
         if (isNaN(amt) || amt < 499) return alert("Minimum recharge amount ₹499 hai!");
         if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number dalein!");
 
+        const sb = getSupabase();
         btn.disabled = true;
         btn.innerText = "Submitting...";
 
         try {
-            if (window.supabase) {
-                const sb = window.supabaseClient || (window.supabase.createClient && window.supabase.createClient("https://YOUR_SUPABASE_PROJECT_URL.supabase.co", "YOUR_SUPABASE_ANON_KEY"));
-                if (sb) {
-                    await sb.from('recharges').insert([{
-                        user_id: activeUser.id,
-                        phone: activeUser.phone,
-                        amount: amt,
-                        utr: utr,
-                        screenshot_url: base64Screenshot || null,
-                        status: 'pending'
-                    }]);
-                }
+            if (sb) {
+                const { error } = await sb.from('recharges').insert([{
+                    user_id: activeUser.id,
+                    phone: activeUser.phone,
+                    amount: amt,
+                    utr: utr,
+                    screenshot_url: base64Screenshot || null,
+                    status: 'pending'
+                }]);
+                if (error) throw error;
             }
 
-            alert("✅ Recharge Request Submitted!\nAdmin review ke baad balance add ho jayega.");
+            alert("✅ Recharge Request Submitted!\nAdmin review ke baad wallet balance add ho jayega.");
             document.getElementById('utrNumberInput').value = '';
             base64Screenshot = "";
             document.getElementById('fileUploadStatus').innerText = "Upload Payment Screenshot (Optional)";
+            loadRechargeHistory();
         } catch (err) {
-            alert("Submitted for review!");
+            alert("Submission error: " + err.message);
         } finally {
             btn.disabled = false;
             btn.innerText = "Submit Recharge Request";
         }
     }
 
-    // Direct execution
-    renderPage();
+    async function loadRechargeHistory() {
+        if (!activeUser) return;
+        const sb = getSupabase();
+        const container = document.getElementById('rechargeHistoryList');
+        if (!container || !sb) return;
+
+        try {
+            const { data: list } = await sb
+                .from('recharges')
+                .select('*')
+                .eq('user_id', activeUser.id)
+                .order('created_at', { ascending: false });
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">No recharge history found.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => {
+                const date = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Recent';
+                const statusClass = item.status === 'approved' ? 'status-approved' : (item.status === 'rejected' ? 'status-rejected' : 'status-pending');
+                return `
+                    <div class="history-item">
+                        <div>
+                            <strong style="font-size: 14px; display: block;">₹${parseFloat(item.amount).toFixed(2)}</strong>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">UTR: ${item.utr} • ${date}</span>
+                        </div>
+                        <span class="badge-status ${statusClass}">${item.status}</span>
+                    </div>
+                `;
+            }).join('');
+        } catch (e) {
+            container.innerHTML = `<p style="color:#ef4444; font-size:12px; text-align:center;">History load error</p>`;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", initRechargePage);
 </script>
 </body>
 </html>
