@@ -395,7 +395,7 @@ async function loadAdminDashboard() {
         allOrdersList = orders;
         document.getElementById('statActivePlans').innerText = allOrdersList.length;
         
-        // 4. Fetch Approved Recharges Sum
+                // 4. Fetch Approved Recharges Sum
         const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
         const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
         document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
@@ -404,7 +404,7 @@ async function loadAdminDashboard() {
         const { data: approvedWithdrawals } = await sb.from('withdrawals').select('amount').eq('status', 'approved');
         const totalWith = (approvedWithdrawals || []).reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
         document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
-
+        
         // 6. Fetch Pending Recharges List
                 // 6. Fetch Pending Recharges List
         const { data: pendingRecharges, error: recErr } = await sb
