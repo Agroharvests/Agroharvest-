@@ -129,28 +129,39 @@
             console.error(e);
         }
 
-        let targetUpiId = "agroharvest@upi";
+let targetUpiId = "paytmqr@paytm";
+let targetUpiName = "AgroHarvest";
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            updateAppLinks();
+document.addEventListener("DOMContentLoaded", async () => {
+    updateAppLinks();
 
-            // Fetch live UPI from database
-            try {
-                const sb = getSupabase();
-                if (sb) {
-                    const { data } = await sb.from('settings').select('value').eq('key', 'upi_id').maybeSingle();
-                    if (data && data.value) {
-                        targetUpiId = data.value.trim();
-                        document.getElementById('adminUpiDisplay').innerText = targetUpiId;
-                        updateAppLinks();
-                    }
-                }
-            } catch (err) {
-                console.error("UPI fetch error:", err);
+    // Fetch live active UPI from database (Multi-UPI Rotation)
+    try {
+        const sb = getSupabase();
+        if (sb) {
+            const { data } = await sb
+                .from('upi_accounts')
+                .select('*')
+                .eq('is_active', true)
+                .maybeSingle();
+
+            if (data && data.upi_id) {
+                targetUpiId = data.upi_id.trim();
+                targetUpiName = data.holder_name || "AgroHarvest";
+                
+                const displayElem = document.getElementById('adminUpiDisplay');
+                if (displayElem) displayElem.innerText = targetUpiId;
+                
+                updateAppLinks();
             }
+        }
+    } catch (err) {
+        console.error("UPI fetch error:", err);
+    }
 
-            loadRechargeHistory();
-        });
+    loadRechargeHistory();
+});
+        
 
         function setRechargeAmt(val, el) {
             document.getElementById('rechargeInput').value = val;
