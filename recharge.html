@@ -553,60 +553,73 @@
     }
 
     async function submitRechargeRequest() {
-        const phoneField = document.getElementById('userPhoneField');
-        let userPhone = phoneField ? phoneField.value.trim() : '';
+    const phoneField = document.getElementById('userPhoneField');
+    let userPhone = phoneField ? phoneField.value.trim() : '';
 
-        if (!userPhone && activeUser) {
-            userPhone = activeUser.phone || activeUser.mobile || '';
-        }
-
-        if (!userPhone || userPhone.length < 10) {
-            return alert("Kripya apna 10-digit mobile number dalein!");
-        }
-
-        const amt = parseFloat(document.getElementById('rechargeInput').value);
-        const utr = document.getElementById('utrNumberInput').value.trim();
-        const btn = document.getElementById('btnSubmitRecharge');
-
-        if (isNaN(amt) || amt < 499) return alert("Minimum recharge amount ₹499 hai!");
-        if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number dalein!");
-
-        const sb = getSupabase();
-        btn.disabled = true;
-        btn.innerText = "Submitting...";
-
-        try {
-            if (sb) {
-                // Find or link profile ID
-                let uid = activeUser ? activeUser.id : null;
-                if (!uid) {
-                    const { data: prof } = await sb.from('profiles').select('id').eq('phone', userPhone).maybeSingle();
-                    if (prof) uid = prof.id;
-                }
-
-                const { error } = await sb.from('recharges').insert([{
-                    user_id: uid,
-                    phone: userPhone,
-                    amount: amt,
-                    utr: utr,
-                    screenshot_url: base64Screenshot || null,
-                    status: 'pending'
-                }]);
-                if (error) throw error;
-            }
-
-            alert("✅ Recharge Request Submitted!\nAdmin review ke baad wallet balance add ho jayega.");
-            document.getElementById('utrNumberInput').value = '';
-            base64Screenshot = "";
-            document.getElementById('fileUploadStatus').innerText = "Upload Payment Screenshot (Optional)";
-            loadRechargeHistory();
-        } catch (err) {
-            alert("Submission error: " + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Submit Recharge Request";
-        }
+    if (!userPhone && activeUser) {
+        userPhone = activeUser.phone || activeUser.mobile || '';
     }
+
+    if (!userPhone || userPhone.length < 10) {
+        return alert("Kripya apna 10-digit mobile number dalein!");
+    }
+
+    const amt = parseFloat(document.getElementById('rechargeInput').value);
+    const utr = document.getElementById('utrNumberInput').value.trim();
+    const btn = document.getElementById('btnSubmitRecharge');
+
+    if (isNaN(amt) || amt < 499) return alert("Minimum recharge amount ₹499 hai!");
+    if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number dalein!");
+
+    const sb = getSupabase();
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+
+    try {
+        let uid = activeUser ? activeUser.id : null;
+        if (!uid && sb) {
+            const { data: prof } = await sb.from('profiles').select('id').eq('phone', userPhone).maybeSingle();
+            if (prof) uid = prof.id;
+        }
+
+        // Payload
+        const rechargeData = {
+            user_id: uid,
+            phone: userPhone,
+            amount: amt,
+            utr: utr,
+            status: 'pending'
+        };
+
+        if (base64Screenshot) {
+            rechargeData.screenshot_url = base64Screenshot;
+        }
+
+        let { error } = await sb.from('recharges').insert([rechargeData]);
+
+        // Fallback: agar screenshot_url column missing ho toh bina screenshot ke submit karega
+        if (error && error.message && error.message.includes('screenshot_url')) {
+            delete rechargeData.screenshot_url;
+            const retry = await sb.from('recharges').insert([rechargeData]);
+            error = retry.error;
+        }
+
+        if (error) throw error;
+
+        alert("✅ Recharge Request Submitted!\nAdmin approval ke baad balance turant add ho jayega.");
+        document.getElementById('utrNumberInput').value = '';
+        base64Screenshot = "";
+        const statusSpan = document.getElementById('fileUploadStatus');
+        if (statusSpan) statusSpan.innerText = "Upload Payment Screenshot (Optional)";
+        loadRechargeHistory();
+    } catch (err) {
+        alert("Submission Error: " + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit Recharge Request";
+    }
+    }
+        
 
     async function loadRechargeHistory() {
         const phoneField = document.getElementById('userPhoneField');
