@@ -239,7 +239,7 @@
             <h2>AgroHarvest Admin</h2>
             <p>Platform Control & Moderation</p>
         </div>
-        <button onclick="runDailyIncomeCron()" class="btn-income-cron">
+        <button type="button" onclick="runDailyIncomeCron()" class="btn-income-cron">
             <i class="fa-solid fa-bolt"></i> Run 12 AM Income
         </button>
     </div>
@@ -271,8 +271,8 @@
                 <h3>Update Receiver UPI ID</h3>
                 <span id="currentUpiBadge" class="badge-pill" style="background:#dcfce7; color:#15803d; font-size:11px;">Loading...</span>
             </div>
-            <input type="text" id="targetUpiInput" class="input-box" placeholder="Enter UPI ID (e.g. 5326807Q1@mairtel)">
-            <button onclick="saveSingleUpi()" class="btn-green-main">Save New UPI</button>
+            <input type="text" id="targetUpiInput" class="input-box" placeholder="Enter UPI ID (e.g. 8433184062@axl)">
+            <button type="button" onclick="saveSingleUpi()" class="btn-green-main">Save New UPI</button>
         </div>
 
         <!-- VIP Premium Plans Control -->
@@ -281,8 +281,8 @@
                 <h3>VIP Premium Plans Control</h3>
             </div>
             <div class="vip-grid">
-                <button class="vip-btn" onclick="toggleVipPlan(4999)">₹4,999: LOCKED 🔒</button>
-                <button class="vip-btn" onclick="toggleVipPlan(9999)">₹9,999: LOCKED 🔒</button>
+                <button type="button" class="vip-btn" onclick="toggleVipPlan(4999)">₹4,999: LOCKED 🔒</button>
+                <button type="button" class="vip-btn" onclick="toggleVipPlan(9999)">₹9,999: LOCKED 🔒</button>
             </div>
         </div>
 
@@ -293,7 +293,7 @@
             </div>
             <input type="text" id="manualUserPhone" class="input-box" placeholder="User Mobile Number (10 Digits)" maxlength="10">
             <input type="number" id="manualAmount" class="input-box" placeholder="Amount (+ to Add, - to Deduct)">
-            <button onclick="applyManualBalance()" class="btn-green-main">Apply Balance Change</button>
+            <button type="button" onclick="applyManualBalance()" class="btn-green-main">Apply Balance Change</button>
         </div>
 
         <!-- Pending Recharges -->
@@ -322,7 +322,7 @@
         <div class="card">
             <div class="card-title-row">
                 <h3>Community Proofs Moderation</h3>
-                <span class="badge-pill" style="background:#fee2e2; color:#b91c1c;">0 Proofs</span>
+                <span id="proofsCountBadge" class="badge-pill" style="background:#fee2e2; color:#b91c1c;">0 Proofs</span>
             </div>
             <div id="proofsContainer">
                 <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No community proofs found.</p>
@@ -341,9 +341,9 @@
             </div>
         </div>
     </div>
-        </div>
+                    </div>
                 <script>
-// Supabase Configuration (Configured with your Project Credentials)
+// Supabase Configuration
 const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
@@ -372,11 +372,11 @@ async function loadAdminDashboard() {
             document.getElementById('currentUpiBadge').innerText = upiSetting.value;
             document.getElementById('targetUpiInput').value = upiSetting.value;
         } else {
-            document.getElementById('currentUpiBadge').innerText = "5326807Q1@mairtel";
-            document.getElementById('targetUpiInput').value = "5326807Q1@mairtel";
+            document.getElementById('currentUpiBadge').innerText = "8433184062@axl";
+            document.getElementById('targetUpiInput').value = "8433184062@axl";
         }
 
-        // 2. Fetch all profiles (Fallback to 'users' table if 'profiles' is empty)
+        // 2. Fetch all profiles
         let { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
         if (!profiles || profiles.length === 0) {
             const res = await sb.from('users').select('*').order('created_at', { ascending: false });
@@ -386,7 +386,7 @@ async function loadAdminDashboard() {
         document.getElementById('statTotalUsers').innerText = allUsersList.length;
         document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
 
-                // 3. Fetch all orders (Fallback to 'investments' table if 'orders' is empty)
+        // 3. Fetch all orders (active plans)
         let { data: orders } = await sb.from('orders').select('*');
         if (!orders || orders.length === 0) {
             const resOrders = await sb.from('investments').select('*');
@@ -395,7 +395,7 @@ async function loadAdminDashboard() {
         allOrdersList = orders;
         document.getElementById('statActivePlans').innerText = allOrdersList.length;
         
-                // 4. Fetch Approved Recharges Sum
+        // 4. Fetch Approved Recharges Sum
         const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
         const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
         document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
@@ -406,8 +406,7 @@ async function loadAdminDashboard() {
         document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
         
         // 6. Fetch Pending Recharges List
-                // 6. Fetch Pending Recharges List
-        const { data: pendingRecharges, error: recErr } = await sb
+        const { data: pendingRecharges } = await sb
             .from('recharges')
             .select('*')
             .eq('status', 'pending')
@@ -427,159 +426,209 @@ async function loadAdminDashboard() {
                     </div>
                     <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr}</b></div>
                     <div style="display:flex; gap:6px; margin-top:6px;">
-                        <button type="button" onclick="approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
-                        <button type="button" onclick="rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
+                        <button type="button" onclick="window.approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
+                        <button type="button" onclick="window.rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
                     </div>
                 </div>
             `).join('');
-    }
-        
+        }
 
         // 7. Render Detailed User Cards
         renderUserDetailedCards(allUsersList);
 
     } catch (err) {
-        console.error("Admin dashboard load notice:", err);
+        console.error("Admin dashboard load error:", err);
     }
 }
-                    
 
-    // Render User Investments & Downlines Box (Matching Original UI Exactly)
-    function renderUserDetailedCards(users) {
-        const container = document.getElementById('userDetailedCardsContainer');
-        if (!users || users.length === 0) {
-            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>`;
-            return;
+// 1. APPROVE RECHARGE HANDLER (Global Scope)
+window.approveRecharge = async function(rechargeId, phone, amount) {
+    if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
+
+    const sb = getSupabase();
+    if (!sb) return alert("Database connection error!");
+
+    try {
+        // Find User Profile
+        let { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
+        if (!user) {
+            const res = await sb.from('users').select('*').eq('phone', phone).maybeSingle();
+            user = res.data;
         }
 
-        container.innerHTML = users.map(user => {
-            // Calculate User's Active Plans
-            const userOrders = allOrdersList.filter(o => o.user_id === user.id);
-            const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
-            
-            // Calculate Downline count
-            const downlineCount = allUsersList.filter(u => u.invited_by === user.ref_code).length;
+        if (user) {
+            const newBal = (parseFloat(user.balance) || 0) + parseFloat(amount);
+            const newTotalRec = (parseFloat(user.total_recharge) || 0) + parseFloat(amount);
 
-            const plansHtml = userOrders.length > 0
-                ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
-                : `<span style="color:#94a3b8; font-weight:700;">No active plan</span>`;
+            // Update user balance in profiles
+            await sb.from('profiles').update({
+                balance: newBal,
+                total_recharge: newTotalRec
+            }).eq('phone', phone);
+        }
 
-            return `
-                <div class="user-detail-card">
-                    <div class="user-top-row">
-                        <div>
-                            <div class="user-phone">+91 ${user.phone}</div>
-                            <span style="font-size: 10px; color: #64748b; font-weight: 700;">Ref by: ${user.invited_by || 'AG-ADMIN'}</span>
-                        </div>
-                        <span class="user-ref-badge">${user.ref_code || 'AG-ADMIN'}</span>
+        // Update Recharge Request Status
+        const { error: recErr } = await sb.from('recharges').update({ status: 'approved' }).eq('id', rechargeId);
+        if (recErr) throw recErr;
+
+        alert(`✅ ₹${amount} user (${phone}) ke wallet me add ho gaye!`);
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Approve Error: " + err.message);
+    }
+};
+
+// 2. REJECT RECHARGE HANDLER (Global Scope)
+window.rejectRecharge = async function(rechargeId) {
+    if (!confirm("Kya aap is recharge request ko reject karna chahte hain?")) return;
+
+    const sb = getSupabase();
+    if (!sb) return alert("Database connection error!");
+
+    try {
+        const { error } = await sb.from('recharges').update({ status: 'rejected' }).eq('id', rechargeId);
+        if (error) throw error;
+
+        alert("❌ Recharge Request Rejected.");
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Reject Error: " + err.message);
+    }
+};
+
+// Render User Investments & Downlines Box
+function renderUserDetailedCards(users) {
+    const container = document.getElementById('userDetailedCardsContainer');
+    if (!users || users.length === 0) {
+        container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>`;
+        return;
+    }
+
+    container.innerHTML = users.map(user => {
+        const userOrders = allOrdersList.filter(o => o.user_id === user.id);
+        const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
+        const downlineCount = allUsersList.filter(u => u.invited_by === user.ref_code).length;
+
+        const plansHtml = userOrders.length > 0
+            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
+            : `<span style="color:#94a3b8; font-weight:700;">No active plan</span>`;
+
+        return `
+            <div class="user-detail-card">
+                <div class="user-top-row">
+                    <div>
+                        <div class="user-phone">+91 ${user.phone}</div>
+                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Ref by: ${user.invited_by || 'AG-ADMIN'}</span>
                     </div>
+                    <span class="user-ref-badge">${user.ref_code || 'AG-ADMIN'}</span>
+                </div>
 
-                    <div class="user-stats-mini-grid">
-                        <div class="mini-stat-box">
-                            <span class="mini-stat-label">WALLET BALANCE</span>
-                            <span class="mini-stat-val">₹${parseFloat(user.balance || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="mini-stat-box">
-                            <span class="mini-stat-label">TOTAL WITHDRAWN</span>
-                            <span class="mini-stat-val red">₹${parseFloat(user.total_withdrawn || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="mini-stat-box">
-                            <span class="mini-stat-label">TEAM (L1 DOWNLINES)</span>
-                            <span class="mini-stat-val blue">${downlineCount} Members</span>
-                        </div>
-                        <div class="mini-stat-box">
-                            <span class="mini-stat-label">TOTAL INVESTMENT</span>
-                            <span class="mini-stat-val">₹${totalInvested.toFixed(2)}</span>
-                        </div>
+                <div class="user-stats-mini-grid">
+                    <div class="mini-stat-box">
+                        <span class="mini-stat-label">WALLET BALANCE</span>
+                        <span class="mini-stat-val">₹${parseFloat(user.balance || 0).toFixed(2)}</span>
                     </div>
-
-                    <div class="user-plans-tag">
-                        <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">ACTIVE PURCHASED PLANS:</span>
-                        ${plansHtml}
+                    <div class="mini-stat-box">
+                        <span class="mini-stat-label">TOTAL WITHDRAWN</span>
+                        <span class="mini-stat-val red">₹${parseFloat(user.total_withdrawn || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="mini-stat-box">
+                        <span class="mini-stat-label">TEAM (L1 DOWNLINES)</span>
+                        <span class="mini-stat-val blue">${downlineCount} Members</span>
+                    </div>
+                    <div class="mini-stat-box">
+                        <span class="mini-stat-label">TOTAL INVESTMENT</span>
+                        <span class="mini-stat-val">₹${totalInvested.toFixed(2)}</span>
                     </div>
                 </div>
-            `;
-        }).join('');
+
+                <div class="user-plans-tag">
+                    <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">ACTIVE PURCHASED PLANS:</span>
+                    ${plansHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Filter Users by Search
+function filterUserCards() {
+    const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
+    const filtered = allUsersList.filter(u => 
+        (u.phone && u.phone.includes(q)) || 
+        (u.ref_code && u.ref_code.toLowerCase().includes(q)) ||
+        (u.invited_by && u.invited_by.toLowerCase().includes(q))
+    );
+    renderUserDetailedCards(filtered);
+}
+
+// Save Single UPI
+async function saveSingleUpi() {
+    const newUpi = document.getElementById('targetUpiInput').value.trim();
+    if (!newUpi) return alert("Kripya UPI ID dalein!");
+
+    const sb = getSupabase();
+    try {
+        await sb.from('settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
+        alert("✅ New UPI ID Saved: " + newUpi);
+        document.getElementById('currentUpiBadge').innerText = newUpi;
+    } catch (err) {
+        alert("Error saving UPI: " + err.message);
     }
+}
 
-    // Filter Users by Search
-    function filterUserCards() {
-        const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
-        const filtered = allUsersList.filter(u => 
-            (u.phone && u.phone.includes(q)) || 
-            (u.ref_code && u.ref_code.toLowerCase().includes(q)) ||
-            (u.invited_by && u.invited_by.toLowerCase().includes(q))
-        );
-        renderUserDetailedCards(filtered);
+// Manual Balance Adjust
+async function applyManualBalance() {
+    const phone = document.getElementById('manualUserPhone').value.trim();
+    const amt = parseFloat(document.getElementById('manualAmount').value);
+    if (!phone || isNaN(amt)) return alert("Phone aur amount dono sahi dalein!");
+
+    const sb = getSupabase();
+    try {
+        const { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
+        if (!user) return alert("User nahi mila!");
+
+        const newBal = (parseFloat(user.balance) || 0) + amt;
+        await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
+        alert(`✅ Balance Updated! New Balance: ₹${newBal.toFixed(2)}`);
+        document.getElementById('manualUserPhone').value = '';
+        document.getElementById('manualAmount').value = '';
+        loadAdminDashboard();
+    } catch (e) {
+        alert("Adjustment error: " + e.message);
     }
+}
 
-    // Save Single UPI
-    async function saveSingleUpi() {
-        const newUpi = document.getElementById('targetUpiInput').value.trim();
-        if (!newUpi) return alert("Kripya UPI ID dalein!");
+// 12 AM Daily Income Cron Trigger
+async function runDailyIncomeCron() {
+    if (!confirm("Kya aap sabhi active plans ki daily harvest income users ke wallet me add karna chahte hain?")) return;
+    const sb = getSupabase();
+    try {
+        const { data: orders } = await sb.from('orders').select('*');
+        if (!orders || orders.length === 0) return alert("Koi active plan nahi mila.");
 
-        const sb = getSupabase();
-        try {
-            await sb.from('settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
-            alert("✅ New UPI ID Saved: " + newUpi);
-            document.getElementById('currentUpiBadge').innerText = newUpi;
-        } catch (err) {
-            alert("Error saving UPI: " + err.message);
-        }
-    }
-
-    // Manual Balance Adjust
-    async function applyManualBalance() {
-        const phone = document.getElementById('manualUserPhone').value.trim();
-        const amt = parseFloat(document.getElementById('manualAmount').value);
-        if (!phone || isNaN(amt)) return alert("Phone aur amount dono sahi dalein!");
-
-        const sb = getSupabase();
-        try {
-            const { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
-            if (!user) return alert("User nahi mila!");
-
-            const newBal = (parseFloat(user.balance) || 0) + amt;
-            await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
-            alert(`✅ Balance Updated! New Balance: ₹${newBal.toFixed(2)}`);
-            document.getElementById('manualUserPhone').value = '';
-            document.getElementById('manualAmount').value = '';
-            loadAdminDashboard();
-        } catch (e) {
-            alert("Adjustment error: " + e.message);
-        }
-    }
-
-    // 12 AM Daily Income Cron Trigger
-    async function runDailyIncomeCron() {
-        if (!confirm("Kya aap sabhi active plans ki daily harvest income users ke wallet me add karna chahte hain?")) return;
-        const sb = getSupabase();
-        try {
-            const { data: orders } = await sb.from('orders').select('*');
-            if (!orders || orders.length === 0) return alert("Koi active plan nahi mila.");
-
-            for (const order of orders) {
-                const dailyInc = parseFloat(order.daily_income || 0);
-                if (dailyInc > 0) {
-                    const { data: prof } = await sb.from('profiles').select('balance').eq('id', order.user_id).single();
-                    if (prof) {
-                        const newBal = (parseFloat(prof.balance) || 0) + dailyInc;
-                        await sb.from('profiles').update({ balance: newBal }).eq('id', order.user_id);
-                    }
+        for (const order of orders) {
+            const dailyInc = parseFloat(order.daily_income || 0);
+            if (dailyInc > 0) {
+                const { data: prof } = await sb.from('profiles').select('balance').eq('id', order.user_id).single();
+                if (prof) {
+                    const newBal = (parseFloat(prof.balance) || 0) + dailyInc;
+                    await sb.from('profiles').update({ balance: newBal }).eq('id', order.user_id);
                 }
             }
-            alert("✅ 12 AM Daily Income successfully credited to all active users!");
-            loadAdminDashboard();
-        } catch (err) {
-            alert("Income cron error: " + err.message);
         }
+        alert("✅ 12 AM Daily Income successfully credited to all active users!");
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Income cron error: " + err.message);
     }
+}
 
-    function toggleVipPlan(amt) {
-        alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
-    }
+function toggleVipPlan(amt) {
+    alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
+}
 
-    document.addEventListener("DOMContentLoaded", loadAdminDashboard);
+document.addEventListener("DOMContentLoaded", loadAdminDashboard);
 </script>
 </body>
 </html>
