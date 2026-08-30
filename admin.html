@@ -85,15 +85,28 @@
             </div>
         </div>
 
-        <!-- Dynamic UPI Control -->
-        <div class="card">
-            <div class="card-header">
-                <h3>Update Receiver UPI ID</h3>
-                <span id="currentUpiBadge" class="badge-count">...</span>
-            </div>
-            <input type="text" id="adminNewUpi" class="input-box" placeholder="Enter new UPI ID (e.g. paytmqr@paytm)">
-            <button onclick="updateUpi()" class="btn-action btn-green" style="width: 100%;">Save New UPI</button>
-        </div>
+        <!-- Dynamic Multi-UPI Manager -->
+<div class="card">
+    <div class="card-header">
+        <h3>Multi-UPI Rotation Manager</h3>
+        <span id="activeUpiCountBadge" class="badge-count" style="background:#dcfce7; color:#15803d;">Active</span>
+    </div>
+
+    <!-- Add New UPI Form -->
+    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <input type="text" id="newUpiId" class="input-box" placeholder="UPI ID (e.g. 98xxxx@ybl)" style="margin: 0; flex: 1.2;">
+        <input type="text" id="newUpiName" class="input-box" placeholder="Name" style="margin: 0; flex: 0.8;">
+    </div>
+    <button onclick="addNewUpiAccount()" class="btn-action btn-green" style="width: 100%; margin-bottom: 14px;">
+        <i class="fa-solid fa-plus"></i> Add New UPI ID
+    </button>
+
+    <!-- List of Configured UPI Accounts -->
+    <div id="adminUpiListContainer">
+        <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading UPI list...</p>
+    </div>
+</div>
+        
 
         <!-- VIP Premium Plans Toggle -->
         <div class="card">
@@ -406,6 +419,94 @@
             }).join('');
         }
 
+            // Load UPI Accounts on Admin Dashboard
+async function loadAdminUpiAccounts() {
+    const sb = getSupabase();
+    if (!sb) return;
+    const container = document.getElementById('adminUpiListContainer');
+
+    try {
+        const { data: list, error } = await sb
+            .from('upi_accounts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!list || list.length === 0) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No UPI accounts added yet.</p>`;
+            return;
+        }
+
+        container.innerHTML = list.map(item => `
+            <div style="background: #f8fafc; border: 1.5px solid ${item.is_active ? '#86efac' : '#e2e8f0'}; border-radius: 14px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="font-size: 13px; color: #0f172a; display: block;">${item.upi_id}</strong>
+                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Name: ${item.holder_name}</span>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    ${item.is_active 
+                        ? `<span style="font-size: 11px; font-weight: 900; background: #dcfce7; color: #15803d; padding: 6px 10px; border-radius: 8px;">Active ✅</span>` 
+                        : `<button onclick="setActiveUpiAccount('${item.id}')" class="btn-action btn-green" style="padding: 6px 10px; font-size: 11px;">Set Active</button>`
+                    }
+                    <button onclick="deleteUpiAccount('${item.id}')" class="btn-action btn-red" style="padding: 6px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (err) {
+        container.innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
+    }
+}
+
+async function addNewUpiAccount() {
+    const upi = document.getElementById('newUpiId').value.trim();
+    const name = document.getElementById('newUpiName').value.trim();
+    if (!upi || !name) return alert("Kripya UPI ID aur Holder Name dono dalein!");
+
+    const sb = getSupabase();
+    try {
+        const { error } = await sb.from('upi_accounts').insert([{ upi_id: upi, holder_name: name, is_active: false }]);
+        if (error) throw error;
+
+        alert("✅ Nayi UPI successfully add ho gayi!");
+        document.getElementById('newUpiId').value = '';
+        document.getElementById('newUpiName').value = '';
+        loadAdminUpiAccounts();
+    } catch (err) {
+        alert("Add failed: " + err.message);
+    }
+}
+
+async function setActiveUpiAccount(selectedId) {
+    const sb = getSupabase();
+    try {
+        // Sabhi ko inactive karke selected ko active karein
+        await sb.from('upi_accounts').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
+        await sb.from('upi_accounts').update({ is_active: true }).eq('id', selectedId);
+
+        alert("✅ Active UPI successfully switch ho gayi!");
+        loadAdminUpiAccounts();
+    } catch (err) {
+        alert("Switch failed: " + err.message);
+    }
+}
+
+async function deleteUpiAccount(id) {
+    if (!confirm("Kya aap is UPI ID ko delete karna chahte hain?")) return;
+    const sb = getSupabase();
+    try {
+        await sb.from('upi_accounts').delete().eq('id', id);
+        alert("🗑️ UPI Deleted!");
+        loadAdminUpiAccounts();
+    } catch (err) {
+        alert("Delete error: " + err.message);
+    }
+}
+
+// loadAdminDashboard ke andar loadAdminUpiAccounts() ko call karein
+
+            
         function filterUserList() {
             const query = document.getElementById('searchUser').value.trim().toLowerCase();
             const filtered = allUsersData.filter(u => 
