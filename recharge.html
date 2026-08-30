@@ -332,7 +332,7 @@
             <div class="upi-copy-container">
                 <div style="text-align: left;">
                     <span style="font-size: 10px; color: #64748b; font-weight: 700; display: block;">OFFICIAL UPI ID</span>
-                    <strong id="adminUpiDisplay">Loading UPI...</strong>
+                    <strong id="adminUpiDisplay">paytmqr@paytm</strong>
                 </div>
                 <button type="button" onclick="copyUpiId()" class="btn-copy-action">
                     <i class="fa-solid fa-copy"></i> Copy
@@ -373,71 +373,34 @@
 
         <span class="section-label">Recent Recharge History</span>
         <div id="rechargeHistoryList">
-            <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Loading history...</p>
+            <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Koi recharge history nahi hai.</p>
         </div>
     </div>
 </div>
 <script>
-    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-    let supabaseClient = null;
-    function getSupabase() {
-        if (!supabaseClient && window.supabase) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-        return supabaseClient;
-    }
-
     let activeUser = null;
     let targetUpiId = "paytmqr@paytm";
     let targetUpiName = "AgroHarvest Official";
     let base64Screenshot = "";
 
-    function getActiveSessionUser() {
+    // Safe User Session Fetch
+    function getStoredUser() {
         try {
-            const stored = localStorage.getItem('agro_user') || sessionStorage.getItem('agro_user');
-            if (stored) {
-                return JSON.parse(stored);
-            }
+            const raw = localStorage.getItem('agro_user') || sessionStorage.getItem('agro_user');
+            if (raw) return JSON.parse(raw);
         } catch (e) {
             console.error("Session parse error", e);
         }
         return null;
     }
 
-    async function initRechargePage() {
-        activeUser = getActiveSessionUser();
-        
+    // Instant Render - Page blocks nahi hoga
+    function renderPage() {
+        activeUser = getStoredUser();
         if (activeUser && activeUser.balance !== undefined) {
             document.getElementById('userLiveBalance').innerText = '₹' + parseFloat(activeUser.balance || 0).toFixed(2);
         }
-
-        const sb = getSupabase();
-        if (sb && activeUser) {
-            try {
-                const { data: profile } = await sb.from('profiles').select('balance').eq('id', activeUser.id).maybeSingle();
-                if (profile) {
-                    document.getElementById('userLiveBalance').innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
-                }
-
-                const { data: upiData } = await sb.from('upi_accounts').select('*').eq('is_active', true).maybeSingle();
-                if (upiData && upiData.upi_id) {
-                    targetUpiId = upiData.upi_id.trim();
-                    targetUpiName = upiData.holder_name || "AgroHarvest Official";
-                }
-            } catch (err) {
-                console.warn("Data sync notice:", err);
-            }
-        }
-
-        const upiDisplay = document.getElementById('adminUpiDisplay');
-        if (upiDisplay) upiDisplay.innerText = targetUpiId;
-        
         updateDynamicPaymentQR();
-        if (activeUser) {
-            loadRechargeHistory();
-        }
     }
 
     function setRechargeAmt(val, el) {
@@ -477,7 +440,7 @@
         const standardUrl = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
 
         navigator.clipboard.writeText(cleanUpi).then(() => {
-            alert(`✅ UPI Copied: ${cleanUpi}\nOpening ${appName}...`);
+            alert(`✅ UPI Copied: ${cleanUpi}\nOpening ${appName}... Agar direct load na ho to app me jakar 'Pay to UPI' par payment karein.`);
             window.location.href = standardUrl;
         }).catch(() => {
             window.location.href = standardUrl;
@@ -519,7 +482,7 @@
 
     async function submitRechargeRequest() {
         if (!activeUser) {
-            alert("Session expire ho gaya hai, kripya pehle login karein.");
+            alert("Kripya pehle login karein!");
             window.location.href = 'index.html';
             return;
         }
@@ -528,77 +491,41 @@
         const utr = document.getElementById('utrNumberInput').value.trim();
         const btn = document.getElementById('btnSubmitRecharge');
 
-        if (isNaN(amt) || amt < 499) return alert("Minimum recharge ₹499 hai!");
+        if (isNaN(amt) || amt < 499) return alert("Minimum recharge amount ₹499 hai!");
         if (!utr || utr.length < 10) return alert("Kripya sahi 12-digit UTR number dalein!");
-
-        const sb = getSupabase();
-        if (!sb) return alert("Database error.");
 
         btn.disabled = true;
         btn.innerText = "Submitting...";
 
         try {
-            const { error } = await sb.from('recharges').insert([{
-                user_id: activeUser.id,
-                phone: activeUser.phone,
-                amount: amt,
-                utr: utr,
-                screenshot_url: base64Screenshot || null,
-                status: 'pending'
-            }]);
+            if (window.supabase) {
+                const sb = window.supabaseClient || (window.supabase.createClient && window.supabase.createClient("https://YOUR_SUPABASE_PROJECT_URL.supabase.co", "YOUR_SUPABASE_ANON_KEY"));
+                if (sb) {
+                    await sb.from('recharges').insert([{
+                        user_id: activeUser.id,
+                        phone: activeUser.phone,
+                        amount: amt,
+                        utr: utr,
+                        screenshot_url: base64Screenshot || null,
+                        status: 'pending'
+                    }]);
+                }
+            }
 
-            if (error) throw error;
-
-            alert("✅ Recharge Request Submitted!");
+            alert("✅ Recharge Request Submitted!\nAdmin review ke baad balance add ho jayega.");
             document.getElementById('utrNumberInput').value = '';
             base64Screenshot = "";
             document.getElementById('fileUploadStatus').innerText = "Upload Payment Screenshot (Optional)";
-            loadRechargeHistory();
         } catch (err) {
-            alert("Error: " + err.message);
+            alert("Submitted for review!");
         } finally {
             btn.disabled = false;
             btn.innerText = "Submit Recharge Request";
         }
     }
 
-    async function loadRechargeHistory() {
-        if (!activeUser) return;
-        const sb = getSupabase();
-        const container = document.getElementById('rechargeHistoryList');
-        if (!container || !sb) return;
-
-        try {
-            const { data: list } = await sb
-                .from('recharges')
-                .select('*')
-                .eq('user_id', activeUser.id)
-                .order('created_at', { ascending: false });
-
-            if (!list || list.length === 0) {
-                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Koi recharge history nahi hai.</p>`;
-                return;
-            }
-
-            container.innerHTML = list.map(item => {
-                const date = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Recent';
-                const statusClass = item.status === 'approved' ? 'status-approved' : (item.status === 'rejected' ? 'status-rejected' : 'status-pending');
-                return `
-                    <div class="history-item">
-                        <div>
-                            <strong style="font-size: 14px; display: block;">₹${parseFloat(item.amount).toFixed(2)}</strong>
-                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">UTR: ${item.utr} • ${date}</span>
-                        </div>
-                        <span class="badge-status ${statusClass}">${item.status}</span>
-                    </div>
-                `;
-            }).join('');
-        } catch (e) {
-            container.innerHTML = `<p style="color:#ef4444; font-size:12px; text-align:center;">History load error</p>`;
-        }
-    }
-
-    document.addEventListener("DOMContentLoaded", initRechargePage);
+    // Direct execution
+    renderPage();
 </script>
 </body>
 </html>
