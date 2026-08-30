@@ -168,7 +168,7 @@ async function submitWithdrawalRequest() {
     const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
     const btn = document.getElementById('btnSubmitWd');
 
-    if (isNaN(amt) || amt < 150) return alert("Minimum withdrawal amount ₹150 hai!");
+    if (isNaN(amt) || amt < 199) return alert("Minimum withdrawal amount ₹199 hai!");
     if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
     if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
     if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
