@@ -261,7 +261,104 @@
     font-weight: 800;
     cursor: pointer;
         }
-                            
+
+   /* Live Scrolling Transactions Widget */
+.tx-ticker-card {
+    background: #ffffff;
+    margin: 14px 16px;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+.tx-ticker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.tx-ticker-header h4 {
+    font-size: 15px;
+    font-weight: 900;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tx-ticker-header .live-badge {
+    font-size: 10px;
+    font-weight: 900;
+    color: #16a34a;
+    background: #dcfce7;
+    padding: 3px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.tx-scroll-wrapper {
+    height: 190px;
+    overflow: hidden;
+    position: relative;
+}
+.tx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.tx-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeInTx 0.4s ease-in-out;
+}
+@keyframes fadeInTx {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.tx-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.tx-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.tx-icon-recharge { background: #dcfce7; color: #16a34a; }
+.tx-icon-plan { background: #ffedd5; color: #ea580c; }
+.tx-icon-withdraw { background: #fee2e2; color: #dc2626; }
+
+.tx-user-info strong {
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 800;
+    display: block;
+}
+.tx-user-info span {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+}
+.tx-amt {
+    font-size: 14px;
+    font-weight: 900;
+}
+.amt-recharge { color: #16a34a; }
+.amt-plan { color: #d97706; }
+.amt-withdraw { color: #dc2626; }
+    
     </style>
 </head>
 <body>
@@ -340,6 +437,18 @@
             </a>
         </div>
 
+                    <div class="tx-ticker-card">
+    <div class="tx-ticker-header">
+        <h4><i class="fa-solid fa-clock-rotate-left" style="color:#16a34a;"></i> Recent Transactions</h4>
+        <span class="live-badge"><span class="pulse-dot"></span> REALTIME</span>
+    </div>
+    
+    <div class="tx-scroll-wrapper">
+        <div class="tx-list" id="liveTxContainer">
+            </div>
+    </div>
+                    </div>
+        
         <div class="section-bar">
             <h3>Available Crop Plans</h3>
             <span>30 Days Yield Cycle</span>
@@ -796,6 +905,79 @@ function closeWelcomePopup() {
 document.addEventListener("DOMContentLoaded", () => {
     checkAndShowWelcomePopup();
 });
+        // Realistic Transaction Generator Engine
+const txTypes = [
+    { type: 'Recharged Wallet', icon: 'fa-wallet', class: 'tx-icon-recharge', amtClass: 'amt-recharge', prefix: '+Rs.', amounts: [500, 1000, 1499, 2499, 4999] },
+    { type: 'Purchased Plan', icon: 'fa-cart-shopping', class: 'tx-icon-plan', amtClass: 'amt-plan', prefix: 'Rs.', amounts: [499, 1499, 2499, 4999] },
+    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', class: 'tx-icon-withdraw', amtClass: 'amt-withdraw', prefix: '-Rs.', amounts: [249, 390, 520, 710, 1250, 2400] }
+];
+
+function getRandomPhone() {
+    const prefixes = ['98', '97', '99', '96', '91', '89', '88', '79', '70', '63'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const lastDigits = Math.floor(1000 + Math.random() * 9000);
+    return `User ****${lastDigits}`;
+}
+
+function createTxElement() {
+    const tx = txTypes[Math.floor(Math.random() * txTypes.length)];
+    const amt = tx.amounts[Math.floor(Math.random() * tx.amounts.length)].toLocaleString('en-IN');
+    const user = getRandomPhone();
+
+    const item = document.createElement('div');
+    item.className = 'tx-item';
+    item.innerHTML = `
+        <div class="tx-left">
+            <div class="tx-icon-box ${tx.class}">
+                <i class="fa-solid ${tx.icon}"></i>
+            </div>
+            <div class="tx-user-info">
+                <strong>${user}</strong>
+                <span>${tx.type}</span>
+            </div>
+        </div>
+        <div class="tx-amt ${tx.amtClass}">
+            ${tx.prefix}${amt}
+        </div>
+    `;
+    return item;
+}
+
+// Initialize and Start Auto Scroll
+function startLiveTxFeed() {
+    const container = document.getElementById('liveTxContainer');
+    if (!container) return;
+
+    // Pehle 5 initial items load karein
+    for (let i = 0; i < 5; i++) {
+        container.appendChild(createTxElement());
+    }
+
+    // Har 2.5 second mein naya transaction smoothly push aur scroll karega
+    setInterval(() => {
+        const newItem = createTxElement();
+        container.appendChild(newItem);
+
+        // Upar scroll karke first child ko remove karega
+        container.style.transform = 'translateY(-58px)';
+        
+        setTimeout(() => {
+            container.style.transition = 'none';
+            container.removeChild(container.firstElementChild);
+            container.style.transform = 'translateY(0)';
+            setTimeout(() => {
+                container.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+            }, 50);
+        }, 600);
+
+    }, 2500);
+}
+
+// Page load par trigger karein
+document.addEventListener("DOMContentLoaded", () => {
+    startLiveTxFeed();
+});
+        
         
     </script>
 </body>
