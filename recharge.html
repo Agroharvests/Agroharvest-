@@ -345,13 +345,13 @@
 
             <div class="instruction-badge">
                 <i class="fa-solid fa-circle-info" style="font-size: 16px;"></i>
-                <span>QR scan karein ya UPI ID Copy karke kisi bhi app se pay karein.</span>
+                <span>QR scan karein ya UPI ID Copy karke payment karein.</span>
             </div>
 
             <div class="upi-copy-container">
                 <div style="text-align: left;">
                     <span style="font-size: 10px; color: #64748b; font-weight: 700; display: block;">OFFICIAL UPI ID</span>
-                    <strong id="adminUpiDisplay">5326807Q1@mairtel</strong>
+                    <strong id="adminUpiDisplay">Loading...</strong>
                 </div>
                 <button type="button" onclick="copyUpiId()" class="btn-copy-action">
                     <i class="fa-solid fa-copy"></i> Copy UPI
@@ -377,6 +377,7 @@
 
         <span class="section-label">Submit Payment Details</span>
         <div class="verify-card">
+            <input type="text" id="userPhoneField" class="form-input" placeholder="Registered 10-Digit Mobile No." maxlength="10">
             <input type="text" id="utrNumberInput" class="form-input" placeholder="Enter 12-Digit UTR / Ref No." maxlength="12">
             
             <div class="file-upload-box" onclick="document.getElementById('screenshotInput').click()">
@@ -395,9 +396,8 @@
             <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Loading history...</p>
         </div>
     </div>
-</div>
-<script>
-    // Supabase Configuration
+    </div>
+    <script>
     const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
@@ -410,25 +410,39 @@
     }
 
     let activeUser = null;
-    let targetUpiId = "5326807Q1@mairtel";
+    let targetUpiId = "8433184062@axl";
     let targetUpiName = "AgroHarvest";
     let base64Screenshot = "";
 
+    // Multi-key Universal Session Finder
     function getStoredUser() {
-        try {
-            const raw = localStorage.getItem('agro_user') || sessionStorage.getItem('agro_user');
-            if (raw) return JSON.parse(raw);
-        } catch (e) {
-            console.error("Session error:", e);
+        const keys = ['agro_user', 'user', 'currentUser', 'profile', 'userData', 'user_session'];
+        for (const k of keys) {
+            try {
+                const val = localStorage.getItem(k) || sessionStorage.getItem(k);
+                if (val) {
+                    const parsed = JSON.parse(val);
+                    if (parsed && (parsed.id || parsed.phone || parsed.mobile)) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {}
         }
         return null;
     }
 
     async function initRechargePage() {
         activeUser = getStoredUser();
-        if (activeUser && activeUser.balance !== undefined) {
-            const balElem = document.getElementById('userLiveBalance');
-            if (balElem) balElem.innerText = '₹' + parseFloat(activeUser.balance || 0).toFixed(2);
+        
+        // Pre-fill phone if user is logged in
+        if (activeUser) {
+            const phoneVal = activeUser.phone || activeUser.mobile || '';
+            const phoneField = document.getElementById('userPhoneField');
+            if (phoneField && phoneVal) phoneField.value = phoneVal;
+
+            if (activeUser.balance !== undefined) {
+                document.getElementById('userLiveBalance').innerText = '₹' + parseFloat(activeUser.balance || 0).toFixed(2);
+            }
         }
 
         const sb = getSupabase();
@@ -440,12 +454,13 @@
                     targetUpiId = settingData.value.trim();
                 }
 
-                // Fetch Live User Balance
-                if (activeUser && activeUser.id) {
-                    const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).maybeSingle();
-                    if (prof && prof.balance !== undefined) {
-                        const balElem = document.getElementById('userLiveBalance');
-                        if (balElem) balElem.innerText = '₹' + parseFloat(prof.balance || 0).toFixed(2);
+                // Live User Balance Sync
+                if (activeUser) {
+                    const identifier = activeUser.id ? { id: activeUser.id } : { phone: activeUser.phone };
+                    const { data: prof } = await sb.from('profiles').select('*').match(identifier).maybeSingle();
+                    if (prof) {
+                        activeUser = prof;
+                        document.getElementById('userLiveBalance').innerText = '₹' + parseFloat(prof.balance || 0).toFixed(2);
                     }
                 }
             } catch (err) {
@@ -474,7 +489,6 @@
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
         
-        // Dynamic QR String
         const upiPayload = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
         const qrImg = document.getElementById('paymentQrImg');
         if (qrImg) {
@@ -484,24 +498,21 @@
 
     function copyUpiId() {
         navigator.clipboard.writeText(targetUpiId).then(() => {
-            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nApne UPI app me jakar 'Pay to UPI ID' me paste karein aur payment complete karein.`);
+            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nApne UPI app me jakar 'Pay to UPI ID' me paste karein.`);
         }).catch(() => {
             alert(`UPI ID: ${targetUpiId}`);
         });
     }
 
-    // Direct App Trigger with Automatic Copy Fallback (Bypasses Bank Intent Blocks)
     function triggerDirectPay(appName) {
         const input = document.getElementById('rechargeInput');
         const amt = parseFloat(input ? input.value : 0) || 499;
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
-
-        // Safe Generic URI
         const standardUri = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR`;
 
         navigator.clipboard.writeText(cleanUpi).then(() => {
-            alert(`✅ UPI ID Copied: ${cleanUpi}\n\nAgar ${appName} me error aaye toh app me jakar 'Pay to UPI ID' me yeh UPI paste karke ₹${amt} pay karein.`);
+            alert(`✅ UPI Copied: ${cleanUpi}\n\nAgar app me error aaye toh ${appName} kholkar 'Pay to UPI ID' me paste karke ₹${amt} pay karein.`);
             window.location.href = standardUri;
         }).catch(() => {
             window.location.href = standardUri;
@@ -542,10 +553,15 @@
     }
 
     async function submitRechargeRequest() {
-        if (!activeUser) {
-            alert("Kripya pehle login karein!");
-            window.location.href = 'index.html';
-            return;
+        const phoneField = document.getElementById('userPhoneField');
+        let userPhone = phoneField ? phoneField.value.trim() : '';
+
+        if (!userPhone && activeUser) {
+            userPhone = activeUser.phone || activeUser.mobile || '';
+        }
+
+        if (!userPhone || userPhone.length < 10) {
+            return alert("Kripya apna 10-digit mobile number dalein!");
         }
 
         const amt = parseFloat(document.getElementById('rechargeInput').value);
@@ -561,9 +577,16 @@
 
         try {
             if (sb) {
+                // Find or link profile ID
+                let uid = activeUser ? activeUser.id : null;
+                if (!uid) {
+                    const { data: prof } = await sb.from('profiles').select('id').eq('phone', userPhone).maybeSingle();
+                    if (prof) uid = prof.id;
+                }
+
                 const { error } = await sb.from('recharges').insert([{
-                    user_id: activeUser.id,
-                    phone: activeUser.phone,
+                    user_id: uid,
+                    phone: userPhone,
                     amount: amt,
                     utr: utr,
                     screenshot_url: base64Screenshot || null,
@@ -586,7 +609,10 @@
     }
 
     async function loadRechargeHistory() {
-        if (!activeUser) return;
+        const phoneField = document.getElementById('userPhoneField');
+        const phone = (phoneField ? phoneField.value.trim() : '') || (activeUser ? (activeUser.phone || activeUser.mobile) : null);
+        if (!phone) return;
+
         const sb = getSupabase();
         const container = document.getElementById('rechargeHistoryList');
         if (!container || !sb) return;
@@ -595,7 +621,7 @@
             const { data: list } = await sb
                 .from('recharges')
                 .select('*')
-                .eq('user_id', activeUser.id)
+                .eq('phone', phone)
                 .order('created_at', { ascending: false });
 
             if (!list || list.length === 0) {
