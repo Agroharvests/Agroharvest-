@@ -376,8 +376,8 @@
             <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Loading history...</p>
         </div>
     </div>
-</div>
-<script>
+                    </div>
+                    <script>
     // Configured with exact Supabase credentials
     const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
@@ -392,7 +392,7 @@
 
     let activeUser = null;
     let targetUpiId = "5326807Q1@mairtel";
-    let targetUpiName = "AgroHarvest Official";
+    let targetUpiName = "AgroHarvest";
     let base64Screenshot = "";
 
     function getStoredUser() {
@@ -415,19 +415,13 @@
         const sb = getSupabase();
         if (sb) {
             try {
-                // 1. Live Receiver UPI Fetch
+                // Live Receiver UPI Fetch
                 const { data: settingData } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
                 if (settingData && settingData.value) {
                     targetUpiId = settingData.value.trim();
-                } else {
-                    const { data: activeUpi } = await sb.from('upi_accounts').select('*').eq('is_active', true).maybeSingle();
-                    if (activeUpi && activeUpi.upi_id) {
-                        targetUpiId = activeUpi.upi_id.trim();
-                        targetUpiName = activeUpi.holder_name || "AgroHarvest Official";
-                    }
                 }
 
-                // 2. Live User Balance Fetch
+                // Live User Balance Fetch
                 if (activeUser && activeUser.id) {
                     const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).maybeSingle();
                     if (prof && prof.balance !== undefined) {
@@ -461,6 +455,7 @@
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
         
+        // Clean Standard UPI Payload (NPCI compliant)
         const upiPayload = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
         const qrImg = document.getElementById('paymentQrImg');
         if (qrImg) {
@@ -470,21 +465,24 @@
 
     function copyUpiId() {
         navigator.clipboard.writeText(targetUpiId).then(() => {
-            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nAb kisi bhi UPI app me jakar 'Pay to UPI ID' par payment complete karein.`);
+            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nAb apne UPI app (PhonePe/Paytm/GPay) me 'Pay to UPI ID' option me jakar paste karein.`);
         }).catch(() => {
             alert(`UPI ID: ${targetUpiId}`);
         });
     }
 
+    // App Trigger with automatic fallback copy
     function triggerAppPay(appName) {
         const input = document.getElementById('rechargeInput');
         const amt = parseFloat(input ? input.value : 0) || 499;
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
-        const standardUrl = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
+        
+        // Formatted intent URL
+        const standardUrl = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Wallet+Recharge`;
 
         navigator.clipboard.writeText(cleanUpi).then(() => {
-            alert(`✅ UPI Copied: ${cleanUpi}\nOpening ${appName}... Agar payment load na ho to 'Pay to UPI' me paste karein.`);
+            alert(`✅ UPI Copied: ${cleanUpi}\n\nAgar app direct open na ho ya error aaye toh ${appName} kholkar 'Pay to UPI ID' me yeh UPI paste karein aur payment karein.`);
             window.location.href = standardUrl;
         }).catch(() => {
             window.location.href = standardUrl;
