@@ -177,6 +177,20 @@
             border-radius: 10px;
             display: block;
         }
+        .instruction-badge {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         .upi-copy-container {
             display: flex;
             align-items: center;
@@ -194,9 +208,9 @@
             background: #059669;
             color: white;
             border: none;
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
             cursor: pointer;
         }
@@ -289,8 +303,8 @@
         .status-pending { background: #fef9c3; color: #854d0e; }
         .status-rejected { background: #fee2e2; color: #b91c1c; }
     </style>
-</head>
-<body>
+    </head>
+    <body>
 
 <div class="app-container">
     <div class="top-navbar">
@@ -322,11 +336,16 @@
         </div>
 
         <div class="qr-card">
-            <h4 style="font-size: 15px; font-weight: 900;">Scan QR Code to Pay</h4>
-            <p style="font-size: 12px; color: #64748b; font-weight: 700; margin-top: 2px;">Amount & UPI are auto-configured in QR</p>
+            <h4 style="font-size: 15px; font-weight: 900;">Scan & Pay Via Any UPI App</h4>
+            <p style="font-size: 12px; color: #64748b; font-weight: 700; margin-top: 2px;">QR Code me Amount & UPI pre-configured hai</p>
 
             <div class="qr-wrapper">
                 <img id="paymentQrImg" src="" alt="UPI Payment QR">
+            </div>
+
+            <div class="instruction-badge">
+                <i class="fa-solid fa-circle-info" style="font-size: 16px;"></i>
+                <span>QR scan karein ya UPI ID Copy karke kisi bhi app se pay karein.</span>
             </div>
 
             <div class="upi-copy-container">
@@ -335,22 +354,22 @@
                     <strong id="adminUpiDisplay">5326807Q1@mairtel</strong>
                 </div>
                 <button type="button" onclick="copyUpiId()" class="btn-copy-action">
-                    <i class="fa-solid fa-copy"></i> Copy
+                    <i class="fa-solid fa-copy"></i> Copy UPI
                 </button>
             </div>
         </div>
 
         <span class="section-label">Or Pay Directly Via App</span>
         <div class="app-buttons-grid">
-            <div class="btn-app-pay" onclick="triggerAppPay('PhonePe')">
+            <div class="btn-app-pay" onclick="triggerDirectPay('PhonePe')">
                 <i class="fa-solid fa-mobile-screen-button icon-phonepe"></i>
                 <span>PhonePe</span>
             </div>
-            <div class="btn-app-pay" onclick="triggerAppPay('Paytm')">
+            <div class="btn-app-pay" onclick="triggerDirectPay('Paytm')">
                 <i class="fa-solid fa-money-bill-wave icon-paytm"></i>
                 <span>Paytm</span>
             </div>
-            <div class="btn-app-pay" onclick="triggerAppPay('GPay')">
+            <div class="btn-app-pay" onclick="triggerDirectPay('GPay')">
                 <i class="fa-brands fa-google-pay icon-gpay"></i>
                 <span>GPay</span>
             </div>
@@ -376,9 +395,9 @@
             <p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 10px;">Loading history...</p>
         </div>
     </div>
-                    </div>
-                    <script>
-    // Configured with exact Supabase credentials
+</div>
+<script>
+    // Supabase Configuration
     const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
@@ -400,7 +419,7 @@
             const raw = localStorage.getItem('agro_user') || sessionStorage.getItem('agro_user');
             if (raw) return JSON.parse(raw);
         } catch (e) {
-            console.error("Session fetch error:", e);
+            console.error("Session error:", e);
         }
         return null;
     }
@@ -415,13 +434,13 @@
         const sb = getSupabase();
         if (sb) {
             try {
-                // Live Receiver UPI Fetch
+                // Fetch Live Receiver UPI
                 const { data: settingData } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
                 if (settingData && settingData.value) {
                     targetUpiId = settingData.value.trim();
                 }
 
-                // Live User Balance Fetch
+                // Fetch Live User Balance
                 if (activeUser && activeUser.id) {
                     const { data: prof } = await sb.from('profiles').select('balance').eq('id', activeUser.id).maybeSingle();
                     if (prof && prof.balance !== undefined) {
@@ -430,7 +449,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("UPI Sync Notice:", err);
+                console.warn("Sync notice:", err);
             }
         }
 
@@ -455,7 +474,7 @@
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
         
-        // Clean Standard UPI Payload (NPCI compliant)
+        // Dynamic QR String
         const upiPayload = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Recharge`;
         const qrImg = document.getElementById('paymentQrImg');
         if (qrImg) {
@@ -465,27 +484,27 @@
 
     function copyUpiId() {
         navigator.clipboard.writeText(targetUpiId).then(() => {
-            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nAb apne UPI app (PhonePe/Paytm/GPay) me 'Pay to UPI ID' option me jakar paste karein.`);
+            alert(`✅ UPI ID Copied: ${targetUpiId}\n\nApne UPI app me jakar 'Pay to UPI ID' me paste karein aur payment complete karein.`);
         }).catch(() => {
             alert(`UPI ID: ${targetUpiId}`);
         });
     }
 
-    // App Trigger with automatic fallback copy
-    function triggerAppPay(appName) {
+    // Direct App Trigger with Automatic Copy Fallback (Bypasses Bank Intent Blocks)
+    function triggerDirectPay(appName) {
         const input = document.getElementById('rechargeInput');
         const amt = parseFloat(input ? input.value : 0) || 499;
         const cleanUpi = targetUpiId.trim();
         const cleanName = encodeURIComponent(targetUpiName);
-        
-        // Formatted intent URL
-        const standardUrl = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR&tn=Wallet+Recharge`;
+
+        // Safe Generic URI
+        const standardUri = `upi://pay?pa=${cleanUpi}&pn=${cleanName}&am=${amt}&cu=INR`;
 
         navigator.clipboard.writeText(cleanUpi).then(() => {
-            alert(`✅ UPI Copied: ${cleanUpi}\n\nAgar app direct open na ho ya error aaye toh ${appName} kholkar 'Pay to UPI ID' me yeh UPI paste karein aur payment karein.`);
-            window.location.href = standardUrl;
+            alert(`✅ UPI ID Copied: ${cleanUpi}\n\nAgar ${appName} me error aaye toh app me jakar 'Pay to UPI ID' me yeh UPI paste karke ₹${amt} pay karein.`);
+            window.location.href = standardUri;
         }).catch(() => {
-            window.location.href = standardUrl;
+            window.location.href = standardUri;
         });
     }
 
