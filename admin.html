@@ -1,621 +1,594 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Master Admin Panel</title>
+    <title>Admin Dashboard - AgroHarvest</title>
+    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
-    <script src="config.js"></script>
-    <script src="auth.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .admin-app { width: 100%; max-width: 520px; background: #f8fafc; min-height: 100vh; padding-bottom: 50px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .admin-wrapper {
+            width: 100%;
+            max-width: 540px;
+            background: #ffffff;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.06);
+        }
+        .header-bar {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-bar h2 {
+            font-size: 17px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-bar .btn-refresh {
+            background: #1e293b;
+            color: #38bdf8;
+            border: 1px solid #334155;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .admin-body {
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .card-header h3 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .badge-count {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        .input-box:focus {
+            border-color: #10b981;
+        }
+        .btn-action {
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-green { background: #16a34a; color: #ffffff; }
+        .btn-red { background: #dc2626; color: #ffffff; }
+        .btn-blue { background: #2563eb; color: #ffffff; }
+        .btn-full { width: 100%; }
         
-        .top-header { background: #0f172a; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 20px 20px; }
-        .top-header h2 { font-size: 18px; font-weight: 900; }
-        .btn-midnight { background: #eab308; color: #0f172a; border: none; padding: 8px 14px; border-radius: 10px; font-weight: 900; font-size: 12px; cursor: pointer; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 14px; }
-        .kpi-box { background: white; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 14px; }
-        .kpi-box p { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; }
-        .kpi-box h3 { font-size: 18px; font-weight: 900; color: #16a34a; margin-top: 2px; }
-
-        .card { background: white; margin: 0 14px 14px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .card-header h3 { font-size: 16px; font-weight: 900; color: #0f172a; }
-        .badge-count { background: #dcfce7; color: #16a34a; font-weight: 900; font-size: 11px; padding: 3px 8px; border-radius: 8px; }
-
-        .input-box { width: 100%; border: 1.5px solid #e2e8f0; padding: 12px 14px; border-radius: 12px; font-size: 14px; font-weight: 700; outline: none; margin-top: 6px; margin-bottom: 10px; }
-        .input-box:focus { border-color: #16a34a; }
-        .btn-action { padding: 9px 14px; border-radius: 12px; border: none; font-weight: 800; font-size: 12px; cursor: pointer; }
-        .btn-green { background: #16a34a; color: white; }
-        .btn-red { background: #dc2626; color: white; }
-
-        .item-row { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; }
-        
-        /* Moderation Proof Items */
-        .proof-mod-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; }
-        .proof-thumb { width: 75px; height: 75px; border-radius: 12px; object-fit: cover; border: 1px solid #cbd5e1; flex-shrink: 0; cursor: pointer; }
-        .proof-info { flex: 1; min-width: 0; }
-        .proof-info-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-        .badge-proof-type { font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; background: #e0f2fe; color: #0284c7; }
-
-        .user-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 12px; }
-        .user-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px; }
-        .user-phone { font-size: 14px; font-weight: 900; color: #0f172a; }
-        .user-ref { font-size: 11px; font-weight: 800; background: #e0f2fe; color: #0284c7; padding: 2px 8px; border-radius: 6px; }
-
-        .user-stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px; margin-bottom: 10px; }
-        .u-stat { background: #f8fafc; padding: 8px 10px; border-radius: 10px; border: 1px solid #f1f5f9; }
-        .u-stat span { color: #64748b; font-weight: 600; display: block; font-size: 10px; text-transform: uppercase; }
-        .u-stat strong { font-weight: 900; color: #0f172a; font-size: 13px; }
-        .u-stat strong.green { color: #16a34a; }
-        .plan-pill { background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px; display: inline-block; margin: 2px 4px 2px 0; border: 1px solid #fde68a; }
+        .list-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .list-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .img-preview {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 8px;
+            margin-top: 6px;
+            border: 1px solid #cbd5e1;
+        }
     </style>
-</head>
-<body>
-    <div class="admin-app">
-        <div class="top-header">
-            <div>
-                <h2>AgroHarvest Admin</h2>
-                <p style="font-size: 11px; opacity: 0.8;">Platform Control & Moderation</p>
-            </div>
-            <button onclick="runDailyIncomeManually()" class="btn-midnight">Run 12 AM Income</button>
-        </div>
+    </head>
+    <body>
 
-        <div class="kpi-grid">
-            <div class="kpi-box">
-                <p>Total Registered Users</p>
-                <h3 id="statTotalUsers">0</h3>
-            </div>
-            <div class="kpi-box">
-                <p>Active Planted Plans</p>
-                <h3 id="statActivePlans" style="color: #0284c7;">0</h3>
-            </div>
-            <div class="kpi-box">
-                <p>Total Recharges (Approved)</p>
-                <h3 id="statTotalRecharges">₹0</h3>
-            </div>
-            <div class="kpi-box">
-                <p>Total Paid Withdrawals</p>
-                <h3 id="statTotalWithdrawals" style="color: #dc2626;">₹0</h3>
-            </div>
-        </div>
-
-        <!-- Dynamic Multi-UPI Manager -->
-<div class="card">
-    <div class="card-header">
-        <h3>Multi-UPI Rotation Manager</h3>
-        <span id="activeUpiCountBadge" class="badge-count" style="background:#dcfce7; color:#15803d;">Active</span>
+<div class="admin-wrapper">
+    <div class="header-bar">
+        <h2><i class="fa-solid fa-shield-halved"></i> Admin Control</h2>
+        <button onclick="loadAdminDashboard()" class="btn-refresh"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
     </div>
 
-    <!-- Add New UPI Form -->
-    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-        <input type="text" id="newUpiId" class="input-box" placeholder="UPI ID (e.g. 98xxxx@ybl)" style="margin: 0; flex: 1.2;">
-        <input type="text" id="newUpiName" class="input-box" placeholder="Name" style="margin: 0; flex: 0.8;">
-    </div>
-    <button onclick="addNewUpiAccount()" class="btn-action btn-green" style="width: 100%; margin-bottom: 14px;">
-        <i class="fa-solid fa-plus"></i> Add New UPI ID
-    </button>
-
-    <!-- List of Configured UPI Accounts -->
-    <div id="adminUpiListContainer">
-        <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading UPI list...</p>
-    </div>
-</div>
-        
-
-        <!-- VIP Premium Plans Toggle -->
-        <div class="card">
-            <div class="card-header">
-                <h3>VIP Premium Plans Control</h3>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="toggleVipPlan('plan_4999_open')" id="btnToggle4999" class="btn-action btn-green" style="flex: 1;">Toggle ₹4,999 Plan</button>
-                <button onclick="toggleVipPlan('plan_9999_open')" id="btnToggle9999" class="btn-action btn-green" style="flex: 1;">Toggle ₹9,999 Plan</button>
-            </div>
-        </div>
-
-        <!-- Manual Balance Adjust -->
+    <div class="admin-body">
+        <!-- 1. Manual Balance Adjustment -->
         <div class="card">
             <div class="card-header">
                 <h3>Manual Balance Adjustment</h3>
             </div>
-            <input type="text" id="targetPhone" class="input-box" placeholder="User Mobile Number (10 Digits)">
-            <input type="number" id="adjustAmt" class="input-box" placeholder="Amount (+ to Add, - to Deduct)">
-            <button onclick="adjustUserBalance()" class="btn-action btn-green" style="width: 100%;">Apply Balance Change</button>
+            <input type="text" id="manualUserPhone" class="input-box" placeholder="User Mobile Number (10 Digits)" maxlength="10">
+            <input type="number" id="manualAmount" class="input-box" placeholder="Amount (+ to Add, - to Deduct)">
+            <button onclick="applyManualBalance()" class="btn-action btn-green btn-full">Apply Balance Change</button>
         </div>
-                <!-- Pending Recharges List -->
+
+        <!-- 2. Dynamic Multi-UPI Rotation Manager -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Multi-UPI Rotation Manager</h3>
+                <span class="badge-count" style="background:#dcfce7; color:#15803d;">Active Config</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <input type="text" id="newUpiId" class="input-box" placeholder="UPI ID (e.g. name@upi)" style="margin: 0; flex: 1.2;">
+                <input type="text" id="newUpiName" class="input-box" placeholder="Holder Name" style="margin: 0; flex: 0.8;">
+            </div>
+            <button onclick="addNewUpiAccount()" class="btn-action btn-blue btn-full" style="margin-bottom: 12px;">
+                <i class="fa-solid fa-plus"></i> Add New UPI ID
+            </button>
+            <div id="adminUpiListContainer">
+                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading UPI list...</p>
+            </div>
+        </div>
+
+        <!-- 3. Pending Recharges -->
         <div class="card">
             <div class="card-header">
                 <h3>Pending Recharges</h3>
-                <span id="rechargePendingCount" class="badge-count">0</span>
+                <span id="rechargeCountBadge" class="badge-count" style="background:#fef9c3; color:#854d0e;">0</span>
             </div>
-            <div id="rechargesList">Loading...</div>
+            <div id="pendingRechargesContainer">
+                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading...</p>
+            </div>
         </div>
 
-        <!-- Pending Withdrawals List -->
+        <!-- 4. Pending Withdrawals -->
         <div class="card">
             <div class="card-header">
                 <h3>Pending Withdrawals</h3>
-                <span id="withdrawPendingCount" class="badge-count">0</span>
+                <span id="withdrawalCountBadge" class="badge-count" style="background:#fee2e2; color:#b91c1c;">0</span>
             </div>
-            <div id="withdrawalsList">Loading...</div>
+            <div id="pendingWithdrawalsContainer">
+                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading...</p>
+            </div>
         </div>
 
-        <!-- Community Proofs Moderation Panel -->
+        <!-- 5. Community Proofs Moderation -->
         <div class="card">
             <div class="card-header">
                 <h3>Community Proofs Moderation</h3>
-                <span id="proofsCountBadge" class="badge-count" style="background:#fee2e2; color:#dc2626;">0 Proofs</span>
+                <span id="proofsCountBadge" class="badge-count" style="background:#fee2e2; color:#b91c1c;">0 Proofs</span>
             </div>
-            <div id="adminProofsList">Loading proofs...</div>
+            <div id="proofsContainer">
+                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading proofs...</p>
+            </div>
         </div>
 
-        <!-- Master Users Directory -->
+        <!-- 6. User Investments & Search -->
         <div class="card">
             <div class="card-header">
                 <h3>User Investments & Downlines</h3>
-                <span id="usersCountBadge" class="badge-count">0 Users</span>
+                <span id="userCountBadge" class="badge-count" style="background:#dcfce7; color:#15803d;">0 Users</span>
             </div>
-            <input type="text" id="searchUser" class="input-box" placeholder="🔍 Search by Mobile or Ref Code..." oninput="filterUserList()">
-            <div id="usersDirectoryList">Loading user data...</div>
+            <input type="text" id="userSearchInput" class="input-box" placeholder="🔍 Search by Mobile or Ref Code..." oninput="filterUserList()">
+            <div id="userListContainer">
+                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading user data...</p>
+            </div>
         </div>
     </div>
-        <script>
-        const activeUser = requireAuth();
-        if (activeUser.phone !== ADMIN_PHONE) {
-            alert("Unauthorized Access!");
-            window.location.replace("index.html");
+</div>
+<script>
+    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_URL.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+
+    let supabaseClient = null;
+    function getSupabase() {
+        if (!supabaseClient && window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
+        return supabaseClient;
+    }
 
-        let allUsersData = [];
-        let allProfilesMap = {};
+    let globalUserList = [];
 
-        document.addEventListener("DOMContentLoaded", loadAdminDashboard);
-
-        async function loadAdminDashboard() {
-            const sb = getSupabase();
-            if (!sb) {
-                alert("Database connection error. Refresh karein.");
-                return;
-            }
-
-            try {
-                // 1. Fetch System Settings
-                const { data: sList } = await sb.from('settings').select('*');
-                if (sList) {
-                    const upiSetting = sList.find(s => s.key === 'upi_id');
-                    if (upiSetting) {
-                        document.getElementById('currentUpiBadge').innerText = upiSetting.value;
-                        document.getElementById('adminNewUpi').value = upiSetting.value;
-                    }
-                    const p4999 = sList.find(s => s.key === 'plan_4999_open');
-                    const p9999 = sList.find(s => s.key === 'plan_9999_open');
-                    if (p4999) document.getElementById('btnToggle4999').innerText = `₹4,999: ${p4999.value === '1' ? 'OPEN ✅' : 'LOCKED 🔒'}`;
-                    if (p9999) document.getElementById('btnToggle9999').innerText = `₹9,999: ${p9999.value === '1' ? 'OPEN ✅' : 'LOCKED 🔒'}`;
-                }
-
-                // 2. Fetch Profiles
-                const { data: users, error: uErr } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-                if (uErr) throw uErr;
-
-                allProfilesMap = {};
-                (users || []).forEach(u => { allProfilesMap[u.id] = u; });
-
-                // 3. Fetch Recharges, Withdrawals, Orders
-                const { data: allRecharges } = await sb.from('recharges').select('*').order('created_at', { ascending: false });
-                const { data: allWithdrawals } = await sb.from('withdrawals').select('*').order('created_at', { ascending: false });
-                const { data: allOrders } = await sb.from('orders').select('*');
-
-                const recharges = allRecharges || [];
-                const withdrawals = allWithdrawals || [];
-                const orders = allOrders || [];
-
-                // 4. Render Pending Recharges
-                const pendingRecharges = recharges.filter(r => r.status === 'pending');
-                document.getElementById('rechargePendingCount').innerText = pendingRecharges.length;
-                const rDiv = document.getElementById('rechargesList');
-
-                if (pendingRecharges.length === 0) {
-                    rDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending recharge requests.</p>`;
-                } else {
-                    rDiv.innerHTML = pendingRecharges.map(r => {
-                        const userPhone = allProfilesMap[r.user_id]?.phone || r.phone || 'Unknown User';
-                        return `
-                            <div class="item-row">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <strong style="font-size: 14px;">+91 ${userPhone}</strong>
-                                    <strong style="font-size: 15px; color: #16a34a;">₹${r.amount}</strong>
-                                </div>
-                                <div style="font-size: 12px; color: #0284c7; font-weight: 800; margin: 4px 0;">UTR: ${r.utr}</div>
-                                <div style="margin-top: 8px; display: flex; gap: 8px;">
-                                    <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-action btn-green" style="flex:1;">Approve</button>
-                                    <button onclick="rejectRecharge('${r.id}')" class="btn-action btn-red" style="flex:1;">Reject</button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-
-                // 5. Render Pending Withdrawals
-                const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending');
-                document.getElementById('withdrawPendingCount').innerText = pendingWithdrawals.length;
-                const wDiv = document.getElementById('withdrawalsList');
-
-                if (pendingWithdrawals.length === 0) {
-                    wDiv.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No pending withdrawal requests.</p>`;
-                } else {
-                    wDiv.innerHTML = pendingWithdrawals.map(w => {
-                        const userPhone = allProfilesMap[w.user_id]?.phone || 'Unknown User';
-                        return `
-                            <div class="item-row">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <strong style="font-size: 14px;">+91 ${userPhone}</strong>
-                                    <strong style="font-size: 15px; color: #dc2626;">Net: ₹${w.final_amount}</strong>
-                                </div>
-                                <p style="font-size: 11px; color: #64748b; font-weight: 700; margin: 4px 0;">
-                                    Req: ₹${w.amount} | 10% Fee: ₹${w.fee_amount}<br>
-                                    Bank: <b>${w.holder_name}</b> | Acc: <b>${w.account_number}</b> | IFSC: <b>${w.ifsc_code}</b>
-                                </p>
-                                <div style="margin-top: 8px; display: flex; gap: 8px;">
-                                    <button onclick="approveWithdrawal('${w.id}')" class="btn-action btn-green" style="flex:1;">Mark Paid</button>
-                                    <button onclick="rejectWithdrawal('${w.id}', '${w.user_id}', ${w.amount})" class="btn-action btn-red" style="flex:1;">Reject & Refund</button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-
-                // 6. Load & Render Community Proofs for Moderation
-                await loadProofModerationList(sb);
-
-                // 7. Update KPI Metrics
-                document.getElementById('statTotalUsers').innerText = (users || []).length;
-                document.getElementById('statActivePlans').innerText = orders.filter(o => o.status === 'active').length;
-
-                const totalRec = recharges.filter(r => r.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
-                document.getElementById('statTotalRecharges').innerText = "₹" + totalRec.toFixed(0);
-
-                const totalWd = withdrawals.filter(w => w.status === 'approved').reduce((acc, c) => acc + parseFloat(c.amount || 0), 0);
-                document.getElementById('statTotalWithdrawals').innerText = "₹" + totalWd.toFixed(0);
-
-                // 8. User Investments & Downlines Directory
-                allUsersData = (users || []).map(u => {
-                    const userOrders = orders.filter(o => o.user_id === u.id);
-                    const userActiveOrders = userOrders.filter(o => o.status === 'active');
-                    const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || 0), 0);
-
-                    const userWithdrawals = withdrawals.filter(w => w.user_id === u.id && w.status === 'approved');
-                    const totalWithdrawn = userWithdrawals.reduce((acc, w) => acc + parseFloat(w.amount || 0), 0);
-
-                    const downlineCount = (users || []).filter(sub => sub.referred_by === u.referral_code && sub.id !== u.id).length;
-
-                    return {
-                        ...u,
-                        activeOrders: userActiveOrders,
-                        totalInvested: totalInvested,
-                        totalWithdrawn: totalWithdrawn,
-                        downlineCount: downlineCount
-                    };
-                });
-
-                renderUsersDirectory(allUsersData);
-
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function loadProofModerationList(sb) {
-            const proofsContainer = document.getElementById('adminProofsList');
-            try {
-                const { data: proofs, error } = await sb.from('payment_proofs').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-
-                document.getElementById('proofsCountBadge').innerText = `${(proofs || []).length} Proofs`;
-
-                if (!proofs || proofs.length === 0) {
-                    proofsContainer.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 6px 0;">No community proofs found.</p>`;
-                    return;
-                }
-
-                proofsContainer.innerHTML = proofs.map(p => {
-                    const phone = p.phone || 'Unknown';
-                    const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : 'Recent';
-                    return `
-                        <div class="proof-mod-item">
-                            <a href="${p.image_url}" target="_blank">
-                                <img src="${p.image_url}" class="proof-thumb" alt="Proof">
-                            </a>
-                            <div class="proof-info">
-                                <div class="proof-info-top">
-                                    <strong style="font-size: 13px;">+91 ${phone}</strong>
-                                    <span class="badge-proof-type">${p.proof_type || 'bank'}</span>
-                                </div>
-                                <div style="font-size: 12px; color: #16a34a; font-weight: 800; margin-bottom: 2px;">₹${parseFloat(p.amount || 0).toFixed(0)}</div>
-                                <p style="font-size: 11px; color: #64748b; margin-bottom: 6px; word-break: break-all;">${p.caption || 'No caption'}</p>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <small style="font-size: 10px; color: #94a3b8;">${dateStr}</small>
-                                    <button onclick="deleteCommunityProof('${p.id}')" class="btn-action btn-red" style="padding: 4px 10px; font-size: 11px;">
-                                        <i class="fa-solid fa-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (err) {
-                proofsContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
-            }
-        }
-
-        async function deleteCommunityProof(id) {
-            if (!confirm("Kya aap sach me is screenshot proof ko delete karna chahte hain?")) return;
-            const sb = getSupabase();
-            try {
-                const { error } = await sb.from('payment_proofs').delete().eq('id', id);
-                if (error) throw error;
-                alert("🗑️ Screenshot Proof Deleted Successfully!");
-                loadProofModerationList(sb);
-            } catch (err) {
-                alert("Delete failed: " + err.message);
-            }
-        }
-
-        function renderUsersDirectory(list) {
-            const container = document.getElementById('usersDirectoryList');
-            document.getElementById('usersCountBadge').innerText = `${list.length} Users`;
-
-            if (!list || list.length === 0) {
-                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700; text-align: center; padding: 20px;">No users found.</p>`;
-                return;
-            }
-
-            container.innerHTML = list.map(u => {
-                const plansBadge = u.activeOrders.length > 0 
-                    ? u.activeOrders.map(o => `<span class="plan-pill">${o.plan_name} (₹${o.price})</span>`).join('')
-                    : `<span style="font-size: 11px; color: #94a3b8; font-weight: 600;">No active plan</span>`;
-
-                return `
-                    <div class="user-card">
-                        <div class="user-header-row">
-                            <div>
-                                <span class="user-phone">+91 ${u.phone}</span>
-                                <div style="font-size: 10px; color: #64748b; font-weight: 600;">Ref by: <b>${u.referred_by || 'DIRECT'}</b></div>
-                            </div>
-                            <span class="user-ref">${u.referral_code}</span>
-                        </div>
-
-                        <div class="user-stats-grid">
-                            <div class="u-stat">
-                                <span>Wallet Balance</span>
-                                <strong class="green">₹${parseFloat(u.balance || 0).toFixed(2)}</strong>
-                            </div>
-                            <div class="u-stat">
-                                <span>Total Withdrawn</span>
-                                <strong style="color: #dc2626;">₹${u.totalWithdrawn.toFixed(2)}</strong>
-                            </div>
-                            <div class="u-stat">
-                                <span>Team (L1 Downlines)</span>
-                                <strong style="color: #0284c7;">${u.downlineCount} Members</strong>
-                            </div>
-                            <div class="u-stat">
-                                <span>Total Investment</span>
-                                <strong>₹${u.totalInvested.toFixed(2)}</strong>
-                            </div>
-                        </div>
-
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px;">
-                            <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px;">Active Purchased Plans:</span>
-                            <div>${plansBadge}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-            // Load UPI Accounts on Admin Dashboard
-async function loadAdminUpiAccounts() {
-    const sb = getSupabase();
-    if (!sb) return;
-    const container = document.getElementById('adminUpiListContainer');
-
-    try {
-        const { data: list, error } = await sb
-            .from('upi_accounts')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (!list || list.length === 0) {
-            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No UPI accounts added yet.</p>`;
+    // Master Dashboard Loader with Isolated Try/Catch blocks
+    async function loadAdminDashboard() {
+        const sb = getSupabase();
+        if (!sb) {
+            alert("Database connection failed. Supabase configuration check karein.");
             return;
         }
 
-        container.innerHTML = list.map(item => `
-            <div style="background: #f8fafc; border: 1.5px solid ${item.is_active ? '#86efac' : '#e2e8f0'}; border-radius: 14px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong style="font-size: 13px; color: #0f172a; display: block;">${item.upi_id}</strong>
-                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">Name: ${item.holder_name}</span>
+        loadAdminUpiAccounts();
+        loadPendingRecharges();
+        loadPendingWithdrawals();
+        loadCommunityProofs();
+        loadUsersData();
+    }
+
+    // 1. Multi-UPI Rotation Manager
+    async function loadAdminUpiAccounts() {
+        const sb = getSupabase();
+        const container = document.getElementById('adminUpiListContainer');
+        try {
+            const { data: list, error } = await sb
+                .from('upi_accounts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi UPI accounts add nahi hain.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div style="background: #ffffff; border: 1.5px solid ${item.is_active ? '#86efac' : '#e2e8f0'}; border-radius: 12px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 13px; color: #0f172a; display: block;">${item.upi_id}</strong>
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600;">Name: ${item.holder_name}</span>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        ${item.is_active 
+                            ? `<span style="font-size: 11px; font-weight: 900; background: #dcfce7; color: #15803d; padding: 5px 8px; border-radius: 6px;">Active ✅</span>` 
+                            : `<button onclick="setActiveUpi('${item.id}')" class="btn-action btn-green" style="padding: 5px 8px; font-size: 11px;">Set Active</button>`
+                        }
+                        <button onclick="deleteUpi('${item.id}')" class="btn-action btn-red" style="padding: 5px 8px; font-size: 11px;"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
-                <div style="display: flex; gap: 6px;">
-                    ${item.is_active 
-                        ? `<span style="font-size: 11px; font-weight: 900; background: #dcfce7; color: #15803d; padding: 6px 10px; border-radius: 8px;">Active ✅</span>` 
-                        : `<button onclick="setActiveUpiAccount('${item.id}')" class="btn-action btn-green" style="padding: 6px 10px; font-size: 11px;">Set Active</button>`
-                    }
-                    <button onclick="deleteUpiAccount('${item.id}')" class="btn-action btn-red" style="padding: 6px 10px; font-size: 11px;"><i class="fa-solid fa-trash"></i></button>
+            `).join('');
+        } catch (e) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">UPI accounts table missing or error.</p>`;
+        }
+    }
+
+    async function addNewUpiAccount() {
+        const upi = document.getElementById('newUpiId').value.trim();
+        const name = document.getElementById('newUpiName').value.trim();
+        if (!upi || !name) return alert("UPI ID aur Holder Name dono fill karein!");
+
+        const sb = getSupabase();
+        try {
+            const { error } = await sb.from('upi_accounts').insert([{ upi_id: upi, holder_name: name, is_active: false }]);
+            if (error) throw error;
+            document.getElementById('newUpiId').value = '';
+            document.getElementById('newUpiName').value = '';
+            loadAdminUpiAccounts();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function setActiveUpi(id) {
+        const sb = getSupabase();
+        try {
+            await sb.from('upi_accounts').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
+            await sb.from('upi_accounts').update({ is_active: true }).eq('id', id);
+            loadAdminUpiAccounts();
+        } catch (err) {
+            alert("Error switching UPI: " + err.message);
+        }
+    }
+
+    async function deleteUpi(id) {
+        if (!confirm("Kya aap is UPI ko delete karna chahte hain?")) return;
+        const sb = getSupabase();
+        try {
+            await sb.from('upi_accounts').delete().eq('id', id);
+            loadAdminUpiAccounts();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    // 2. Pending Recharges
+    async function loadPendingRecharges() {
+        const sb = getSupabase();
+        const container = document.getElementById('pendingRechargesContainer');
+        const badge = document.getElementById('rechargeCountBadge');
+        try {
+            const { data: list, error } = await sb.from('recharges').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            if (error) throw error;
+
+            badge.innerText = list ? list.length : 0;
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi pending recharge nahi hai.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="list-item">
+                    <div class="list-row">
+                        <strong>📱 ${item.phone}</strong>
+                        <strong style="color:#16a34a; font-size:15px;">₹${parseFloat(item.amount).toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600;">UTR: <b>${item.utr}</b></div>
+                    ${item.screenshot_url ? `<img src="${item.screenshot_url}" class="img-preview" onclick="window.open(this.src)" alt="Screenshot">` : ''}
+                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        <button onclick="approveRecharge('${item.id}', '${item.user_id}', ${item.amount})" class="btn-action btn-green btn-full"><i class="fa-solid fa-check"></i> Approve</button>
+                        <button onclick="rejectRecharge('${item.id}')" class="btn-action btn-red btn-full"><i class="fa-solid fa-xmark"></i> Reject</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-
-    } catch (err) {
-        container.innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${err.message}</p>`;
-    }
-}
-
-async function addNewUpiAccount() {
-    const upi = document.getElementById('newUpiId').value.trim();
-    const name = document.getElementById('newUpiName').value.trim();
-    if (!upi || !name) return alert("Kripya UPI ID aur Holder Name dono dalein!");
-
-    const sb = getSupabase();
-    try {
-        const { error } = await sb.from('upi_accounts').insert([{ upi_id: upi, holder_name: name, is_active: false }]);
-        if (error) throw error;
-
-        alert("✅ Nayi UPI successfully add ho gayi!");
-        document.getElementById('newUpiId').value = '';
-        document.getElementById('newUpiName').value = '';
-        loadAdminUpiAccounts();
-    } catch (err) {
-        alert("Add failed: " + err.message);
-    }
-}
-
-async function setActiveUpiAccount(selectedId) {
-    const sb = getSupabase();
-    try {
-        // Sabhi ko inactive karke selected ko active karein
-        await sb.from('upi_accounts').update({ is_active: false }).neq('id', '00000000-0000-0000-0000-000000000000');
-        await sb.from('upi_accounts').update({ is_active: true }).eq('id', selectedId);
-
-        alert("✅ Active UPI successfully switch ho gayi!");
-        loadAdminUpiAccounts();
-    } catch (err) {
-        alert("Switch failed: " + err.message);
-    }
-}
-
-async function deleteUpiAccount(id) {
-    if (!confirm("Kya aap is UPI ID ko delete karna chahte hain?")) return;
-    const sb = getSupabase();
-    try {
-        await sb.from('upi_accounts').delete().eq('id', id);
-        alert("🗑️ UPI Deleted!");
-        loadAdminUpiAccounts();
-    } catch (err) {
-        alert("Delete error: " + err.message);
-    }
-}
-
-// loadAdminDashboard ke andar loadAdminUpiAccounts() ko call karein
-
-            
-        function filterUserList() {
-            const query = document.getElementById('searchUser').value.trim().toLowerCase();
-            const filtered = allUsersData.filter(u => 
-                (u.phone && u.phone.toLowerCase().includes(query)) || 
-                (u.referral_code && u.referral_code.toLowerCase().includes(query)) ||
-                (u.referred_by && u.referred_by.toLowerCase().includes(query))
-            );
-            renderUsersDirectory(filtered);
+            `).join('');
+        } catch (e) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Recharges load nahi ho sake.</p>`;
         }
+    }
 
-        async function updateUpi() {
-            const upi = document.getElementById('adminNewUpi').value.trim();
-            if (!upi) return alert("Enter valid UPI ID!");
-            const sb = getSupabase();
-            await sb.from('settings').upsert({ key: 'upi_id', value: upi });
-            alert("✅ UPI ID Updated Successfully!");
-            loadAdminDashboard();
-        }
+    async function approveRecharge(rechargeId, userId, amount) {
+        if (!confirm(`Recharge approve karein aur ₹${amount} user wallet me add karein?`)) return;
+        const sb = getSupabase();
+        try {
+            const { data: prof } = await sb.from('profiles').select('balance').eq('id', userId).single();
+            const newBal = (parseFloat(prof?.balance) || 0) + parseFloat(amount);
+            await sb.from('profiles').update({ balance: newBal }).eq('id', userId);
 
-        async function toggleVipPlan(planKey) {
-            const sb = getSupabase();
-            const { data } = await sb.from('settings').select('value').eq('key', planKey).maybeSingle();
-            const currentVal = data ? data.value : '0';
-            const newVal = currentVal === '1' ? '0' : '1';
-            
-            await sb.from('settings').upsert({ key: planKey, value: newVal });
-            alert(`Plan status changed to: ${newVal === '1' ? 'OPEN / UNLOCKED ✅' : 'LOCKED / UPCOMING 🔒'}`);
-            loadAdminDashboard();
-        }
-
-        async function adjustUserBalance() {
-            const phone = document.getElementById('targetPhone').value.trim();
-            const amt = parseFloat(document.getElementById('adjustAmt').value);
-            if (!phone || isNaN(amt)) return alert("Mobile number aur amount dalein!");
-
-            const sb = getSupabase();
-            const { data: user } = await sb.from('profiles').select('id, balance').eq('phone', phone).single();
-            if (!user) return alert("Yeh user number nahi mila!");
-
-            const newBal = parseFloat(user.balance || 0) + amt;
-            await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
-            
-            await sb.from('transactions').insert([{
-                user_id: user.id,
-                type: 'bonus',
-                amount: Math.abs(amt),
-                details: `Admin Adjustment: ${amt >= 0 ? 'Credited' : 'Debited'} ₹${Math.abs(amt)}`
-            }]);
-
-            alert(`✅ Balance Updated! New Balance: ₹${newBal.toFixed(2)}`);
-            document.getElementById('targetPhone').value = '';
-            document.getElementById('adjustAmt').value = '';
-            loadAdminDashboard();
-        }
-
-        async function approveRecharge(id, userId, amt) {
-            const sb = getSupabase();
-            await sb.from('recharges').update({ status: 'approved' }).eq('id', id);
-            const { data: u } = await sb.from('profiles').select('balance').eq('id', userId).single();
-            await sb.from('profiles').update({ balance: parseFloat(u.balance || 0) + amt }).eq('id', userId);
+            await sb.from('recharges').update({ status: 'approved' }).eq('id', rechargeId);
             
             await sb.from('transactions').insert([{
                 user_id: userId,
                 type: 'recharge',
-                amount: amt,
-                details: `Wallet Recharge Approved`
+                amount: amount,
+                details: `Wallet Recharge (₹${amount}) Approved`
             }]);
 
-            alert("✅ Recharge Approved & Wallet Balance Added!");
-            loadAdminDashboard();
+            alert("✅ Recharge Approved!");
+            loadPendingRecharges();
+        } catch (err) {
+            alert("Error: " + err.message);
         }
+    }
 
-        async function rejectRecharge(id) {
-            const sb = getSupabase();
-            await sb.from('recharges').update({ status: 'rejected' }).eq('id', id);
-            alert("❌ Recharge Request Rejected!");
-            loadAdminDashboard();
+    async function rejectRecharge(rechargeId) {
+        if (!confirm("Is recharge ko reject karein?")) return;
+        const sb = getSupabase();
+        try {
+            await sb.from('recharges').update({ status: 'rejected' }).eq('id', rechargeId);
+            loadPendingRecharges();
+        } catch (err) {
+            alert("Error: " + err.message);
         }
+    }
 
-        async function approveWithdrawal(id) {
-            const sb = getSupabase();
+    // 3. Pending Withdrawals
+    async function loadPendingWithdrawals() {
+        const sb = getSupabase();
+        const container = document.getElementById('pendingWithdrawalsContainer');
+        const badge = document.getElementById('withdrawalCountBadge');
+        try {
+            const { data: list, error } = await sb.from('withdrawals').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            if (error) throw error;
+
+            badge.innerText = list ? list.length : 0;
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi pending withdrawal nahi hai.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="list-item">
+                    <div class="list-row">
+                        <strong>📱 ${item.phone}</strong>
+                        <strong style="color:#dc2626; font-size:15px;">-₹${parseFloat(item.amount).toFixed(2)}</strong>
+                    </div>
+                    <div style="font-size: 11px; color: #475569;">
+                        <b>Account:</b> ${item.account_number || item.bank_account || 'N/A'}<br>
+                        <b>IFSC:</b> ${item.ifsc || 'N/A'} | <b>Holder:</b> ${item.holder_name || 'N/A'}
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        <button onclick="approveWithdrawal('${item.id}')" class="btn-action btn-green btn-full"><i class="fa-solid fa-check"></i> Complete Paid</button>
+                        <button onclick="rejectWithdrawal('${item.id}', '${item.user_id}', ${item.amount})" class="btn-action btn-red btn-full"><i class="fa-solid fa-rotate-left"></i> Reject & Refund</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Withdrawals load nahi ho sake.</p>`;
+        }
+    }
+
+    async function approveWithdrawal(id) {
+        if (!confirm("Payment complete mark karein?")) return;
+        const sb = getSupabase();
+        try {
             await sb.from('withdrawals').update({ status: 'approved' }).eq('id', id);
-            alert("✅ Withdrawal marked as Paid!");
-            loadAdminDashboard();
+            loadPendingWithdrawals();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function rejectWithdrawal(id, userId, amount) {
+        if (!confirm(`Withdrawal reject karke ₹${amount} user ko wapas refund karein?`)) return;
+        const sb = getSupabase();
+        try {
+            const { data: prof } = await sb.from('profiles').select('balance').eq('id', userId).single();
+            const newBal = (parseFloat(prof?.balance) || 0) + parseFloat(amount);
+            await sb.from('profiles').update({ balance: newBal }).eq('id', userId);
+
+            await sb.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
+            loadPendingWithdrawals();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    // 4. Community Proofs Moderation
+    async function loadCommunityProofs() {
+        const sb = getSupabase();
+        const container = document.getElementById('proofsContainer');
+        const badge = document.getElementById('proofsCountBadge');
+        try {
+            const { data: list, error } = await sb.from('proofs').select('*').eq('status', 'pending');
+            if (error) throw error;
+
+            badge.innerText = `${list ? list.length : 0} Proofs`;
+            if (!list || list.length === 0) {
+                container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi naya proof pending nahi hai.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(item => `
+                <div class="list-item">
+                    <div class="list-row">
+                        <strong>📱 ${item.phone}</strong>
+                        <span style="font-size: 11px; color: #64748b;">${item.caption || 'Payment Proof'}</span>
+                    </div>
+                    ${item.image_url ? `<img src="${item.image_url}" class="img-preview" alt="Proof">` : ''}
+                    <div style="display: flex; gap: 8px; margin-top: 4px;">
+                        <button onclick="approveProof('${item.id}')" class="btn-action btn-green btn-full">Publish</button>
+                        <button onclick="deleteProof('${item.id}')" class="btn-action btn-red btn-full">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Proofs section ready.</p>`;
+        }
+    }
+
+    async function approveProof(id) {
+        const sb = getSupabase();
+        await sb.from('proofs').update({ status: 'approved' }).eq('id', id);
+        loadCommunityProofs();
+    }
+
+    async function deleteProof(id) {
+        const sb = getSupabase();
+        await sb.from('proofs').delete().eq('id', id);
+        loadCommunityProofs();
+    }
+
+    // 5. User Investments & Search
+    async function loadUsersData() {
+        const sb = getSupabase();
+        const container = document.getElementById('userListContainer');
+        const badge = document.getElementById('userCountBadge');
+        try {
+            const { data: list, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+
+            globalUserList = list || [];
+            badge.innerText = `${globalUserList.length} Users`;
+            renderUserList(globalUserList);
+        } catch (e) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Users load nahi ho sake.</p>`;
+        }
+    }
+
+    function renderUserList(list) {
+        const container = document.getElementById('userListContainer');
+        if (!list || list.length === 0) {
+            container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi user nahi mila.</p>`;
+            return;
         }
 
-        async function rejectWithdrawal(id, userId, amt) {
-            const sb = getSupabase();
-            await sb.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
-            const { data: u } = await sb.from('profiles').select('balance').eq('id', userId).single();
-            await sb.from('profiles').update({ balance: parseFloat(u.balance || 0) + amt }).eq('id', userId);
-            
+        container.innerHTML = list.slice(0, 30).map(u => `
+            <div class="list-item" style="padding: 10px;">
+                <div class="list-row">
+                    <strong>📱 ${u.phone}</strong>
+                    <strong style="color: #16a34a;">₹${parseFloat(u.balance || 0).toFixed(2)}</strong>
+                </div>
+                <div style="font-size: 11px; color: #64748b;">
+                    <b>Ref Code:</b> ${u.ref_code || 'N/A'} | <b>Total Recharge:</b> ₹${u.total_recharge || 0}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterUserList() {
+        const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
+        const filtered = globalUserList.filter(u => 
+            (u.phone && u.phone.includes(q)) || 
+            (u.ref_code && u.ref_code.toLowerCase().includes(q))
+        );
+        renderUserList(filtered);
+    }
+
+    // 6. Manual Balance Adjust
+    async function applyManualBalance() {
+        const phone = document.getElementById('manualUserPhone').value.trim();
+        const amt = parseFloat(document.getElementById('manualAmount').value);
+
+        if (!phone || isNaN(amt)) return alert("Mobile number aur amount sahi dalein!");
+        const sb = getSupabase();
+
+        try {
+            const { data: user, error: fetchErr } = await sb.from('profiles').select('*').eq('phone', phone).single();
+            if (fetchErr || !user) return alert("User find nahi hua!");
+
+            const newBal = (parseFloat(user.balance) || 0) + amt;
+            await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
+
             await sb.from('transactions').insert([{
-                user_id: userId,
-                type: 'bonus',
-                amount: amt,
-                details: `Withdrawal Rejected & Refunded to Wallet`
+                user_id: user.id,
+                type: amt >= 0 ? 'admin_credit' : 'admin_debit',
+                amount: Math.abs(amt),
+                details: `Admin Adjustment: ${amt >= 0 ? '+₹' + amt : '-₹' + Math.abs(amt)}`
             }]);
 
-            alert("❌ Withdrawal Rejected & Balance Refunded to User!");
-            loadAdminDashboard();
+            alert(`✅ Success! Updated balance: ₹${newBal.toFixed(2)}`);
+            document.getElementById('manualUserPhone').value = '';
+            document.getElementById('manualAmount').value = '';
+            loadUsersData();
+        } catch (err) {
+            alert("Adjustment Error: " + err.message);
         }
+    }
 
-        async function runDailyIncomeManually() {
-            const sb = getSupabase();
-            await sb.rpc('run_midnight_daily_income');
-            alert("🎉 12:00 AM Daily Income Engine Executed Successfully!");
-            loadAdminDashboard();
-        }
-    </script>
+    document.addEventListener("DOMContentLoaded", loadAdminDashboard);
+</script>
 </body>
 </html>
