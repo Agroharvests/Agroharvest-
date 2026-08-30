@@ -386,7 +386,7 @@ async function loadAdminDashboard() {
         document.getElementById('statTotalUsers').innerText = allUsersList.length;
         document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
 
-        // 3. Fetch all orders (Fallback to 'investments' table if 'orders' is empty)
+                // 3. Fetch all orders (Fallback to 'investments' table if 'orders' is empty)
         let { data: orders } = await sb.from('orders').select('*');
         if (!orders || orders.length === 0) {
             const resOrders = await sb.from('investments').select('*');
@@ -394,7 +394,7 @@ async function loadAdminDashboard() {
         }
         allOrdersList = orders;
         document.getElementById('statActivePlans').innerText = allOrdersList.length;
-
+        
         // 4. Fetch Approved Recharges Sum
         const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
         const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
@@ -406,26 +406,34 @@ async function loadAdminDashboard() {
         document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
 
         // 6. Fetch Pending Recharges List
-        const { data: pendingRecharges } = await sb.from('recharges').select('*').eq('status', 'pending');
+                // 6. Fetch Pending Recharges List
+        const { data: pendingRecharges, error: recErr } = await sb
+            .from('recharges')
+            .select('*')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+
         const recContainer = document.getElementById('pendingRechargesContainer');
         document.getElementById('rechargeCountBadge').innerText = pendingRecharges ? pendingRecharges.length : 0;
+        
         if (!pendingRecharges || pendingRecharges.length === 0) {
-            recContainer.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>`;
+            recContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>';
         } else {
             recContainer.innerHTML = pendingRecharges.map(r => `
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>📱 ${r.phone}</strong>
-                        <strong style="color:#16a34a;">₹${r.amount}</strong>
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="font-size:14px; color:#0f172a;">📱 ${r.phone}</strong>
+                        <strong style="color:#16a34a; font-size:15px;">₹${r.amount}</strong>
                     </div>
                     <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr}</b></div>
                     <div style="display:flex; gap:6px; margin-top:6px;">
-                        <button onclick="approveRecharge('${r.id}', '${r.user_id}', ${r.amount})" class="btn-green-main" style="padding:6px; font-size:11px;">Approve</button>
-                        <button onclick="rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:6px; font-size:11px;">Reject</button>
+                        <button type="button" onclick="approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
+                        <button type="button" onclick="rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
                     </div>
                 </div>
             `).join('');
-        }
+    }
+        
 
         // 7. Render Detailed User Cards
         renderUserDetailedCards(allUsersList);
