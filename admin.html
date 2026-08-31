@@ -496,7 +496,7 @@ window.rejectRecharge = async function(rechargeId) {
     }
 };
 
-// Render User Investments & Downlines Box
+// Updated Downline Calculation Logic
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!users || users.length === 0) {
@@ -505,9 +505,15 @@ function renderUserDetailedCards(users) {
     }
 
     container.innerHTML = users.map(user => {
+        // Calculate User's Active Plans
         const userOrders = allOrdersList.filter(o => o.user_id === user.id);
         const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
-        const downlineCount = allUsersList.filter(u => u.invited_by === user.ref_code).length;
+        
+        // Correct Downline matching: Match only if user has a valid unique ref_code
+        let downlineCount = 0;
+        if (user.ref_code && user.ref_code.trim() !== '' && user.ref_code !== 'AG-ADMIN') {
+            downlineCount = allUsersList.filter(u => u.invited_by === user.ref_code).length;
+        }
 
         const plansHtml = userOrders.length > 0
             ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
@@ -518,9 +524,9 @@ function renderUserDetailedCards(users) {
                 <div class="user-top-row">
                     <div>
                         <div class="user-phone">+91 ${user.phone}</div>
-                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Ref by: ${user.invited_by || 'AG-ADMIN'}</span>
+                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Ref by: ${user.invited_by || 'Direct'}</span>
                     </div>
-                    <span class="user-ref-badge">${user.ref_code || 'AG-ADMIN'}</span>
+                    <span class="user-ref-badge">${user.ref_code || 'No Code'}</span>
                 </div>
 
                 <div class="user-stats-mini-grid">
@@ -550,6 +556,7 @@ function renderUserDetailedCards(users) {
         `;
     }).join('');
 }
+                    
 
 // Filter Users by Search
 function filterUserCards() {
