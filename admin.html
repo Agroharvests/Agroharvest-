@@ -496,37 +496,52 @@ window.rejectRecharge = async function(rechargeId) {
     }
 };
 
-// Updated Downline Calculation Logic
+// Render User Investments & Downlines Box with Full Member Details
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!users || users.length === 0) {
-        container.innerHTML = `<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>`;
+        container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>';
         return;
     }
 
     container.innerHTML = users.map(user => {
-        // Calculate User's Active Plans
+        // 1. Calculate Active Investments
         const userOrders = allOrdersList.filter(o => o.user_id === user.id);
         const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
         
-        // Correct Downline matching: Match only if user has a valid unique ref_code
-        let downlineCount = 0;
-        if (user.ref_code && user.ref_code.trim() !== '' && user.ref_code !== 'AG-ADMIN') {
-            downlineCount = allUsersList.filter(u => u.invited_by === user.ref_code).length;
-        }
+        // 2. Multi-match Downlines (matches by ref_code OR phone number)
+        const myCode = (user.ref_code || '').trim().toLowerCase();
+        const myPhone = (user.phone || '').trim();
+        const myShortCode = myPhone.slice(-6);
+
+        const downlineMembers = allUsersList.filter(u => {
+            if (u.id === user.id) return false;
+            const inv = (u.invited_by || '').trim().toLowerCase();
+            if (!inv || inv === 'direct') return false;
+            return (myCode && inv === myCode) || 
+                   (myPhone && inv === myPhone) || 
+                   (myShortCode && inv.includes(myShortCode));
+        });
+
+        const downlineCount = downlineMembers.length;
+
+        // Downline Members List Preview
+        const downlinePreviewHtml = downlineCount > 0
+            ? downlineMembers.map(m => `<span style="display:inline-block; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; margin:2px; font-size:10px; font-weight:800;">📱 ${m.phone}</span>`).join('')
+            : '<span style="color:#94a3b8; font-weight:600; font-size:11px;">No team members joined yet</span>';
 
         const plansHtml = userOrders.length > 0
             ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
-            : `<span style="color:#94a3b8; font-weight:700;">No active plan</span>`;
+            : '<span style="color:#94a3b8; font-weight:700;">No active plan</span>';
 
         return `
             <div class="user-detail-card">
                 <div class="user-top-row">
                     <div>
                         <div class="user-phone">+91 ${user.phone}</div>
-                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Ref by: ${user.invited_by || 'Direct'}</span>
+                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Invited By: <b style="color:#0f172a;">${user.invited_by || 'Direct / Admin'}</b></span>
                     </div>
-                    <span class="user-ref-badge">${user.ref_code || 'No Code'}</span>
+                    <span class="user-ref-badge">${user.ref_code || ('AG-' + user.phone.slice(-6))}</span>
                 </div>
 
                 <div class="user-stats-mini-grid">
@@ -548,6 +563,11 @@ function renderUserDetailedCards(users) {
                     </div>
                 </div>
 
+                <div class="user-plans-tag" style="margin-bottom:6px;">
+                    <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">TEAM MEMBERS LIST:</span>
+                    <div style="margin-top:2px;">${downlinePreviewHtml}</div>
+                </div>
+
                 <div class="user-plans-tag">
                     <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">ACTIVE PURCHASED PLANS:</span>
                     ${plansHtml}
@@ -555,8 +575,8 @@ function renderUserDetailedCards(users) {
             </div>
         `;
     }).join('');
-}
-                    
+                    }
+              
 
 // Filter Users by Search
 function filterUserCards() {
