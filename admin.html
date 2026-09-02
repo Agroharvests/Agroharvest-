@@ -496,7 +496,7 @@ window.rejectRecharge = async function(rechargeId) {
     }
 };
 
-// Render User Investments & Downlines Box with Full Member Details
+// Render User Investments & 3-Level Downlines Tree Box
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!users || users.length === 0) {
@@ -504,31 +504,49 @@ function renderUserDetailedCards(users) {
         return;
     }
 
+    // Helper: Match downlines for a given user or list of users
+    function getDirectDownlines(parentUsers) {
+        const parentCodes = new Set();
+        const parentPhones = new Set();
+        const parentShortCodes = new Set();
+
+        parentUsers.forEach(u => {
+            if (u.ref_code) parentCodes.add(u.ref_code.trim().toLowerCase());
+            if (u.phone) {
+                const p = u.phone.trim();
+                parentPhones.add(p);
+                if (p.length >= 6) parentShortCodes.add(p.slice(-6));
+            }
+        });
+
+        return allUsersList.filter(candidate => {
+            // Avoid cycle/self-match
+            if (parentUsers.some(p => p.id === candidate.id)) return false;
+            const inv = (candidate.invited_by || '').trim().toLowerCase();
+            if (!inv || inv === 'direct') return false;
+
+            return parentCodes.has(inv) || 
+                   parentPhones.has(inv) || 
+                   Array.from(parentShortCodes).some(short => inv.includes(short));
+        });
+    }
+
     container.innerHTML = users.map(user => {
         // 1. Calculate Active Investments
         const userOrders = allOrdersList.filter(o => o.user_id === user.id);
         const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
-        
-        // 2. Multi-match Downlines (matches by ref_code OR phone number)
-        const myCode = (user.ref_code || '').trim().toLowerCase();
-        const myPhone = (user.phone || '').trim();
-        const myShortCode = myPhone.slice(-6);
 
-        const downlineMembers = allUsersList.filter(u => {
-            if (u.id === user.id) return false;
-            const inv = (u.invited_by || '').trim().toLowerCase();
-            if (!inv || inv === 'direct') return false;
-            return (myCode && inv === myCode) || 
-                   (myPhone && inv === myPhone) || 
-                   (myShortCode && inv.includes(myShortCode));
-        });
+        // 2. Multi-Tier Downline Calculations (L1, L2, L3)
+        const l1Members = getDirectDownlines([user]);
+        const l2Members = l1Members.length > 0 ? getDirectDownlines(l1Members) : [];
+        const l3Members = l2Members.length > 0 ? getDirectDownlines(l2Members) : [];
 
-        const downlineCount = downlineMembers.length;
+        const totalTeamCount = l1Members.length + l2Members.length + l3Members.length;
 
-        // Downline Members List Preview
-        const downlinePreviewHtml = downlineCount > 0
-            ? downlineMembers.map(m => `<span style="display:inline-block; background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; margin:2px; font-size:10px; font-weight:800;">📱 ${m.phone}</span>`).join('')
-            : '<span style="color:#94a3b8; font-weight:600; font-size:11px;">No team members joined yet</span>';
+        // Render phone badges
+        const renderBadges = (list, bg, fg) => list.length > 0
+            ? list.map(m => `<span style="display:inline-block; background:${bg}; color:${fg}; padding:2px 6px; border-radius:4px; margin:2px; font-size:10px; font-weight:800;">📱 ${m.phone}</span>`).join('')
+            : '<span style="color:#94a3b8; font-size:10px; font-weight:600;">None</span>';
 
         const plansHtml = userOrders.length > 0
             ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
@@ -554,8 +572,8 @@ function renderUserDetailedCards(users) {
                         <span class="mini-stat-val red">₹${parseFloat(user.total_withdrawn || 0).toFixed(2)}</span>
                     </div>
                     <div class="mini-stat-box">
-                        <span class="mini-stat-label">TEAM (L1 DOWNLINES)</span>
-                        <span class="mini-stat-val blue">${downlineCount} Members</span>
+                        <span class="mini-stat-label">TOTAL NETWORK (L1-L3)</span>
+                        <span class="mini-stat-val blue">${totalTeamCount} Members</span>
                     </div>
                     <div class="mini-stat-box">
                         <span class="mini-stat-label">TOTAL INVESTMENT</span>
@@ -563,9 +581,26 @@ function renderUserDetailedCards(users) {
                     </div>
                 </div>
 
-                <div class="user-plans-tag" style="margin-bottom:6px;">
-                    <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">TEAM MEMBERS LIST:</span>
-                    <div style="margin-top:2px;">${downlinePreviewHtml}</div>
+                <!-- Downline Tree Breakdown -->
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin-bottom:8px;">
+                    <span style="font-size:10px; font-weight:800; color:#0f172a; text-transform:uppercase; display:block; margin-bottom:6px;">
+                        <i class="fa-solid fa-sitemap"></i> Team Network Tree:
+                    </span>
+
+                    <div style="margin-bottom:6px; font-size:11px;">
+                        <b style="color:#0369a1;">Level 1 (${l1Members.length}):</b>
+                        <div>${renderBadges(l1Members, '#e0f2fe', '#0369a1')}</div>
+                    </div>
+
+                    <div style="margin-bottom:6px; font-size:11px;">
+                        <b style="color:#7c3aed;">Level 2 (${l2Members.length}):</b>
+                        <div>${renderBadges(l2Members, '#f3e8ff', '#6b21a8')}</div>
+                    </div>
+
+                    <div style="font-size:11px;">
+                        <b style="color:#b45309;">Level 3 (${l3Members.length}):</b>
+                        <div>${renderBadges(l3Members, '#fef3c7', '#92400e')}</div>
+                    </div>
                 </div>
 
                 <div class="user-plans-tag">
@@ -575,7 +610,8 @@ function renderUserDetailedCards(users) {
             </div>
         `;
     }).join('');
-                    }
+        }
+            
               
 
 // Filter Users by Search
