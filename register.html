@@ -74,26 +74,26 @@
     </div>
 
     <script>
-
-        document.addEventListener('DOMContentLoaded', () => {
-    // URL se ?ref= parameter nikalna
-    const urlParams = new URLSearchParams(window.location.search);
-    const ref = urlParams.get('ref');
-
-    if (ref) {
-        const refInput = document.getElementById('refCode') || document.querySelector('input[name="ref"]');
-        if (refInput) {
-            refInput.value = ref.trim();
-            refInput.readOnly = true; // Taaki user ise badal na sake
-            refInput.style.backgroundColor = '#f1f5f9';
+        if (typeof requireGuest === 'function') {
+            requireGuest();
         }
-    }
-});
-        
-        requireGuest();
-        const urlParams = new URLSearchParams(window.location.search);
-        const refParam = urlParams.get('ref');
-        if (refParam) document.getElementById('regRef').value = refParam;
+
+        // URL se ?ref= parameter padhkar input box me bharna
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+
+            if (ref) {
+                const refInput = document.getElementById('regRef');
+                if (refInput) {
+                    refInput.value = ref.trim().toUpperCase();
+                    refInput.readOnly = true;
+                    refInput.style.backgroundColor = '#f1f5f9';
+                    refInput.style.color = '#15803d';
+                    refInput.style.fontWeight = '800';
+                }
+            }
+        });
 
         function generateUniqueRefCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -111,8 +111,8 @@
             const refBy = document.getElementById('regRef').value.trim().toUpperCase();
             const btn = document.getElementById('regBtn');
 
-            const sb = getSupabase();
-            if (!sb) return alert("Connecting database...");
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (!sb) return alert("Connecting database... Please try again.");
 
             if (phone.length !== 10 || isNaN(phone)) return alert("Valid 10 digit number enter karein!");
             if (password.length < 6) return alert("Password kam se kam 6 digits ka hona chahiye!");
@@ -165,7 +165,12 @@
                     details: 'Welcome Signup Bonus'
                 }]);
 
-                setSessionUser(newUser);
+                if (typeof setSessionUser === 'function') {
+                    setSessionUser(newUser);
+                } else {
+                    localStorage.setItem('agro_user', JSON.stringify(newUser));
+                }
+
                 alert("🎉 Registration Successful! ₹50 Bonus added.");
                 window.location.replace("index.html");
 
@@ -177,5 +182,4 @@
         }
     </script>
 </body>
-                                                        </html>
-                                                        
+</html>
