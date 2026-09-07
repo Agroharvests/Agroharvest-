@@ -577,24 +577,84 @@
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
         }
 
-                    // Check day: 1 = Monday, 4 = Thursday
-        const todayDay = new Date().getDay();
-        const isWithdrawalDay = (todayDay === 1 || todayDay === 4);
+        // ================= LIVE FAKE TRANSACTIONS =================
+        const todayDayNum = new Date().getDay(); // 1 = Mon, 4 = Thu
+        const isWdDay = (todayDayNum === 1 || todayDayNum === 4);
 
-        // Monday & Thursday ko withdrawal transactions add hongi, baaki din sirf Plan Buy
-        const txTypes = [
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', prefix: '', amounts: [499, 1499, 2499, 4999] }
+        // Daily sirf Plan Purchase
+        const txPool = [
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' },
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.4,999' }
         ];
 
-        if (isWithdrawalDay) {
-            txTypes.push({
-                type: 'Withdrawal',
-                icon: 'fa-money-bill-transfer',
-                iconClass: 'icon-withdraw',
-                prefix: 'Rs.',
-                amounts: [199, 390, 710, 1420, 2500]
-            });
+        // Monday aur Thursday ko hi withdrawal include hoga
+        if (isWdDay) {
+            txPool.push(
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
+            );
         }
+
+        function getFakePhone() {
+            const series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
+            const p = series[Math.floor(Math.random() * series.length)];
+            const end = Math.floor(1000 + Math.random() * 9000);
+            return `${p}****${end}`;
+        }
+
+        function makeTxRow() {
+            const item = txPool[Math.floor(Math.random() * txPool.length)];
+            const div = document.createElement('div');
+            div.className = 'tx-item';
+            div.innerHTML = `
+                <div class="tx-left">
+                    <div class="tx-icon-box ${item.iconClass}">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </div>
+                    <div class="tx-details">
+                        <strong>User ${getFakePhone()}</strong>
+                        <span>${item.type}</span>
+                    </div>
+                </div>
+                <div class="tx-amount ${item.type === 'Withdrawal' ? 'amt-withdraw' : 'amt-plan'}">
+                    ${item.amt}
+                </div>
+            `;
+            return div;
+        }
+
+        function startTransactionsFeed() {
+            // Dono id check karega taaki miss na ho
+            const target = document.getElementById('liveTxContainer') || document.getElementById('txContainer');
+            if (!target) return;
+
+            target.innerHTML = '';
+            // Pehle se 3 rows dikha dega
+            for (let i = 0; i < 3; i++) {
+                target.appendChild(makeTxRow());
+            }
+
+            // Har 2.5 second mein nayi fake entry scroll karegi
+            setInterval(() => {
+                const newEntry = makeTxRow();
+                target.prepend(newEntry);
+                if (target.children.length > 4) {
+                    target.removeChild(target.lastChild);
+                }
+            }, 2500);
+        }
+
+        // Auto Run
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            startTransactionsFeed();
+        } else {
+            document.addEventListener('DOMContentLoaded', startTransactionsFeed);
+        }
+        // Safety call
+        setTimeout(startTransactionsFeed, 800);
             
     </script>
 </body>
