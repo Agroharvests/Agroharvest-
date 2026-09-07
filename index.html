@@ -787,71 +787,93 @@ async function loadDashboard() {
             buySeedPlan(title, price, daily, days);
         }
 
-        async function buySeedPlan(title, price, daily, days) {
-            if (!confirm(`Kya aap ₹${price} ka "${title}" activate karna chahte hain?`)) return;
+ async function buySeedPlan(title, price, daily, days) {
+    if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) activate karna chahte hain?`)) return;
 
-            const sb = getSupabase();
-            if (!sb) return alert("Database connecting... Kripya dobara try karein.");
+    const sb = getSupabase();
+    if (!sb) return alert("Database connecting... Kripya dobara try karein!");
 
-            try {
-                const { data: userProfile, error: uErr } = await sb
-                    .from('profiles')
-                    .select('balance, id, phone')
-                    .eq('id', activeUser.id)
-                    .single();
+    try {
+        const { data: userProfile, error: uErr } = await sb
+            .from('profiles')
+            .select('balance, id, phone')
+            .eq('id', activeUser.id)
+            .single();
 
-                if (uErr || !userProfile) throw new Error("Balance check failed.");
+        if (uErr || !userProfile) throw new Error("Balance check failed.");
 
-                const curBal = parseFloat(userProfile.balance || 0);
-                if (curBal < price) {
-                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
-                    window.location.href = 'recharge.html';
-                    return;
-                }
-
-                // Deduct balance
-                const newBal = curBal - price;
-                await sb.from('profiles').update({ balance: newBal }).eq('id', activeUser.id);
-                activeUser.balance = newBal;
-                setSessionUser(activeUser);
-
-                // Single Order Insert
-                const { error: ordErr } = await sb.from('orders').insert([{
-                    user_id: activeUser.id,
-                    phone: activeUser.phone,
-                    plan_name: title,
-                    price: price,
-                    daily_income: daily,
-                    validity_days: days,
-                    days_remaining: days,
-                    status: 'active'
-                }]);
-
-                if (ordErr) throw ordErr;
-
-                // User purchase transaction log
-                await sb.from('transactions').insert([{
-                    user_id: activeUser.id,
-                    type: 'purchase',
-                    amount: price,
-                    details: `Activated ${title}`
-                }]);
-
-                // Single Commission Call via RPC
-                await sb.rpc('distribute_plan_commission', {
-                    buyer_id: activeUser.id,
-                    buyer_phone: activeUser.phone,
-                    plan_price: price,
-                    plan_title: title
-                });
-
-                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} profit credit hoga.`);
-                window.location.href = 'orders.html';
-
-            } catch (err) {
-                alert("Purchase Error: " + err.message);
-            }
+        const curBal = parseFloat(userProfile.balance || 0);
+        if (curBal < price) {
+            alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
+            window.location.href = 'recharge.html';
+            return;
         }
+
+        // Expiry Date & Total Yield calculation
+        const now = new Date();
+        const expiryDate = new Date();
+        expiryDate.setDate(now.getDate() + parseInt(days));
+        const totalYield = parseFloat(daily) * parseInt(days);
+
+        // 1. Deduct balance from profile
+        const newBal = curBal - price;
+        const { error: deductErr } = await sb
+            .from('profiles')
+            .update({ balance: newBal })
+            .eq('id', activeUser.id);
+
+        if (deductErr) throw deductErr;
+
+        // 2. Insert order with updated duration and end_date
+        const { error: ordErr } = await sb.from('orders').insert([{
+            user_id: activeUser.id,
+            phone: activeUser.phone,
+            plan_name: title,
+            price: price,
+            daily_income: daily,
+            validity_days: days,
+            days_remaining: days,
+            duration: days,
+            total_income: totalYield,
+            status: 'active',
+            created_at: now.toISOString(),
+            end_date: expiryDate.toISOString()
+        }]);
+
+        if (ordErr) throw ordErr;
+
+        // 3. User purchase transaction log
+        await sb.from('transactions').insert([{
+            user_id: activeUser.id,
+            type: 'purchase',
+            amount: price,
+            details: `Activated ${title}`
+        }]);
+
+        // 4. Commission Call via RPC (Preserved)
+        try {
+            await sb.rpc('distribute_plan_commission', {
+                buyer_id: activeUser.id,
+                buyer_phone: activeUser.phone,
+                plan_price: price,
+                plan_title: title
+            });
+        } catch (commErr) {
+            console.warn("Commission RPC notice:", commErr);
+        }
+
+        // 5. Session update
+        activeUser.balance = newBal;
+        localStorage.setItem('agro_user', JSON.stringify(activeUser));
+
+        alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily}`);
+        window.location.href = 'orders.html';
+
+    } catch (err) {
+        alert("Purchase Error: " + err.message);
+    }
+        }
+        
 
         function openInviteModal() {
             const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
