@@ -93,7 +93,8 @@
             </div>
 
             <div class="rules-tag">
-                ⏰ Payout Time: 00:30 AM to 05:00 PM | Limit: 1 request per day.
+                ⏰ Payout Time: 07:00 AM to 05:00 PM | Limit: 1 request per day.
+                
             </div>
 
             <button onclick="submitWithdrawalRequest()" id="btnSubmitWd" class="btn-withdraw">
@@ -167,6 +168,11 @@ async function submitWithdrawalRequest() {
     const acc = document.getElementById('accNumber').value.trim();
     const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
     const btn = document.getElementById('btnSubmitWd');
+    // Strict Payout Time Check (07:00 AM to 05:00 PM)
+    const currentHour = new Date().getHours();
+    if (currentHour < 7 || currentHour >= 17) {
+        return alert("⏰ Payout Service abhi band hai!\nWithdrawal subha 07:00 AM se shaam 05:00 PM ke beech hi uplabdh hai.");
+    }
 
     if (isNaN(amt) || amt < 199) return alert("Minimum withdrawal amount ₹199 hai!");
     if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
