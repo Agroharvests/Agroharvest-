@@ -34,11 +34,8 @@
         .proofs-live-tag { font-size: 9px; background: #dc2626; color: white; padding: 2px 6px; border-radius: 6px; font-weight: 700; text-transform: uppercase; animation: pulseGlow 1.5s infinite; }
         .proofs-banner-right { font-size: 13px; color: #a7f3d0; background: rgba(255,255,255,0.08); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         @keyframes pulseGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-                .balance-strip { margin: 6px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .balance-item p { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 3px; }
-        .balance-item h2 { font-size: 18px; font-weight: 800; color: #16a34a; }
 
-        .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 6px 14px; }
+        .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 14px; }
         .act-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.15s; }
         .act-box:active { transform: scale(0.95); }
         .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 16px; }
@@ -49,7 +46,7 @@
         .section-bar span { font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 8px; border-radius: 12px; }
 
         .plan-list { display: flex; flex-direction: column; gap: 10px; }
-        .plan-card-pro { background: #ffffff; border-radius: 20px; padding: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
+        .plan-card-pro { background: #ffffff; border-radius: 20px; padding: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,0.05); border: 2px solid transparent; }
         .plan-starter { border-color: #16a34a; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
         .plan-gold { border-color: #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 40%); }
         .plan-diamond { border-color: #0ea5e9; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
@@ -72,7 +69,7 @@
         .spec-col p { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
         .spec-col h4 { font-size: 12px; font-weight: 800; color: #0f172a; }
 
-        .btn-invest { width: 100%; border: none; padding: 10px; border-radius: 12px; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; position: relative; z-index: 10; pointer-events: auto !important; }
+        .btn-invest { width: 100%; border: none; padding: 10px; border-radius: 12px; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; }
         .btn-invest-green { background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 4px 12px rgba(22,163,74,0.25); }
         .btn-invest-gold { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 12px rgba(245,158,11,0.25); }
         .btn-invest-diamond { background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 4px 12px rgba(14,165,233,0.25); }
@@ -111,10 +108,9 @@
         .amt-withdraw { color: #dc2626; }
     </style>
 </head>
-    
 <body>
     <div class="app-container">
-        <!-- Brand Header Bar -->
+                <!-- Brand Header Bar -->
         <div class="brand-bar">
             <div class="top-left">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
@@ -144,15 +140,13 @@
             <div class="proofs-banner-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
 
-        
-        
         <!-- Quick Navigation Bar -->
         <div class="action-row">
             <a href="recharge.html" class="act-box">
                 <div class="act-icon" style="background: #dcfce7; color: #16a34a;"><i class="fa-solid fa-bolt"></i></div>
                 <span>Recharge</span>
             </a>
-            <a href="crops.html" class="act-box">
+            <a href="orders.html" class="act-box">
                 <div class="act-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-seedling"></i></div>
                 <span>My Crops</span>
             </a>
@@ -182,7 +176,7 @@
             <h3>Available Crop Plans</h3>
             <span>Flexible Harvest Cycles</span>
         </div>
-                <div class="plan-list" style="padding: 4px 14px 14px;">
+        <div class="plan-list" style="padding: 4px 14px 14px;">
             <!-- Plan 1: Green Starter -->
             <div class="plan-card-pro plan-starter">
                 <div class="ribbon-badge ribbon-green"><i class="fa-solid fa-star"></i> 781% YIELD</div>
@@ -247,9 +241,8 @@
                 <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-diamond">
                     Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
-            </div>
-
-            <!-- Plan 4: Platinum VIP 1 (Upcoming) -->
+                            </div>
+                                                                            <!-- Plan 4: Platinum VIP 1 (Upcoming) -->
             <div class="plan-card-pro plan-platinum">
                 <div class="ribbon-badge ribbon-locked" id="badge4999"><i class="fa-solid fa-lock"></i> Upcoming</div>
                 <div class="plan-head">
@@ -266,7 +259,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹1,05,000</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">70 Days</h4></div>
                 </div>
-                <button id="btnPlan4999" onclick="tryBuyUpPlan('Platinum Agro', 4999, 1500, 70, 'plan_4999_open')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan4999" onclick="tryBuyUpPlan('Platinum Agro')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
@@ -288,7 +281,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹2,88,000</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">90 Days</h4></div>
                 </div>
-                <button id="btnPlan9999" onclick="tryBuyUpPlan('Royal Empire', 9999, 3200, 90, 'plan_9999_open')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan9999" onclick="tryBuyUpPlan('Royal Empire')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
@@ -297,12 +290,12 @@
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a href="crops.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
+            <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
             <a href="team.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Team</span></a>
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Invite Modal (Default Closed) -->
+        <!-- Invite Modal -->
         <div id="inviteModal" class="modal-overlay" style="display: none;" onclick="closeInviteModal(event)">
             <div class="modal-box">
                 <div class="modal-gift-icon"><i class="fa-solid fa-gift"></i></div>
@@ -318,7 +311,7 @@
             </div>
         </div>
 
-        <!-- Welcome Popup Modal (Fixed: default display none) -->
+        <!-- Welcome Popup Modal -->
         <div id="welcomePopup" class="modal-overlay" style="display: none;">
             <div class="modal-box">
                 <div class="modal-gift-icon"><i class="fa-solid fa-bullhorn"></i></div>
@@ -329,14 +322,10 @@
         </div>
     </div>
         <script>
-        const activeUser = getActiveUser();
-        if (!activeUser) {
-            window.location.replace('login.html');
-        }
+        var activeUser = (typeof getActiveUser === 'function') ? getActiveUser() : null;
 
         document.addEventListener('DOMContentLoaded', () => {
             checkAndShowWelcomePopup();
-            loadDashboard();
             checkUpcomingPlans();
         });
 
@@ -354,8 +343,12 @@
             localStorage.setItem('agro_welcome_shown', 'true');
         }
 
+        function tryBuyUpPlan(title) {
+            alert('⚠️ ' + title + ' abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
+        }
+
         async function checkUpcomingPlans() {
-            const sb = getSupabase();
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) return;
             try {
                 const { data: settings } = await sb.from('admin_settings').select('*');
@@ -364,19 +357,25 @@
                     const p9999 = settings.find(s => s.key === 'plan_9999_open');
 
                     if (p4999 && p4999.value == '1') {
-                        document.getElementById('badge4999').className = 'ribbon-badge ribbon-green';
-                        document.getElementById('badge4999').innerText = 'VIP Active';
-                        const btn = document.getElementById('btnPlan4999');
-                        btn.className = 'btn-invest btn-invest-green';
-                        btn.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                        const b4 = document.getElementById('badge4999');
+                        if (b4) { b4.className = 'ribbon-badge ribbon-green'; b4.innerText = 'VIP Active'; }
+                        const btn4 = document.getElementById('btnPlan4999');
+                        if (btn4) {
+                            btn4.className = 'btn-invest btn-invest-green';
+                            btn4.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                            btn4.setAttribute('onclick', "buySeedPlan('Platinum Agro', 4999, 1500, 70)");
+                        }
                     }
 
                     if (p9999 && p9999.value == '1') {
-                        document.getElementById('badge9999').className = 'ribbon-badge ribbon-gold';
-                        document.getElementById('badge9999').innerText = '👑 VIP Active';
-                        const btn = document.getElementById('btnPlan9999');
-                        btn.className = 'btn-invest btn-invest-gold';
-                        btn.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                        const b9 = document.getElementById('badge9999');
+                        if (b9) { b9.className = 'ribbon-badge ribbon-gold'; b9.innerText = '👑 VIP Active'; }
+                        const btn9 = document.getElementById('btnPlan9999');
+                        if (btn9) {
+                            btn9.className = 'btn-invest btn-invest-gold';
+                            btn9.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                            btn9.setAttribute('onclick', "buySeedPlan('Royal Empire', 9999, 3200, 90)");
+                        }
                     }
                 }
             } catch (e) {
@@ -384,149 +383,95 @@
             }
         }
 
-         {
-    var sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-    if (!sb) return;
+        async function buySeedPlan(title, price, daily, days) {
+            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-    // 1. Session dhoondein
-    var user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
-    if (!user) {
-        var keys = ['agro_user', 'active_user', 'user', 'session_user'];
-        for (var i = 0; i < keys.length; i++) {
-            var raw = localStorage.getItem(keys[i]);
-            if (raw) {
-                try { user = JSON.parse(raw); break; } catch(e) {}
-            }
-        }
-    }
-
-    if (!user) return;
-
-    try {
-        // 2. Database se fresh balance fetch karein
-        var query = sb.from('profiles').select('balance, team_income');
-        if (user.id) {
-            query = query.eq('id', user.id);
-        } else if (user.phone) {
-            query = query.eq('phone', user.phone);
-        }
-
-        var { data: profile, error: err } = await query.single();
-
-        if (profile && !err) {
-            // 3. Screen par balance print karein
-            var balElem = document.getElementById('totalBalDisplay');
-            var incElem = document.getElementById('teamIncDisplay');
-
-            if (balElem) {
-                balElem.innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
-            }
-            if (incElem) {
-                incElem.innerText = '₹' + parseFloat(profile.team_income || 0).toFixed(2);
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (!sb) {
+                alert("Database connection error! Page reload karein.");
+                return;
             }
 
-            // LocalStorage sync
-            user.balance = profile.balance;
-            localStorage.setItem('agro_user', JSON.stringify(user));
-        }
-    } catch (e) {
-        console.error("Dashboard error:", e);
-    }
+            let user = null;
+            const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+            for (let k of keys) {
+                const raw = localStorage.getItem(k);
+                if (raw) {
+                    try { user = JSON.parse(raw); break; } catch(e) {}
+                }
             }
-            
-            // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
-            
-async function buySeedPlan(title, price, daily, days) {
-    if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-    const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-    if (!sb) {
-        alert("Database connection error! Page reload karein.");
-        return;
-    }
+            let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
+            let userId = (user && user.id) ? user.id : null;
 
-    let user = null;
-    const keys = ['agro_user', 'active_user', 'user', 'session_user'];
-    for (let k of keys) {
-        const raw = localStorage.getItem(k);
-        if (raw) {
-            try { user = JSON.parse(raw); break; } catch(e) {}
+            if (!userPhone && !userId) {
+                userPhone = prompt("Session verify nahi hua. Registered mobile number dalein:");
+                if (!userPhone) return;
+            }
+
+            try {
+                let query = sb.from('profiles').select('*');
+                if (userId) query = query.eq('id', userId);
+                else query = query.eq('phone', userPhone.trim());
+
+                const { data: prof, error: pErr } = await query.single();
+                if (pErr || !prof) {
+                    alert("Record nahi mila! Sahi number dalein ya login karein.");
+                    return;
+                }
+
+                const curBal = parseFloat(prof.balance || 0);
+                if (curBal < price) {
+                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein!`);
+                    window.location.href = 'recharge.html';
+                    return;
+                }
+
+                const newBal = curBal - price;
+
+                // 1. Balance deduct karein
+                const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
+                if (dErr) throw dErr;
+
+                // 2. Orders table entry
+                const now = new Date();
+                const expDate = new Date();
+                expDate.setDate(now.getDate() + parseInt(days));
+
+                await sb.from('orders').insert([{
+                    user_id: prof.id,
+                    phone: prof.phone,
+                    plan_name: title,
+                    price: price,
+                    daily_income: daily,
+                    validity_days: days,
+                    days_remaining: days,
+                    duration: days,
+                    total_income: parseFloat(daily) * parseInt(days),
+                    status: 'active',
+                    created_at: now.toISOString(),
+                    end_date: expDate.toISOString()
+                }]);
+
+                // 3. Transactions entry
+                await sb.from('transactions').insert([{
+                    user_id: prof.id,
+                    type: 'purchase',
+                    amount: price,
+                    details: `Activated ${title}`
+                }]);
+
+                // Local storage update
+                localStorage.setItem('agro_user', JSON.stringify(prof));
+
+                alert(`🎉 Badhai ho! "${title}" plan activate ho gaya!`);
+                window.location.href = 'orders.html';
+
+            } catch (err) {
+                alert("Error: " + (err.message || JSON.stringify(err)));
+            }
         }
-    }
-
-    let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
-    let userId = (user && user.id) ? user.id : null;
-
-    if (!userPhone && !userId) {
-        userPhone = prompt("Session verify nahi hua. Registered mobile number dalein:");
-        if (!userPhone) return;
-    }
-
-    try {
-        let query = sb.from('profiles').select('*');
-        if (userId) query = query.eq('id', userId);
-        else query = query.eq('phone', userPhone.trim());
-
-        const { data: prof, error: pErr } = await query.single();
-        if (pErr || !prof) {
-            alert("Record nahi mila! Sahi number dalein.");
-            return;
-        }
-
-        const curBal = parseFloat(prof.balance || 0);
-        if (curBal < price) {
-            alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}`);
-            return;
-        }
-
-        const newBal = curBal - price;
-
-        // Balance katna
-        const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
-        if (dErr) throw dErr;
-
-        // Order insert
-        const now = new Date();
-        const expDate = new Date();
-        expDate.setDate(now.getDate() + parseInt(days));
-
-        await sb.from('orders').insert([{
-            user_id: prof.id,
-            phone: prof.phone,
-            plan_name: title,
-            price: price,
-            daily_income: daily,
-            validity_days: days,
-            days_remaining: days,
-            duration: days,
-            total_income: parseFloat(daily) * parseInt(days),
-            status: 'active',
-            created_at: now.toISOString(),
-            end_date: expDate.toISOString()
-        }]);
-
-        // Transaction log
-        await sb.from('transactions').insert([{
-            user_id: prof.id,
-            type: 'purchase',
-            amount: price,
-            details: `Activated ${title}`
-        }]);
-
-        // Storage update
-        localStorage.setItem('agro_user', JSON.stringify(prof));
-
-        alert(`🎉 Badhai ho! "${title}" plan activate ho gaya!`);
-        window.location.href = 'orders.html';
-
-    } catch (err) {
-        alert("Error: " + (err.message || JSON.stringify(err)));
-    }
-                  }
-            
-        
-                    
-        function openInviteModal() {
+                    function openInviteModal() {
             const modal = document.getElementById('inviteModal');
             if (modal) modal.style.display = 'flex';
         }
@@ -544,7 +489,8 @@ async function buySeedPlan(title, price, daily, days) {
 
         function copyRefLink() {
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const refCode = activeUser ? (activeUser.referral_code || '') : '';
+            const link = `${base}register.html?ref=${refCode}`;
             navigator.clipboard.writeText(link).then(() => {
                 alert("Referral link copied to clipboard!");
             });
@@ -552,44 +498,34 @@ async function buySeedPlan(title, price, daily, days) {
 
         function shareViaWhatsApp() {
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const refCode = activeUser ? (activeUser.referral_code || '') : '';
+            const link = `${base}register.html?ref=${refCode}`;
             const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`);
         }
 
         function shareViaTelegram() {
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const refCode = activeUser ? (activeUser.referral_code || '') : '';
+            const link = `${base}register.html?ref=${refCode}`;
             const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
             window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
         }
 
         function shareViaFacebook() {
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const refCode = activeUser ? (activeUser.referral_code || '') : '';
+            const link = `${base}register.html?ref=${refCode}`;
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
         }
 
-        // ================= LIVE TRANSACTIONS TICKER =================
+        // Live Transactions Ticker
         (function() {
-            const now = new Date();
-            const day = now.getDay(); // 1 = Monday, 4 = Thursday
-            const hr = now.getHours();
-            const isWithdrawOpen = (day === 1 || day === 4) && (hr >= 7 && hr < 17);
-
             const txList = [
                 { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
                 { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
                 { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
             ];
-
-            if (isWithdrawOpen) {
-                txList.push(
-                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
-                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
-                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
-                );
-            }
 
             function getRandomPhone() {
                 const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
@@ -612,7 +548,7 @@ async function buySeedPlan(title, price, daily, days) {
                             <span>${item.type}</span>
                         </div>
                     </div>
-                    <div class="tx-amount ${item.type === 'Withdrawal' ? 'amt-withdraw' : 'amt-plan'}">
+                    <div class="tx-amount amt-plan">
                         ${item.amt}
                     </div>
                 `;
@@ -642,9 +578,7 @@ async function buySeedPlan(title, price, daily, days) {
             } else {
                 document.addEventListener('DOMContentLoaded', startTicker);
             }
-            setTimeout(startTicker, 500);
         })();
     </script>
 </body>
-    </html>
-
+</html>
