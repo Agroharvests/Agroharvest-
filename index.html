@@ -413,104 +413,71 @@
         function tryBuyUpPlan(title, price, daily, days, settingKey) {
             alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
                 }
-        async function buySeedPlan(title, price, daily, days) {
+        
+            // Agar auth se na mile toh localStorage ke alag alag keys check karein
+      
+                
+                async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-            // 1. Supabase Client find karein
-            let sb = null;
-            if (typeof getSupabase === 'function') sb = getSupabase();
-            if (!sb && typeof supabase !== 'undefined') sb = supabase;
-            if (!sb && window.supabaseClient) sb = window.supabaseClient;
-            if (!sb && window.sb) sb = window.sb;
-
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) {
-                alert("Database Error: Supabase client nahi mila. Page refresh karein!");
+                alert("Database Error! Page refresh karein.");
                 return;
             }
 
-            // 2. Multi-source User Check (Auth Session + Storage)
-            let curUserId = null;
-            let curUserPhone = null;
-
-            try {
-                // Pehle active session check
-                const { data: sessionData } = await sb.auth.getSession();
-                if (sessionData && sessionData.session && sessionData.session.user) {
-                    curUserId = sessionData.session.user.id;
-                    curUserPhone = sessionData.session.user.phone;
-                }
-            } catch (e) {}
-
-            // Agar auth se na mile toh localStorage ke alag alag keys check karein
-            if (!curUserId && !curUserPhone) {
-                for (let key of ['agro_user', 'active_user', 'user', 'sb-user', 'supabase.auth.token']) {
-                    try {
-                        const item = localStorage.getItem(key);
-                        if (item) {
-                            const parsed = JSON.parse(item);
-                            if (parsed.id || parsed.phone) {
-                                curUserId = parsed.id || null;
-                                curUserPhone = parsed.phone || null;
-                                break;
-                            }
-                            if (parsed.user && (parsed.user.id || parsed.user.phone)) {
-                                curUserId = parsed.user.id || null;
-                                curUserPhone = parsed.user.phone || null;
-                                break;
-                            }
-                            if (parsed.currentSession && parsed.currentSession.user) {
-                                curUserId = parsed.currentSession.user.id;
-                                curUserPhone = parsed.currentSession.user.phone;
-                                break;
-                            }
-                        }
-                    } catch (e) {}
+            // Sabhi storage keys check karein
+            let user = null;
+            const possibleKeys = ['agro_user', 'user', 'active_user', 'session_user', 'agroUser'];
+            for (let k of possibleKeys) {
+                const val = localStorage.getItem(k);
+                if (val) {
+                    try { user = JSON.parse(val); break; } catch(e) {}
                 }
             }
 
-            // Window variable fallback
-            if (!curUserId && window.activeUser) {
-                curUserId = window.activeUser.id || null;
-                curUserPhone = window.activeUser.phone || null;
-            }
+            // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
+            let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
+            let userId = (user && user.id) ? user.id : null;
 
-            // Agar bilkul koi record na mile
-            if (!curUserId && !curUserPhone) {
-                alert("Aapka account login nahi hai. Kripya pehle Login karein!");
-                window.location.href = 'login.html';
-                return;
+            if (!userPhone && !userId) {
+                userPhone = prompt("Aap logged-out hain. Kripya apna registered Mobile Number dalein:");
+                if (!userPhone) return;
             }
 
             try {
-                // 3. User balance fetch karein
+                // Profile check
                 let query = sb.from('profiles').select('id, phone, balance');
-                if (curUserId) query = query.eq('id', curUserId);
-                else query = query.eq('phone', curUserPhone);
+                if (userId) query = query.eq('id', userId);
+                else query = query.eq('phone', userPhone.trim());
 
-                const { data: prof, error: pErr } = await query.single();
-                if (pErr || !prof) throw new Error("Profile verify nahi hui: " + (pErr ? pErr.message : "User record missing"));
+                const { data: profileData, error: profErr } = await query.single();
+                if (profErr || !profileData) {
+                    alert("Account nahi mila! Pehle register/login karein.");
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-                const curBal = parseFloat(prof.balance || 0);
+                const curBal = parseFloat(profileData.balance || 0);
                 if (curBal < price) {
-                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein!`);
+                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle recharge karein.`);
                     window.location.href = 'recharge.html';
                     return;
                 }
 
                 const newBal = curBal - price;
 
-                // 4. Balance deduct karein
-                const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
-                if (dErr) throw new Error("Balance deduct error: " + dErr.message);
+                // 1. Balance Minus
+                await sb.from('profiles').update({ balance: newBal }).eq('id', profileData.id);
 
-                // 5. Orders table entry
+                // 2. Orders Table Entry
                 const now = new Date();
                 const expDate = new Date();
                 expDate.setDate(now.getDate() + parseInt(days));
 
                 await sb.from('orders').insert([{
-                    user_id: prof.id,
-                    phone: prof.phone,
+                    user_id: profileData.id,
+                    phone: profileData.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -523,27 +490,24 @@
                     end_date: expDate.toISOString()
                 }]);
 
-                // 6. Transactions table entry
+                // 3. Transactions Entry
                 await sb.from('transactions').insert([{
-                    user_id: prof.id,
+                    user_id: profileData.id,
                     type: 'purchase',
                     amount: price,
                     details: `Activated ${title}`
                 }]);
 
-                // Screen UI Update
-                const balText = document.getElementById('totalBalDisplay');
-                if (balText) balText.innerText = '₹' + newBal.toFixed(2);
-
-                alert(`🎉 Badhai ho! "${title}" plan successfully activate ho gaya!`);
+                // Local user update
+                localStorage.setItem('agro_user', JSON.stringify(profileData));
+                alert(`🎉 Badhai ho! "${title}" plan activate ho gaya!`);
                 window.location.href = 'crops.html';
 
             } catch (err) {
-                alert("Purchase Error: " + (err.message || JSON.stringify(err)));
+                alert("Error: " + (err.message || JSON.stringify(err)));
             }
-                              }
-                
-                
+                }
+                    
 
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
