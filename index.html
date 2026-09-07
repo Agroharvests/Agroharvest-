@@ -293,20 +293,21 @@
         </div>
 
         <!-- Invite Modal -->
-        <div id="inviteModal" class="modal-overlay" style="display: none;" onclick="closeInviteModal(event)">
-            <div class="modal-box">
-                <div class="modal-gift-icon"><i class="fa-solid fa-gift"></i></div>
-                <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Invite & Earn 28%</h3>
-                <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 12px;">Earn L1 25%, L2 2%, and L3 1% direct commissions instantly.</p>
-                <div class="ref-box-grid">
-                    <button onclick="shareViaWhatsApp()" class="social-box btn-whatsapp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
-                    <button onclick="shareViaTelegram()" class="social-box btn-telegram"><i class="fa-brands fa-telegram"></i><span>Telegram</span></button>
-                    <button onclick="shareViaFacebook()" class="social-box btn-facebook"><i class="fa-brands fa-facebook"></i><span>Facebook</span></button>
-                </div>
-                <button onclick="copyRefLink()" class="btn-copy-main"><i class="fa-regular fa-copy"></i> Copy Referral Link</button>
-                <button onclick="closeInviteModalForce()" style="width: 100%; background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 12px; margin-top: 10px; cursor: pointer;">Close Window</button>
-            </div>
+<div id="inviteModal" class="modal-overlay" style="display: none;" onclick="closeInviteModal(event)">
+    <div class="modal-box">
+        <div class="modal-gift-icon"><i class="fa-solid fa-gift"></i></div>
+        <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Invite & Earn 28%</h3>
+        <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 12px;">Earn L1 25%, L2 2%, and L3 1% direct commissions instantly.</p>
+        <div class="ref-box-grid">
+            <button id="btnShareWA" class="social-box btn-whatsapp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
+            <button id="btnShareTG" class="social-box btn-telegram"><i class="fa-brands fa-telegram"></i><span>Telegram</span></button>
+            <button id="btnShareFB" class="social-box btn-facebook"><i class="fa-brands fa-facebook"></i><span>Facebook</span></button>
         </div>
+        <button id="btnCopyRef" class="btn-copy-main"><i class="fa-regular fa-copy"></i> Copy Referral Link</button>
+        <button onclick="closeInviteModalForce()" style="width: 100%; background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 12px; margin-top: 10px; cursor: pointer;">Close Window</button>
+    </div>
+</div>
+        
 
         <!-- Welcome Popup Modal -->
         <div id="welcomePopup" class="modal-overlay" style="display: none;">
