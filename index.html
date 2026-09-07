@@ -413,10 +413,10 @@
         function tryBuyUpPlan(title, price, daily, days, settingKey) {
             alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
                 }
-                    async function buySeedPlan(title, price, daily, days) {
+        async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-            // 1. Supabase Client dhoondein
+            // 1. Supabase Client find karein
             let sb = null;
             if (typeof getSupabase === 'function') sb = getSupabase();
             if (!sb && typeof supabase !== 'undefined') sb = supabase;
@@ -424,34 +424,71 @@
             if (!sb && window.sb) sb = window.sb;
 
             if (!sb) {
-                alert("Database Error: Supabase client nahi mila. Page reload karein!");
+                alert("Database Error: Supabase client nahi mila. Page refresh karein!");
                 return;
             }
 
-            // 2. User fetch karein
-            let user = window.activeUser || (typeof getActiveUser === 'function' ? getActiveUser() : null);
-            if (!user) {
-                try {
-                    user = JSON.parse(localStorage.getItem('agro_user')) || 
-                           JSON.parse(localStorage.getItem('active_user')) || 
-                           JSON.parse(localStorage.getItem('user'));
-                } catch (e) {}
+            // 2. Multi-source User Check (Auth Session + Storage)
+            let curUserId = null;
+            let curUserPhone = null;
+
+            try {
+                // Pehle active session check
+                const { data: sessionData } = await sb.auth.getSession();
+                if (sessionData && sessionData.session && sessionData.session.user) {
+                    curUserId = sessionData.session.user.id;
+                    curUserPhone = sessionData.session.user.phone;
+                }
+            } catch (e) {}
+
+            // Agar auth se na mile toh localStorage ke alag alag keys check karein
+            if (!curUserId && !curUserPhone) {
+                for (let key of ['agro_user', 'active_user', 'user', 'sb-user', 'supabase.auth.token']) {
+                    try {
+                        const item = localStorage.getItem(key);
+                        if (item) {
+                            const parsed = JSON.parse(item);
+                            if (parsed.id || parsed.phone) {
+                                curUserId = parsed.id || null;
+                                curUserPhone = parsed.phone || null;
+                                break;
+                            }
+                            if (parsed.user && (parsed.user.id || parsed.user.phone)) {
+                                curUserId = parsed.user.id || null;
+                                curUserPhone = parsed.user.phone || null;
+                                break;
+                            }
+                            if (parsed.currentSession && parsed.currentSession.user) {
+                                curUserId = parsed.currentSession.user.id;
+                                curUserPhone = parsed.currentSession.user.phone;
+                                break;
+                            }
+                        }
+                    } catch (e) {}
+                }
             }
 
-            if (!user || (!user.id && !user.phone)) {
-                alert("Session expire ho gaya hai! Kripya dobara login karein.");
+            // Window variable fallback
+            if (!curUserId && window.activeUser) {
+                curUserId = window.activeUser.id || null;
+                curUserPhone = window.activeUser.phone || null;
+            }
+
+            // Agar bilkul koi record na mile
+            if (!curUserId && !curUserPhone) {
+                alert("Aapka account login nahi hai. Kripya pehle Login karein!");
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // 3. Balance fetch karein
+                // 3. User balance fetch karein
                 let query = sb.from('profiles').select('id, phone, balance');
-                if (user.id) query = query.eq('id', user.id);
-                else query = query.eq('phone', user.phone);
+                if (curUserId) query = query.eq('id', curUserId);
+                else query = query.eq('phone', curUserPhone);
 
                 const { data: prof, error: pErr } = await query.single();
-                if (pErr || !prof) throw new Error("Profile verify nahi hui: " + (pErr ? pErr.message : "Not found"));
+                if (pErr || !prof) throw new Error("Profile verify nahi hui: " + (pErr ? pErr.message : "User record missing"));
 
                 const curBal = parseFloat(prof.balance || 0);
                 if (curBal < price) {
@@ -466,14 +503,14 @@
                 const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
                 if (dErr) throw new Error("Balance deduct error: " + dErr.message);
 
-                // 5. Order table me entry
+                // 5. Orders table entry
                 const now = new Date();
                 const expDate = new Date();
                 expDate.setDate(now.getDate() + parseInt(days));
 
-                const { error: oErr } = await sb.from('orders').insert([{
+                await sb.from('orders').insert([{
                     user_id: prof.id,
-                    phone: prof.phone || user.phone,
+                    phone: prof.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -486,8 +523,6 @@
                     end_date: expDate.toISOString()
                 }]);
 
-                if (oErr) console.warn("Orders insert warning:", oErr);
-
                 // 6. Transactions table entry
                 await sb.from('transactions').insert([{
                     user_id: prof.id,
@@ -496,9 +531,7 @@
                     details: `Activated ${title}`
                 }]);
 
-                // Local state update
-                user.balance = newBal;
-                localStorage.setItem('agro_user', JSON.stringify(user));
+                // Screen UI Update
                 const balText = document.getElementById('totalBalDisplay');
                 if (balText) balText.innerText = '₹' + newBal.toFixed(2);
 
@@ -508,7 +541,8 @@
             } catch (err) {
                 alert("Purchase Error: " + (err.message || JSON.stringify(err)));
             }
-                      }
+                              }
+                
                 
 
         function openInviteModal() {
