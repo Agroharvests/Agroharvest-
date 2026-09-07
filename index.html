@@ -613,67 +613,73 @@
             </button>
         </div>
                     
+        <!-- Fully Responsive Welcome Popup Modal -->
+<div id="welcomeModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; z-index: 999999; padding: 16px; box-sizing: border-box;">
+    <div style="background: #ffffff; width: 100%; max-width: 360px; border-radius: 24px; padding: 20px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); max-height: 90vh; overflow-y: auto; text-align: center; box-sizing: border-box;">
         
-        <!-- Welcome Bonus & Channel Popup -->
-<div id="welcomePopup" class="welcome-modal-overlay">
-    <div class="welcome-card">
-        <h2 class="welcome-title">Welcome to AgroHarvest</h2>
-        <p class="welcome-sub">Daily income, daily withdrawal</p>
+        <!-- Header -->
+        <h3 style="margin: 0 0 4px 0; font-size: 20px; font-weight: 800; color: #0f172a;">Welcome to AgroHarvest</h3>
+        <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b; font-weight: 600;">Daily Income, daily withdrawal</p>
 
-        <!-- Bonus Strip -->
-        <div class="bonus-banner">
-            <div class="bonus-icon-wrap">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-            <div class="bonus-info">
-                <span>Signup Bonus</span>
-                <strong>₹50</strong>
+        <!-- Bonus Banner -->
+        <div style="background: #1d4ed8; color: #ffffff; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <i class="fa-solid fa-trophy" style="font-size: 24px;"></i>
+            <div style="text-align: left;">
+                <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; display: block; font-weight: 700;">SIGNUP BONUS</span>
+                <strong style="font-size: 20px;">₹50</strong>
             </div>
         </div>
 
-<div class="two-col-grid">
-    <div class="metric-pill">
-        <span>Min Deposit</span>
-        <strong>₹499</strong>
-    </div>
-    <div class="metric-pill">
-        <span>Min Withdraw</span>
-        <strong>₹199</strong>
-    </div>
-</div>
-        
-
-        <!-- Invitation Commission Levels -->
-        <div class="commission-section-label">Invitation Commission</div>
-        <div class="three-col-grid">
-            <div class="comm-pill">
-                <span>Level 1</span>
-                <strong>25%</strong>
+        <!-- Limits Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px;">
+                <span style="font-size: 9px; color: #64748b; font-weight: 800; display: block;">MIN DEPOSIT</span>
+                <strong style="font-size: 14px; color: #0f172a;">₹499</strong>
             </div>
-            <div class="comm-pill">
-                <span>Level 2</span>
-                <strong>2%</strong>
-            </div>
-            <div class="comm-pill">
-                <span>Level 3</span>
-                <strong>1%</strong>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px;">
+                <span style="font-size: 9px; color: #64748b; font-weight: 800; display: block;">MIN WITHDRAW</span>
+                <strong style="font-size: 14px; color: #0f172a;">₹199</strong>
             </div>
         </div>
 
-        <!-- Action Buttons -->
-<div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 15px;">
-    <a href="https://t.me/Agroharvestofficial" target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #16a34a; color: #ffffff; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 14px; box-sizing: border-box;">
-        <i class="fa-brands fa-telegram" style="font-size: 18px;"></i> Join Channel
-    </a>
+        <!-- Invitation Commission -->
+        <div style="margin-bottom: 16px;">
+            <span style="font-size: 10px; font-weight: 800; color: #64748b; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">INVITATION COMMISSION</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; padding: 8px 4px;">
+                    <span style="font-size: 10px; color: #1e40af; display: block;">LEVEL 1</span>
+                    <strong style="font-size: 14px; color: #1e3a8a;">25%</strong>
+                </div>
+                <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; padding: 8px 4px;">
+                    <span style="font-size: 10px; color: #1e40af; display: block;">LEVEL 2</span>
+                    <strong style="font-size: 14px; color: #1e3a8a;">2%</strong>
+                </div>
+                <div style="background: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; padding: 8px 4px;">
+                    <span style="font-size: 10px; color: #1e40af; display: block;">LEVEL 3</span>
+                    <strong style="font-size: 14px; color: #1e3a8a;">1%</strong>
+                </div>
+            </div>
+        </div>
 
-    <a href="https://t.me/agroharvestcustomer" target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #0284c7; color: #ffffff; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 14px; box-sizing: border-box;">
-        <i class="fa-solid fa-headset" style="font-size: 18px;"></i> Customer Support
-    </a>
+        <!-- Action Buttons (Properly Spaced & Stacked) -->
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+            <a href="https://t.me/Agroharvestofficial" target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 0; background: #0088cc; color: #ffffff; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 14px; box-sizing: border-box;">
+                <i class="fa-brands fa-telegram" style="font-size: 18px;"></i> Join Channel
+            </a>
 
-    <button type="button" onclick="closeWelcomePopup()" style="background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 13px; padding: 6px; cursor: pointer;">
-        Maybe Later
-    </button>
-</div>
+            <a href="https://t.me/agroharvestcustomer" target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 0; background: #0284c7; color: #ffffff; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 14px; box-sizing: border-box;">
+                <i class="fa-solid fa-headset" style="font-size: 18px;"></i> Customer Support
+            </a>
+
+            <button type="button" onclick="closeWelcomePopup()" style="background: transparent; border: none; color: #94a3b8; font-weight: 700; font-size: 13px; padding: 8px 0; cursor: pointer;">
+                Maybe Later
+            </button>
+        </div>
+
+    </div>
+    </div>
+                        
+
         
                         <!-- Bottom Navigation -->
         <div class="bottom-nav">
