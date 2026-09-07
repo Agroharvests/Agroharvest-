@@ -34,4 +34,81 @@
         .proofs-live-tag { font-size: 9px; background: #dc2626; color: white; padding: 2px 6px; border-radius: 6px; font-weight: 700; text-transform: uppercase; animation: pulseGlow 1.5s infinite; }
         .proofs-banner-right { font-size: 13px; color: #a7f3d0; background: rgba(255,255,255,0.08); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         @keyframes pulseGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        
+                .balance-strip { margin: 6px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .balance-item p { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 3px; }
+        .balance-item h2 { font-size: 18px; font-weight: 800; color: #16a34a; }
+
+        .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 6px 14px; }
+        .act-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.15s; }
+        .act-box:active { transform: scale(0.95); }
+        .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 16px; }
+        .act-box span { font-size: 11px; font-weight: 800; display: block; letter-spacing: -0.2px; }
+
+        .section-bar { padding: 10px 15px 4px; display: flex; justify-content: space-between; align-items: center; }
+        .section-bar h3 { font-size: 14px; font-weight: 800; color: #0f172a; }
+        .section-bar span { font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 8px; border-radius: 12px; }
+
+        .plan-list { display: flex; flex-direction: column; gap: 10px; }
+        .plan-card-pro { background: #ffffff; border-radius: 20px; padding: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
+        .plan-starter { border-color: #16a34a; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
+        .plan-gold { border-color: #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 40%); }
+        .plan-diamond { border-color: #0ea5e9; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
+        .plan-platinum { border-color: #8b5cf6; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 40%); }
+        .plan-royal { border-color: #e11d48; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 40%); }
+
+        .ribbon-badge { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 10px; font-weight: 800; color: white; border-radius: 0 0 0 14px; text-transform: uppercase; }
+        .ribbon-green { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .ribbon-gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .ribbon-diamond { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .ribbon-locked { background: linear-gradient(135deg, #64748b, #475569); }
+
+        .plan-head { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+        .plan-img-wrap { width: 52px; height: 52px; border-radius: 12px; overflow: hidden; flex-shrink: 0; border: 1px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .plan-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .plan-title-block h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+        .plan-price-tag { font-size: 16px; font-weight: 800; }
+
+        .plan-spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; margin-bottom: 8px; text-align: center; }
+        .spec-col p { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+        .spec-col h4 { font-size: 12px; font-weight: 800; color: #0f172a; }
+
+        .btn-invest { width: 100%; border: none; padding: 10px; border-radius: 12px; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; position: relative; z-index: 10; pointer-events: auto !important; }
+        .btn-invest-green { background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 4px 12px rgba(22,163,74,0.25); }
+        .btn-invest-gold { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 12px rgba(245,158,11,0.25); }
+        .btn-invest-diamond { background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 4px 12px rgba(14,165,233,0.25); }
+        .btn-invest-locked { background: #64748b; cursor: not-allowed; box-shadow: none; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; padding: 20px; align-items: center; justify-content: center; }
+        .modal-box { background: #ffffff; width: 100%; max-width: 380px; border-radius: 20px; padding: 18px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-gift-icon { width: 50px; height: 50px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 22px; border: 2px solid #bbf7d0; }
+        .ref-box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
+        .social-box { border: none; padding: 8px; border-radius: 12px; color: white; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .btn-whatsapp { background: #25D366; }
+        .btn-telegram { background: #0088cc; }
+        .btn-facebook { background: #1877F2; }
+        .btn-copy-main { width: 100%; background: #0f172a; color: white; border: none; padding: 9px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #ffffff; backdrop-filter: blur(8px); border-top: 1px solid #f1f5f9; display: flex; justify-content: space-around; align-items: center; padding: 8px 0; z-index: 100; }
+        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 10px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .nav-item i { font-size: 17px; }
+        .nav-item.active { color: #16a34a; }
+
+        .tx-card { background: #ffffff; margin: 6px 14px; border-radius: 18px; padding: 12px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tx-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tx-card-header h3 { font-size: 13px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px; margin: 0; }
+        .live-badge { font-size: 9px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 2px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+        .tx-scroll-wrapper { position: relative; overflow: hidden; }
+        .tx-list { display: flex; flex-direction: column; gap: 6px; min-height: 120px; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; }
+        .tx-left { display: flex; align-items: center; gap: 8px; }
+        .tx-icon-box { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        .icon-plan { background: #fef3c7; color: #d97706; }
+        .icon-withdraw { background: #fee2e2; color: #dc2626; }
+        .tx-details strong { font-size: 12px; font-weight: 800; display: block; color: #0f172a; }
+        .tx-details span { font-size: 10px; color: #64748b; font-weight: 600; }
+        .tx-amount { font-size: 13px; font-weight: 800; }
+        .amt-plan { color: #d97706; }
+        .amt-withdraw { color: #dc2626; }
+    </style>
+</head>
+    
