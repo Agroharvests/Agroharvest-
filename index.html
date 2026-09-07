@@ -487,46 +487,56 @@
             if (modal) modal.style.display = 'none';
         }
 
+                function getDirectReferralCode() {
+            let u = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+            if (!u) {
+                const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+                for (let k of keys) {
+                    const raw = localStorage.getItem(k);
+                    if (raw) {
+                        try { u = JSON.parse(raw); break; } catch(e) {}
+                    }
+                }
+            }
+            return (u && (u.referral_code || u.ref_code)) ? (u.referral_code || u.ref_code) : '';
+        }
+
         function copyRefLink() {
+            const code = getDirectReferralCode();
+            if (!code) {
+                alert("Session load nahi hua. Ek baar page refresh karein!");
+                return;
+            }
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const refCode = activeUser ? (activeUser.referral_code || '') : '';
-            const link = `${base}register.html?ref=${refCode}`;
+            const link = `${base}register.html?ref=${code}`;
             navigator.clipboard.writeText(link).then(() => {
-                alert("Referral link copied to clipboard!");
+                alert("Referral link copied: " + link);
             });
         }
 
         function shareViaWhatsApp() {
+            const code = getDirectReferralCode();
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const refCode = activeUser ? (activeUser.referral_code || '') : '';
-            const link = `${base}register.html?ref=${refCode}`;
+            const link = `${base}register.html?ref=${code}`;
             const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`);
         }
 
         function shareViaTelegram() {
+            const code = getDirectReferralCode();
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const refCode = activeUser ? (activeUser.referral_code || '') : '';
-            const link = `${base}register.html?ref=${refCode}`;
+            const link = `${base}register.html?ref=${code}`;
             const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
             window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
         }
 
         function shareViaFacebook() {
+            const code = getDirectReferralCode();
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const refCode = activeUser ? (activeUser.referral_code || '') : '';
-            const link = `${base}register.html?ref=${refCode}`;
+            const link = `${base}register.html?ref=${code}`;
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
-        }
-
-        // Live Transactions Ticker
-        (function() {
-            const txList = [
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
-            ];
-
+                    }
+                
             function getRandomPhone() {
                 const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
                 const p = prefix[Math.floor(Math.random() * prefix.length)];
