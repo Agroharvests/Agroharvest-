@@ -413,31 +413,44 @@
         function tryBuyUpPlan(title, price, daily, days, settingKey) {
             alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
         }
-
         async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = getSupabase();
             if (!sb) return alert("Database connection error. Kripya page refresh karein!");
 
-            // Safely get logged in user from localStorage
-            let currentUser = null;
+            // wallet.js ke getActiveUser() se ya local storage se safely user fetch karein
+            let user = null;
             try {
-                currentUser = JSON.parse(localStorage.getItem('agro_user'));
+                if (typeof getActiveUser === 'function') {
+                    user = getActiveUser();
+                }
             } catch(e) {}
 
-            if (!currentUser || !currentUser.id) {
+            if (!user) {
+                try {
+                    user = JSON.parse(localStorage.getItem('agro_user')) || 
+                           JSON.parse(localStorage.getItem('active_user')) || 
+                           JSON.parse(localStorage.getItem('user'));
+                } catch(e) {}
+            }
+
+            if (!user || (!user.id && !user.phone)) {
                 alert("Session expire ho gaya hai. Kripya dobara login karein!");
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                const { data: userProfile, error: uErr } = await sb
-                    .from('profiles')
-                    .select('balance, id, phone')
-                    .eq('id', currentUser.id)
-                    .single();
+                // User query: ID se ya Phone number se
+                let query = sb.from('profiles').select('balance, id, phone');
+                if (user.id) {
+                    query = query.eq('id', user.id);
+                } else {
+                    query = query.eq('phone', user.phone);
+                }
+
+                const { data: userProfile, error: uErr } = await query.single();
 
                 if (uErr || !userProfile) throw new Error("Balance check failed. Please re-login.");
 
@@ -452,21 +465,20 @@
                 const expiryDate = new Date();
                 expiryDate.setDate(now.getDate() + parseInt(days));
                 const totalYield = parseFloat(daily) * parseInt(days);
-
                 const newBal = curBal - price;
 
                 // 1. Balance deduct karein
                 const { error: deductErr } = await sb
                     .from('profiles')
                     .update({ balance: newBal })
-                    .eq('id', currentUser.id);
+                    .eq('id', userProfile.id);
 
                 if (deductErr) throw deductErr;
 
                 // 2. Order insert karein
                 const { error: ordErr } = await sb.from('orders').insert([{
-                    user_id: currentUser.id,
-                    phone: currentUser.phone || userProfile.phone,
+                    user_id: userProfile.id,
+                    phone: userProfile.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -483,15 +495,16 @@
 
                 // 3. Transaction log karein
                 await sb.from('transactions').insert([{
-                    user_id: currentUser.id,
+                    user_id: userProfile.id,
                     type: 'purchase',
                     amount: price,
                     details: `Activated ${title}`
                 }]);
 
                 // Local balance update
-                currentUser.balance = newBal;
-                localStorage.setItem('agro_user', JSON.stringify(currentUser));
+                user.balance = newBal;
+                if (localStorage.getItem('agro_user')) localStorage.setItem('agro_user', JSON.stringify(user));
+                if (localStorage.getItem('active_user')) localStorage.setItem('active_user', JSON.stringify(user));
 
                 alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} credit hoga.`);
                 window.location.href = 'crops.html';
@@ -499,8 +512,8 @@
             } catch (err) {
                 alert("Purchase Error: " + err.message);
             }
-                              }
-                              
+        }
+            
 
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
