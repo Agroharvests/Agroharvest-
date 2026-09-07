@@ -487,137 +487,131 @@
                 </button>
             </div>
 
-            <!-- 2. Gold Plan (₹1499 -> ₹390 Daily) -->
-            <div class="plan-card-pro plan-gold">
-                <div class="ribbon-badge ribbon-gold">👑 Popular</div>
-                <div class="plan-head">
-                    <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80" alt="Gold Harvest">
-                    </div>
-                    <div class="plan-title-block">
-                        <h4>Gold Harvest</h4>
-                        <div class="plan-price-tag" style="color: #d97706;">₹1,499</div>
-                    </div>
+                    <!-- 2. Gold Plan (₹1499 -> ₹390 Daily -> 45 Days) -->
+        <div class="plan-card-pro plan-gold">
+            <div class="ribbon-badge ribbon-gold">👑 Popular</div>
+            <div class="plan-head">
+                <div class="plan-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=150" alt="Gold Harvest">
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col">
-                        <p>Daily Yield</p>
-                        <h5 style="color: #d97706;">₹390</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Total Yield</p>
-                        <h5>₹11,700</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Duration</p>
-                        <h5>30 Days</h5>
-                    </div>
+                <div class="plan-title-block">
+                    <h4>Gold Harvest</h4>
+                    <div class="plan-price-tag" style="color: #d97706;">₹1,499</div>
                 </div>
-
-                <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 30)" class="btn-invest btn-invest-gold">
-                    Invest ₹1,499 <i class="fa-solid fa-arrow-right"></i>
-                </button>
             </div>
-
-            <!-- 3. Diamond Plan (₹2499 -> ₹710 Daily) -->
-            <div class="plan-card-pro plan-diamond">
-                <div class="ribbon-badge ribbon-diamond">💎 High Yield</div>
-                <div class="plan-head">
-                    <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80" alt="Diamond Silo">
-                    </div>
-                    <div class="plan-title-block">
-                        <h4>Diamond Crop</h4>
-                        <div class="plan-price-tag" style="color: #0284c7;">₹2,499</div>
-                    </div>
+            <div class="plan-stats-grid">
+                <div class="stat-col">
+                    <p>Daily Yield</p>
+                    <h5 style="color: #d97706;">₹390</h5>
                 </div>
-
-                <div class="plan-stats-grid">
-                    <div class="stat-col">
-                        <p>Daily Yield</p>
-                        <h5 style="color: #0284c7;">₹710</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Total Yield</p>
-                        <h5>₹21,300</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Duration</p>
-                        <h5>30 Days</h5>
-                    </div>
+                <div class="stat-col">
+                    <p>Total Yield</p>
+                    <h5>₹17,550</h5>
                 </div>
-
-                <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 30)" class="btn-invest btn-invest-diamond">
-                    Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
-                </button>
+                <div class="stat-col">
+                    <p>Duration</p>
+                    <h5>45 Days</h5>
+                </div>
             </div>
+            <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 45)" class="btn-plan-action">
+                Invest ₹1,499 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
 
-            <!-- 4. Premium VIP 1 (₹4999 -> ₹1250 Daily - Upcoming / Dynamic) -->
-            <div class="plan-card-pro plan-platinum">
-                <div id="badge4999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
-                <div class="plan-head">
-                    <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=400&q=80" alt="Platinum Agro">
-                    </div>
-                    <div class="plan-title-block">
-                        <h4>Platinum Agro</h4>
-                        <div class="plan-price-tag" style="color: #9333ea;">₹4,999</div>
-                    </div>
+        <!-- 3. Diamond Plan (₹2499 -> ₹710 Daily -> 60 Days) -->
+        <div class="plan-card-pro plan-diamond">
+            <div class="ribbon-badge ribbon-diamond">💎 High Yield</div>
+            <div class="plan-head">
+                <div class="plan-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150" alt="Diamond Crop">
                 </div>
-
-                <div class="plan-stats-grid">
-                    <div class="stat-col">
-                        <p>Daily Yield</p>
-                        <h5 style="color: #9333ea;">₹1,250</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Total Yield</p>
-                        <h5>₹37,500</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Duration</p>
-                        <h5>30 Days</h5>
-                    </div>
+                <div class="plan-title-block">
+                    <h4>Diamond Crop</h4>
+                    <div class="plan-price-tag" style="color: #0284c7;">₹2,499</div>
                 </div>
-
-                <button id="btnPlan4999" onclick="tryBuyVipPlan('Platinum Agro', 4999, 1250, 30, 'plan_4999_open')" class="btn-invest btn-invest-locked">
-                    <i class="fa-solid fa-lock"></i> Upcoming Soon
-                </button>
             </div>
-
-            <!-- 5. Premium VIP 2 (₹9999 -> ₹2990 Daily - Upcoming / Dynamic) -->
-            <div class="plan-card-pro plan-royal">
-                <div id="badge9999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
-                <div class="plan-head">
-                    <div class="plan-img-wrap">
-                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80" alt="Royal Empire">
-                    </div>
-                    <div class="plan-title-block">
-                        <h4>Royal Empire</h4>
-                        <div class="plan-price-tag" style="color: #ea580c;">₹9,999</div>
-                    </div>
+            <div class="plan-stats-grid">
+                <div class="stat-col">
+                    <p>Daily Yield</p>
+                    <h5 style="color: #0284c7;">₹710</h5>
                 </div>
-
-                <div class="plan-stats-grid">
-                    <div class="stat-col">
-                        <p>Daily Yield</p>
-                        <h5 style="color: #ea580c;">₹2,990</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Total Yield</p>
-                        <h5>₹89,700</h5>
-                    </div>
-                    <div class="stat-col">
-                        <p>Duration</p>
-                        <h5>30 Days</h5>
-                    </div>
+                <div class="stat-col">
+                    <p>Total Yield</p>
+                    <h5>₹42,600</h5>
                 </div>
-
-                <button id="btnPlan9999" onclick="tryBuyVipPlan('Royal Empire', 9999, 2990, 30, 'plan_9999_open')" class="btn-invest btn-invest-locked">
-                    <i class="fa-solid fa-lock"></i> Upcoming Soon
-                </button>
+                <div class="stat-col">
+                    <p>Duration</p>
+                    <h5>60 Days</h5>
+                </div>
             </div>
+            <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-plan-action">
+                Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- 4. Premium VIP 1 (₹4999 -> ₹1250 Daily -> 75 Days) -->
+        <div class="plan-card-pro plan-platinum">
+            <div id="badge4999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+            <div class="plan-head">
+                <div class="plan-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=150" alt="Platinum Agro">
                 </div>
+                <div class="plan-title-block">
+                    <h4>Platinum Agro</h4>
+                    <div class="plan-price-tag" style="color: #9333ea;">₹4,999</div>
+                </div>
+            </div>
+            <div class="plan-stats-grid">
+                <div class="stat-col">
+                    <p>Daily Yield</p>
+                    <h5 style="color: #9333ea;">₹1,250</h5>
+                </div>
+                <div class="stat-col">
+                    <p>Total Yield</p>
+                    <h5>₹93,750</h5>
+                </div>
+                <div class="stat-col">
+                    <p>Duration</p>
+                    <h5>75 Days</h5>
+                </div>
+            </div>
+            <button id="btnPlan4999" onclick="tryBuyVipPlan('Platinum Agro', 4999, 1250, 75)" class="btn-plan-action">
+                <i class="fa-solid fa-lock"></i> Upcoming Soon
+            </button>
+        </div>
+
+        <!-- 5. Premium VIP 2 (₹9999 -> ₹2990 Daily -> 90 Days) -->
+        <div class="plan-card-pro plan-royal">
+            <div id="badge9999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+            <div class="plan-head">
+                <div class="plan-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=150" alt="Royal Empire">
+                </div>
+                <div class="plan-title-block">
+                    <h4>Royal Empire</h4>
+                    <div class="plan-price-tag" style="color: #ea580c;">₹9,999</div>
+                </div>
+            </div>
+            <div class="plan-stats-grid">
+                <div class="stat-col">
+                    <p>Daily Yield</p>
+                    <h5 style="color: #ea580c;">₹2,990</h5>
+                </div>
+                <div class="stat-col">
+                    <p>Total Yield</p>
+                    <h5>₹2,69,100</h5>
+                </div>
+                <div class="stat-col">
+                    <p>Duration</p>
+                    <h5>90 Days</h5>
+                </div>
+            </div>
+            <button id="btnPlan9999" onclick="tryBuyVipPlan('Royal Empire', 9999, 2990, 90)" class="btn-plan-action">
+                <i class="fa-solid fa-lock"></i> Upcoming Soon
+            </button>
+        </div>
+                    
+        
         <!-- Welcome Bonus & Channel Popup -->
 <div id="welcomePopup" class="welcome-modal-overlay">
     <div class="welcome-card">
