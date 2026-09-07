@@ -1,291 +1,303 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroHarvest - Smart Harvester & Yields</title>
+    <title>AgroHarvest - Smart Farming & Yields</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
     <script src="config.js"></script>
-    <script src="auth.js"></script>
+    <script src="wallet.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #0b1329; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
-        .app-container { width: 100%; max-width: 430px; background: #f8fafc; min-height: 100vh; padding-bottom: 95px; position: relative; box-shadow: 0 0 35px rgba(0,0,0,0.25); }
+        body { background: #0f172a; display: flex; justify-content: center; min-height: 100vh; color: #0f172a; }
+        .app-container { width: 100%; max-width: 480px; background: #ffffff; min-height: 100vh; padding-bottom: 75px; position: relative; box-shadow: 0 0 25px rgba(0,0,0,0.4); }
 
-        .brand-bar { padding: 18px 20px 14px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
-        .logo-box { display: flex; align-items: center; gap: 10px; }
-        .logo-circle { width: 38px; height: 38px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 18px; border: 1.5px solid #86efac; }
-        .logo-text h2 { font-size: 18px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
-        .filter-btn { width: 38px; height: 38px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 15px; border: 1px solid #e2e8f0; cursor: pointer; }
+        .brand-bar { padding: 12px 16px; background: #ffffff; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; }
+        .top-left { display: flex; align-items: center; gap: 8px; }
+        .logo-circle { width: 34px; height: 34px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 17px; border: 1px solid #86efac; }
+        .top-mid-txt { font-size: 14px; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; }
+        .live-btn { width: 32px; height: 32px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #15803d; font-size: 14px; border: 1px solid #bbf7d0; cursor: pointer; }
 
-        .hero-banner-box { margin: 14px 16px 14px; border-radius: 24px; overflow: hidden; position: relative; height: 160px; box-shadow: 0 10px 25px rgba(22, 163, 74, 0.2); border: 1.5px solid #e2e8f0; }
-        .hero-banner-box img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
-        .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,23,42,0.88) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px 18px; color: white; }
-        .hero-banner-overlay h3 { font-size: 18px; font-weight: 900; letter-spacing: -0.3px; margin-bottom: 2px; }
-        .hero-banner-overlay p { font-size: 12px; opacity: 0.95; font-weight: 600; }
+        .hero-banner-box { margin: 8px 14px; border-radius: 20px; overflow: hidden; position: relative; height: 160px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0; }
+        .hero-banner-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+        .hero-banner-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.85) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 16px; color: #fff; }
+        .hero-banner-overlay h2 { font-size: 18px; font-weight: 800; line-height: 1.2; margin-bottom: 2px; }
+        .hero-banner-overlay p { font-size: 12px; opacity: 0.9; font-weight: 600; }
 
-        .proofs-banner-card { margin: 0 16px 16px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1.5px solid #334155; border-radius: 20px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: white; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15); transition: transform 0.2s ease; }
-        .proofs-banner-card:active { transform: scale(0.98); }
-        .proofs-banner-left { display: flex; align-items: center; gap: 12px; }
-        .proofs-banner-icon { width: 44px; height: 44px; background: rgba(22, 163, 74, 0.15); border: 1.5px solid #16a34a; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #4ade80; }
-        .proofs-banner-text h4 { font-size: 14px; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 6px; }
-        .proofs-banner-text p { font-size: 11px; color: #94a3b8; font-weight: 600; margin-top: 2px; }
-        .proofs-live-tag { font-size: 10px; background: #dc2626; color: white; padding: 2px 7px; border-radius: 6px; font-weight: 900; text-transform: uppercase; animation: pulseProof 1.5s infinite; }
-        .proofs-banner-right { font-size: 14px; color: #4ade80; background: rgba(255, 255, 255, 0.08); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        @keyframes pulseProof { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .proofs-banner-card { margin: 6px 14px; background: linear-gradient(135deg, #064e3b 0%, #047857 100%); border: 1px solid #059669; border-radius: 18px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-decoration: none; }
+        .proofs-banner-left { display: flex; align-items: center; gap: 10px; }
+        .proofs-banner-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #a7f3d0; }
+        .proofs-banner-txt h4 { font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 2px; }
+        .proofs-banner-txt p { font-size: 10px; color: #d1fae5; font-weight: 600; margin: 0; }
+        .proofs-live-tag { font-size: 9px; background: #dc2626; color: white; padding: 2px 6px; border-radius: 6px; font-weight: 700; text-transform: uppercase; animation: pulseGlow 1.5s infinite; }
+        .proofs-banner-right { font-size: 13px; color: #a7f3d0; background: rgba(255,255,255,0.08); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        @keyframes pulseGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+                .balance-strip { margin: 6px 14px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .balance-item p { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 3px; }
+        .balance-item h2 { font-size: 18px; font-weight: 800; color: #16a34a; }
 
-        .balance-strip { margin: 0 16px 16px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 18px rgba(0,0,0,0.03); }
-        .balance-item p { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 2px; }
-        .balance-item h4 { font-size: 19px; font-weight: 900; color: #16a34a; }
+        .action-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 6px 14px; }
+        .act-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px 6px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: transform 0.15s; }
+        .act-box:active { transform: scale(0.95); }
+        .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 16px; }
+        .act-box span { font-size: 11px; font-weight: 800; display: block; letter-spacing: -0.2px; }
 
-        .actions-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px 18px; }
-        .act-btn { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 12px 6px 10px; text-align: center; text-decoration: none; color: #334155; box-shadow: 0 4px 14px rgba(0,0,0,0.03); transition: transform 0.15s; }
-        .act-btn:active { transform: scale(0.95); }
-        .act-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin: 0 auto 6px; }
-        .act-btn span { font-size: 11px; font-weight: 800; display: block; white-space: nowrap; }
+        .section-bar { padding: 10px 15px 4px; display: flex; justify-content: space-between; align-items: center; }
+        .section-bar h3 { font-size: 14px; font-weight: 800; color: #0f172a; }
+        .section-bar span { font-size: 11px; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 3px 8px; border-radius: 12px; }
 
-        .section-bar { padding: 0 18px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .section-bar h3 { font-size: 17px; font-weight: 900; color: #0f172a; }
-        .section-bar span { font-size: 11px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 4px 10px; border-radius: 12px; }
+        .plan-list { display: flex; flex-direction: column; gap: 10px; }
+        .plan-card-pro { background: #ffffff; border-radius: 20px; padding: 12px; position: relative; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
+        .plan-starter { border-color: #16a34a; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
+        .plan-gold { border-color: #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 40%); }
+        .plan-diamond { border-color: #0ea5e9; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
+        .plan-platinum { border-color: #8b5cf6; background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 40%); }
+        .plan-royal { border-color: #e11d48; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 40%); }
 
-        .plans-box { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
-        .plan-card-pro { background: #ffffff; border-radius: 24px; padding: 18px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.25s ease; }
-        .plan-card-pro:active { transform: scale(0.985); }
+        .ribbon-badge { position: absolute; top: 0; right: 0; padding: 4px 12px; font-size: 10px; font-weight: 800; color: white; border-radius: 0 0 0 14px; text-transform: uppercase; }
+        .ribbon-green { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .ribbon-gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .ribbon-diamond { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .ribbon-locked { background: linear-gradient(135deg, #64748b, #475569); }
 
-        .plan-green { border-color: #86efac; background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 40%); }
-        .plan-gold { border-color: #fde68a; background: linear-gradient(180deg, #fefce8 0%, #ffffff 40%); }
-        .plan-diamond { border-color: #bae6fd; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 40%); }
-        .plan-platinum { border-color: #e9d5ff; background: linear-gradient(180deg, #faf5ff 0%, #ffffff 40%); }
-        .plan-royal { border-color: #fed7aa; background: linear-gradient(180deg, #fff7ed 0%, #ffffff 40%); }
-
-        .ribbon-badge { position: absolute; top: 0; right: 0; padding: 6px 14px; font-size: 11px; font-weight: 900; color: white; border-radius: 0 0 0 16px; letter-spacing: 0.3px; text-transform: uppercase; }
-        .ribbon-green { background: linear-gradient(135deg, #15803d, #16a34a); }
-        .ribbon-gold { background: linear-gradient(135deg, #b45309, #f59e0b); }
-        .ribbon-diamond { background: linear-gradient(135deg, #0369a1, #0284c7); }
-        .ribbon-locked { background: linear-gradient(135deg, #475569, #64748b); }
-        .plan-head { display: flex; gap: 14px; align-items: center; margin-bottom: 14px; }
-        .plan-img-wrap { width: 72px; height: 72px; border-radius: 18px; overflow: hidden; flex-shrink: 0; border: 2px solid white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
+        .plan-head { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+        .plan-img-wrap { width: 52px; height: 52px; border-radius: 12px; overflow: hidden; flex-shrink: 0; border: 1px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .plan-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .plan-title-block h4 { font-size: 18px; font-weight: 900; color: #0f172a; margin-bottom: 2px; }
-        .plan-price-tag { font-size: 20px; font-weight: 900; }
+        .plan-title-block h3 { margin: 0; font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+        .plan-price-tag { font-size: 16px; font-weight: 800; }
 
-        .plan-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 10px; margin-bottom: 14px; text-align: center; }
-        .stat-col p { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
-        .stat-col h5 { font-size: 14px; font-weight: 900; color: #0f172a; }
+        .plan-spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px; margin-bottom: 8px; text-align: center; }
+        .spec-col p { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 2px; }
+        .spec-col h4 { font-size: 12px; font-weight: 800; color: #0f172a; }
 
-        .btn-invest { width: 100%; border: none; padding: 13px; border-radius: 16px; font-size: 15px; font-weight: 900; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-invest-green { background: linear-gradient(135deg, #15803d, #16a34a); box-shadow: 0 6px 18px rgba(22, 163, 74, 0.35); }
-        .btn-invest-locked { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
-                .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(11, 19, 41, 0.75); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-sheet { background: #ffffff; width: 100%; max-width: 380px; border-radius: 28px; padding: 24px 20px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .modal-gift-icon { width: 62px; height: 62px; background: #dcfce7; color: #16a34a; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; border: 2px solid #bbf7d0; }
-        .ref-box-pro { background: #f8fafc; border: 1.5px dashed #16a34a; padding: 12px; border-radius: 14px; font-size: 13px; font-weight: 800; color: #15803d; margin: 14px 0; word-break: break-all; }
-        .social-share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0 16px; }
-        .social-btn { border: none; padding: 12px 6px; border-radius: 16px; color: white; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-        .btn-whatsapp { background: #25d366; }
+        .btn-invest { width: 100%; border: none; padding: 10px; border-radius: 12px; font-weight: 800; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; position: relative; z-index: 10; pointer-events: auto !important; }
+        .btn-invest-green { background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 4px 12px rgba(22,163,74,0.25); }
+        .btn-invest-gold { background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 4px 12px rgba(245,158,11,0.25); }
+        .btn-invest-diamond { background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 4px 12px rgba(14,165,233,0.25); }
+        .btn-invest-locked { background: #64748b; cursor: not-allowed; box-shadow: none; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 9999; padding: 20px; align-items: center; justify-content: center; }
+        .modal-box { background: #ffffff; width: 100%; max-width: 380px; border-radius: 20px; padding: 18px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal-gift-icon { width: 50px; height: 50px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 22px; border: 2px solid #bbf7d0; }
+        .ref-box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 12px 0; }
+        .social-box { border: none; padding: 8px; border-radius: 12px; color: white; font-size: 12px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .btn-whatsapp { background: #25D366; }
         .btn-telegram { background: #0088cc; }
-        .btn-facebook { background: #1877f2; }
-        .btn-copy-main { width: 100%; background: #0f172a; color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-facebook { background: #1877F2; }
+        .btn-copy-main { width: 100%; background: #0f172a; color: white; border: none; padding: 9px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 430px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; align-items: center; padding: 10px 0 8px; z-index: 100 !important; box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
-        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .nav-item i { font-size: 19px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #ffffff; backdrop-filter: blur(8px); border-top: 1px solid #f1f5f9; display: flex; justify-content: space-around; align-items: center; padding: 8px 0; z-index: 100; }
+        .nav-item { text-align: center; text-decoration: none; color: #64748b; font-size: 10px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .nav-item i { font-size: 17px; }
         .nav-item.active { color: #16a34a; }
 
-        .tx-ticker-card { background: #ffffff; margin: 14px 16px; border-radius: 20px; padding: 16px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); }
-        .tx-ticker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .tx-ticker-header h4 { font-size: 15px; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 8px; }
-        .tx-ticker-header .live-badge { font-size: 10px; font-weight: 900; color: #16a34a; background: #dcfce7; padding: 3px 8px; border-radius: 8px; display: flex; align-items: center; gap: 4px; }
-        .tx-scroll-wrapper { height: 190px; overflow: hidden; position: relative; }
-        .tx-list { display: flex; flex-direction: column; gap: 8px; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
-        .tx-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; animation: fadeInTx 0.4s ease-in-out; }
-        @keyframes fadeInTx { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .tx-left { display: flex; align-items: center; gap: 10px; }
-        .tx-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-        .tx-icon-recharge { background: #dcfce7; color: #16a34a; }
-        .tx-icon-plan { background: #ffedd5; color: #ea580c; }
-        .tx-icon-withdraw { background: #fee2e2; color: #dc2626; }
-        .tx-user-info strong { font-size: 13px; color: #0f172a; font-weight: 800; display: block; }
-        .tx-user-info span { font-size: 11px; color: #64748b; font-weight: 600; }
-        .tx-amt { font-size: 14px; font-weight: 900; }
-        .amt-recharge { color: #16a34a; }
+        .tx-card { background: #ffffff; margin: 6px 14px; border-radius: 18px; padding: 12px; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .tx-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tx-card-header h3 { font-size: 13px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px; margin: 0; }
+        .live-badge { font-size: 9px; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 2px 6px; border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+        .tx-scroll-wrapper { position: relative; overflow: hidden; }
+        .tx-list { display: flex; flex-direction: column; gap: 6px; min-height: 120px; }
+        .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; }
+        .tx-left { display: flex; align-items: center; gap: 8px; }
+        .tx-icon-box { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        .icon-plan { background: #fef3c7; color: #d97706; }
+        .icon-withdraw { background: #fee2e2; color: #dc2626; }
+        .tx-details strong { font-size: 12px; font-weight: 800; display: block; color: #0f172a; }
+        .tx-details span { font-size: 10px; color: #64748b; font-weight: 600; }
+        .tx-amount { font-size: 13px; font-weight: 800; }
         .amt-plan { color: #d97706; }
         .amt-withdraw { color: #dc2626; }
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Brand Header Bar -->
         <div class="brand-bar">
-            <div class="logo-box">
+            <div class="top-left">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
-                <div class="logo-text"><h2>AgroHarvest</h2></div>
+                <div class="top-mid-txt">AgroHarvest</div>
             </div>
-            <div class="filter-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
+            <div class="live-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
 
+        <!-- Hero Banner Box -->
         <div class="hero-banner-box">
-            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvester">
+            <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvest" class="hero-banner-img">
             <div class="hero-banner-overlay">
-                <h3>Smart Farming Better Future</h3>
-                <p>High Yield & Guaranteed Daily Profit</p>
+                <h2>Smart Farming, Daily Returns</h2>
+                <p>High Yield & Guaranteed Daily Profits</p>
             </div>
         </div>
 
+        <!-- Proofs Community Card -->
         <a href="proofs.html" class="proofs-banner-card">
             <div class="proofs-banner-left">
-                <div class="proofs-banner-icon"><i class="fa-solid fa-shield-halved"></i></div>
-                <div class="proofs-banner-text">
+                <div class="proofs-banner-icon"><i class="fa-solid fa-receipt"></i></div>
+                <div class="proofs-banner-txt">
                     <h4>Community Proofs <span class="proofs-live-tag">LIVE</span></h4>
-                    <p>Bank SMS, Payouts & Referral earnings</p>
+                    <p>Bank SMS, Payouts & Referral Earnings</p>
                 </div>
             </div>
             <div class="proofs-banner-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
 
+        <!-- Total Balance & Team Income -->
         <div class="balance-strip">
             <div class="balance-item">
                 <p>Total Balance</p>
-                <h4 id="totalBalText">₹0.00</h4>
+                <h2 id="totalBalDisplay">₹0.00</h2>
             </div>
             <div class="balance-item" style="text-align: right;">
                 <p>Team Income</p>
-                <h4 id="teamIncText">₹0.00</h4>
+                <h2 id="teamIncDisplay">₹0.00</h2>
             </div>
         </div>
 
-        <div class="actions-row">
-            <a href="recharge.html" class="act-btn">
+        <!-- Quick Navigation Bar -->
+        <div class="action-row">
+            <a href="recharge.html" class="act-box">
                 <div class="act-icon" style="background: #dcfce7; color: #16a34a;"><i class="fa-solid fa-bolt"></i></div>
                 <span>Recharge</span>
             </a>
-            <a href="orders.html" class="act-btn">
+            <a href="crops.html" class="act-box">
                 <div class="act-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-seedling"></i></div>
                 <span>My Crops</span>
             </a>
-            <a href="withdraw.html" class="act-btn">
-                <div class="act-icon" style="background: #dbeafe; color: #2563eb;"><i class="fa-solid fa-wallet"></i></div>
+            <a href="withdraw.html" class="act-box">
+                <div class="act-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-wallet"></i></div>
                 <span>Withdraw</span>
             </a>
-            <a href="team.html" class="act-btn">
+            <a href="team.html" class="act-box">
                 <div class="act-icon" style="background: #f3e8ff; color: #9333ea;"><i class="fa-solid fa-users"></i></div>
                 <span>My Team</span>
             </a>
         </div>
 
-        <div class="tx-ticker-card">
-            <div class="tx-ticker-header">
-                <h4><i class="fa-solid fa-clock-rotate-left" style="color:#16a34a;"></i> Recent Transactions</h4>
-                <span class="live-badge"><span class="pulse-dot"></span> REALTIME</span>
+        <!-- Live Transactions Box -->
+        <div class="tx-card">
+            <div class="tx-card-header">
+                <h3><i class="fa-solid fa-clock-rotate-left" style="color: #16a34a;"></i> Recent Transactions</h3>
+                <span class="live-badge"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> REALTIME</span>
             </div>
             <div class="tx-scroll-wrapper">
                 <div class="tx-list" id="liveTxContainer"></div>
             </div>
         </div>
-        
+
+        <!-- Crop Plans Header -->
         <div class="section-bar">
             <h3>Available Crop Plans</h3>
             <span>Flexible Harvest Cycles</span>
         </div>
-                <div class="plans-box">
-            <!-- 1. Green Plan (₹499 -> 30 Days) -->
-            <div class="plan-card-pro plan-green">
-                <div class="ribbon-badge ribbon-green">★ 781% Yield</div>
+                <div class="plan-list" style="padding: 4px 14px 14px;">
+            <!-- Plan 1: Green Starter -->
+            <div class="plan-card-pro plan-starter">
+                <div class="ribbon-badge ribbon-green"><i class="fa-solid fa-star"></i> 781% YIELD</div>
                 <div class="plan-head">
-                    <div class="plan-img-wrap"><img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=400&q=80" alt="Green Starter"></div>
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=80" alt="Starter">
+                    </div>
                     <div class="plan-title-block">
-                        <h4>Green Starter</h4>
+                        <h3>Green Starter</h3>
                         <div class="plan-price-tag" style="color: #16a34a;">₹499</div>
                     </div>
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col"><p>Daily Yield</p><h5 style="color: #16a34a;">₹130</h5></div>
-                    <div class="stat-col"><p>Total Yield</p><h5>₹3,900</h5></div>
-                    <div class="stat-col"><p>Duration</p><h5>30 Days</h5></div>
+                <div class="plan-spec-grid">
+                    <div class="spec-col"><p>Daily Yield</p><h4 style="color: #16a34a;">₹130</h4></div>
+                    <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹3,900</h4></div>
+                    <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">30 Days</h4></div>
                 </div>
                 <button onclick="buySeedPlan('Green Starter', 499, 130, 30)" class="btn-invest btn-invest-green">
                     Invest ₹499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- 2. Gold Plan (₹1499 -> 45 Days) -->
+            <!-- Plan 2: Gold Harvest -->
             <div class="plan-card-pro plan-gold">
-                <div class="ribbon-badge ribbon-gold">👑 Popular</div>
+                <div class="ribbon-badge ribbon-gold"><i class="fa-solid fa-crown"></i> POPULAR</div>
                 <div class="plan-head">
-                    <div class="plan-img-wrap"><img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=150" alt="Gold Harvest"></div>
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=400&q=80" alt="Gold">
+                    </div>
                     <div class="plan-title-block">
-                        <h4>Gold Harvest</h4>
+                        <h3>Gold Harvest</h3>
                         <div class="plan-price-tag" style="color: #d97706;">₹1,499</div>
                     </div>
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col"><p>Daily Yield</p><h5 style="color: #d97706;">₹390</h5></div>
-                    <div class="stat-col"><p>Total Yield</p><h5>₹17,550</h5></div>
-                    <div class="stat-col"><p>Duration</p><h5>45 Days</h5></div>
+                <div class="plan-spec-grid">
+                    <div class="spec-col"><p>Daily Yield</p><h4 style="color: #d97706;">₹390</h4></div>
+                    <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹17,550</h4></div>
+                    <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">45 Days</h4></div>
                 </div>
-                <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 45)" class="btn-invest btn-invest-green">
+                <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 45)" class="btn-invest btn-invest-gold">
                     Invest ₹1,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- 3. Diamond Plan (₹2499 -> 60 Days) -->
+            <!-- Plan 3: Diamond Crop -->
             <div class="plan-card-pro plan-diamond">
-                <div class="ribbon-badge ribbon-diamond">💎 High Yield</div>
+                <div class="ribbon-badge ribbon-diamond"><i class="fa-solid fa-gem"></i> HIGH YIELD</div>
                 <div class="plan-head">
-                    <div class="plan-img-wrap"><img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150" alt="Diamond Crop"></div>
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=400&q=80" alt="Diamond">
+                    </div>
                     <div class="plan-title-block">
-                        <h4>Diamond Crop</h4>
+                        <h3>Diamond Crop</h3>
                         <div class="plan-price-tag" style="color: #0284c7;">₹2,499</div>
                     </div>
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col"><p>Daily Yield</p><h5 style="color: #0284c7;">₹710</h5></div>
-                    <div class="stat-col"><p>Total Yield</p><h5>₹42,600</h5></div>
-                    <div class="stat-col"><p>Duration</p><h5>60 Days</h5></div>
+                <div class="plan-spec-grid">
+                    <div class="spec-col"><p>Daily Yield</p><h4 style="color: #0284c7;">₹710</h4></div>
+                    <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹42,600</h4></div>
+                    <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">60 Days</h4></div>
                 </div>
-                <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-green">
+                <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-diamond">
                     Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
 
-            <!-- 4. Premium VIP 1 (₹4999 -> 75 Days) -->
+            <!-- Plan 4: Platinum VIP 1 (Upcoming) -->
             <div class="plan-card-pro plan-platinum">
-                <div id="badge4999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+                <div class="ribbon-badge ribbon-locked" id="badge4999"><i class="fa-solid fa-lock"></i> Upcoming</div>
                 <div class="plan-head">
-                    <div class="plan-img-wrap"><img src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=150" alt="Platinum Agro"></div>
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=400&q=80" alt="Platinum">
+                    </div>
                     <div class="plan-title-block">
-                        <h4>Platinum Agro</h4>
-                        <div class="plan-price-tag" style="color: #9333ea;">₹4,999</div>
+                        <h3>Platinum Agro</h3>
+                        <div class="plan-price-tag" style="color: #7c3aed;">₹4,999</div>
                     </div>
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col"><p>Daily Yield</p><h5 style="color: #9333ea;">₹1,250</h5></div>
-                    <div class="stat-col"><p>Total Yield</p><h5>₹93,750</h5></div>
-                    <div class="stat-col"><p>Duration</p><h5>75 Days</h5></div>
+                <div class="plan-spec-grid">
+                    <div class="spec-col"><p>Daily Yield</p><h4 style="color: #7c3aed;">₹1,500</h4></div>
+                    <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹1,05,000</h4></div>
+                    <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">70 Days</h4></div>
                 </div>
-                <button id="btnPlan4999" onclick="tryBuyVipPlan('Platinum Agro', 4999, 1250, 75, 'plan_4999_open')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan4999" onclick="tryBuyUpPlan('Platinum Agro', 4999, 1500, 70, 'plan_4999_open')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
 
-            <!-- 5. Premium VIP 2 (₹9999 -> 90 Days) -->
+            <!-- Plan 5: Royal King VIP 2 (Upcoming) -->
             <div class="plan-card-pro plan-royal">
-                <div id="badge9999" class="ribbon-badge ribbon-locked">🔒 Upcoming</div>
+                <div class="ribbon-badge ribbon-locked" id="badge9999"><i class="fa-solid fa-lock"></i> Upcoming</div>
                 <div class="plan-head">
-                    <div class="plan-img-wrap"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=150" alt="Royal Empire"></div>
+                    <div class="plan-img-wrap">
+                        <img src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=400&q=80" alt="Royal">
+                    </div>
                     <div class="plan-title-block">
-                        <h4>Royal Empire</h4>
-                        <div class="plan-price-tag" style="color: #ea580c;">₹9,999</div>
+                        <h3>Royal Empire</h3>
+                        <div class="plan-price-tag" style="color: #e11d48;">₹9,999</div>
                     </div>
                 </div>
-                <div class="plan-stats-grid">
-                    <div class="stat-col"><p>Daily Yield</p><h5 style="color: #ea580c;">₹2,990</h5></div>
-                    <div class="stat-col"><p>Total Yield</p><h5>₹2,69,100</h5></div>
-                    <div class="stat-col"><p>Duration</p><h5>90 Days</h5></div>
+                <div class="plan-spec-grid">
+                    <div class="spec-col"><p>Daily Yield</p><h4 style="color: #e11d48;">₹3,200</h4></div>
+                    <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹2,88,000</h4></div>
+                    <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">90 Days</h4></div>
                 </div>
-                <button id="btnPlan9999" onclick="tryBuyVipPlan('Royal Empire', 9999, 2990, 90, 'plan_9999_open')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan9999" onclick="tryBuyUpPlan('Royal Empire', 9999, 3200, 90, 'plan_9999_open')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
@@ -294,102 +306,52 @@
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-            <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
+            <a href="crops.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
             <a href="team.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Team</span></a>
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
 
-        <!-- Referral Modal -->
-        <div id="inviteModal" class="modal-overlay" onclick="closeInviteModal(event)">
-            <div class="modal-sheet" onclick="event.stopPropagation()">
+        <!-- Invite Modal (Default Closed) -->
+        <div id="inviteModal" class="modal-overlay" style="display: none;" onclick="closeInviteModal(event)">
+            <div class="modal-box">
                 <div class="modal-gift-icon"><i class="fa-solid fa-gift"></i></div>
-                <h3 style="font-size: 19px; font-weight: 900; color: #0f172a;">Invite & Earn 28%</h3>
-                <p style="font-size: 12px; color: #64748b; font-weight: 600; margin-top: 4px;">Earn 25% L1, 2% L2, and 1% L3 direct commission instantly.</p>
-                <div id="refLinkText" class="ref-box-pro">Generating your link...</div>
-                <div class="social-share-grid">
-                    <button onclick="shareViaWhatsApp()" class="social-btn btn-whatsapp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
-                    <button onclick="shareViaTelegram()" class="social-btn btn-telegram"><i class="fa-brands fa-telegram"></i><span>Telegram</span></button>
-                    <button onclick="shareViaFacebook()" class="social-btn btn-facebook"><i class="fa-brands fa-facebook"></i><span>Facebook</span></button>
+                <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">Invite & Earn 28%</h3>
+                <p style="font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 12px;">Earn L1 25%, L2 2%, and L3 1% direct commissions instantly.</p>
+                <div class="ref-box-grid">
+                    <button onclick="shareViaWhatsApp()" class="social-box btn-whatsapp"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></button>
+                    <button onclick="shareViaTelegram()" class="social-box btn-telegram"><i class="fa-brands fa-telegram"></i><span>Telegram</span></button>
+                    <button onclick="shareViaFacebook()" class="social-box btn-facebook"><i class="fa-brands fa-facebook"></i><span>Facebook</span></button>
                 </div>
-                <button onclick="copyInvite()" class="btn-copy-main"><i class="fa-regular fa-copy"></i> Copy Referral Link</button>
-                <button onclick="closeInviteModal()" style="width:100%; background:transparent; border:none; color:#64748b; font-weight:800; margin-top:10px; cursor:pointer;">Close</button>
+                <button onclick="copyRefLink()" class="btn-copy-main"><i class="fa-regular fa-copy"></i> Copy Referral Link</button>
+                <button onclick="closeInviteModalForce()" style="width: 100%; background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 12px; margin-top: 10px; cursor: pointer;">Close Window</button>
             </div>
         </div>
-    </div>
 
-    <!-- Fixed Welcome Popup Modal (Direct Body Child) -->
-    <div id="welcomePopup" style="display: none; position: fixed; inset: 0; background: rgba(11, 19, 41, 0.78); backdrop-filter: blur(8px); z-index: 9999999; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
-        <div style="background: #ffffff; width: 100%; max-width: 360px; border-radius: 28px; padding: 24px 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4); max-height: 90vh; overflow-y: auto; text-align: center; box-sizing: border-box;">
-            <h3 style="margin: 0 0 4px 0; font-size: 21px; font-weight: 900; color: #0f172a;">Welcome to AgroHarvest</h3>
-            <p style="margin: 0 0 16px 0; font-size: 12px; color: #64748b; font-weight: 700;">Daily Income, daily withdrawal</p>
-
-            <div style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); color: #ffffff; border-radius: 18px; padding: 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 14px;">
-                <i class="fa-solid fa-trophy" style="font-size: 26px;"></i>
-                <div style="text-align: left;">
-                    <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; display: block; font-weight: 800;">SIGNUP BONUS</span>
-                    <strong style="font-size: 24px; line-height: 1;">₹50</strong>
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
-                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 10px; text-align: center;">
-                    <span style="font-size: 10px; color: #64748b; font-weight: 800; display: block; margin-bottom: 2px;">MIN DEPOSIT</span>
-                    <strong style="font-size: 16px; color: #0f172a; font-weight: 900;">₹499</strong>
-                </div>
-                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 10px; text-align: center;">
-                    <span style="font-size: 10px; color: #64748b; font-weight: 800; display: block; margin-bottom: 2px;">MIN WITHDRAW</span>
-                    <strong style="font-size: 16px; color: #0f172a; font-weight: 900;">₹199</strong>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 18px;">
-                <span style="font-size: 11px; font-weight: 900; color: #1e3a8a; letter-spacing: 0.6px; text-transform: uppercase; display: block; margin-bottom: 8px;">INVITATION COMMISSION</span>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                    <div style="background: #eff6ff; border: 1.5px solid #dbeafe; border-radius: 12px; padding: 8px 4px;">
-                        <span style="font-size: 10px; color: #1e40af; display: block; font-weight: 800;">LEVEL 1</span>
-                        <strong style="font-size: 15px; color: #1e3a8a; font-weight: 900;">25%</strong>
-                    </div>
-                    <div style="background: #eff6ff; border: 1.5px solid #dbeafe; border-radius: 12px; padding: 8px 4px;">
-                        <span style="font-size: 10px; color: #1e40af; display: block; font-weight: 800;">LEVEL 2</span>
-                        <strong style="font-size: 15px; color: #1e3a8a; font-weight: 900;">2%</strong>
-                    </div>
-                    <div style="background: #eff6ff; border: 1.5px solid #dbeafe; border-radius: 12px; padding: 8px 4px;">
-                        <span style="font-size: 10px; color: #1e40af; display: block; font-weight: 800;">LEVEL 3</span>
-                        <strong style="font-size: 15px; color: #1e3a8a; font-weight: 900;">1%</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-                <a href="https://t.me/Agroharvestofficial" target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 0; background: #0088cc; color: #ffffff; border-radius: 14px; font-weight: 800; text-decoration: none; font-size: 14px; box-sizing: border-box; box-shadow: 0 4px 14px rgba(0, 136, 204, 0.3);">
-                    <i class="fa-brands fa-telegram" style="font-size: 18px;"></i> Join Channel
-                </a>
-                <a href="https://t.me/Agroharvestt"
-                    target="_blank" onclick="closeWelcomePopup()" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 0; background: #0284c7; color: #ffffff; border-radius: 14px; font-weight: 800; text-decoration: none; font-size: 14px; box-sizing: border-box; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);">
-                    <i class="fa-solid fa-headset" style="font-size: 18px;"></i> Customer Support
-                </a>
-                <button type="button" onclick="closeWelcomePopup()" style="background: transparent; border: none; color: #94a3b8; font-weight: 800; font-size: 13px; padding: 8px 0; cursor: pointer;">
-                    Maybe Later
-                </button>
+        <!-- Welcome Popup Modal (Fixed: default display none) -->
+        <div id="welcomePopup" class="modal-overlay" style="display: none;">
+            <div class="modal-box">
+                <div class="modal-gift-icon"><i class="fa-solid fa-bullhorn"></i></div>
+                <h3 style="font-size: 15px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Welcome to AgroHarvest</h3>
+                <p style="font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.4; margin-bottom: 12px;">Get daily harvest profits, instant referral bonuses & fast payouts directly into your bank account.</p>
+                <button onclick="closeWelcomePopup()" class="btn-copy-main" style="background: #16a34a;">Start Earning Now</button>
             </div>
         </div>
-    </div>
-        <script>
-        const activeUser = requireAuth();
-        let fullReferralLink = "";
-        let isPlan4999Unlocked = false;
-        let isPlan9999Unlocked = false;
+                                                     </div>
+                                                         <script>
+        const activeUser = getActiveUser();
+        if (!activeUser) {
+            window.location.replace('login.html');
+        }
 
-        document.addEventListener("DOMContentLoaded", async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             checkAndShowWelcomePopup();
             loadDashboard();
-            await checkVipPlanStatus();
-            startLiveTxFeed();
+            checkUpcomingPlans();
         });
 
         function checkAndShowWelcomePopup() {
-            const isShown = sessionStorage.getItem('agro_welcome_shown');
-            if (!isShown) {
+            const hasSeen = localStorage.getItem('agro_welcome_shown');
+            if (!hasSeen) {
                 const modal = document.getElementById('welcomePopup');
                 if (modal) modal.style.display = 'flex';
             }
@@ -398,76 +360,64 @@
         function closeWelcomePopup() {
             const modal = document.getElementById('welcomePopup');
             if (modal) modal.style.display = 'none';
-            sessionStorage.setItem('agro_welcome_shown', 'true');
+            localStorage.setItem('agro_welcome_shown', 'true');
         }
 
-        async function checkVipPlanStatus() {
+        async function checkUpcomingPlans() {
             const sb = getSupabase();
             if (!sb) return;
+            try {
+                const { data: settings } = await sb.from('admin_settings').select('*');
+                if (settings) {
+                    const p4999 = settings.find(s => s.key === 'plan_4999_open');
+                    const p9999 = settings.find(s => s.key === 'plan_9999_open');
 
-            const { data: sData } = await sb.from('settings').select('*');
-            if (sData) {
-                const p4999 = sData.find(s => s.key === 'plan_4999_open');
-                const p9999 = sData.find(s => s.key === 'plan_9999_open');
+                    if (p4999 && p4999.value == '1') {
+                        document.getElementById('badge4999').className = 'ribbon-badge ribbon-green';
+                        document.getElementById('badge4999').innerText = 'VIP Active';
+                        const btn = document.getElementById('btnPlan4999');
+                        btn.className = 'btn-invest btn-invest-green';
+                        btn.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                    }
 
-                if (p4999 && p4999.value === '1') {
-                    isPlan4999Unlocked = true;
-                    document.getElementById('badge4999').className = "ribbon-badge ribbon-green";
-                    document.getElementById('badge4999').innerText = "★ VIP Active";
-                    const btn1 = document.getElementById('btnPlan4999');
-                    btn1.className = "btn-invest btn-invest-green";
-                    btn1.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                    if (p9999 && p9999.value == '1') {
+                        document.getElementById('badge9999').className = 'ribbon-badge ribbon-gold';
+                        document.getElementById('badge9999').innerText = '👑 VIP Active';
+                        const btn = document.getElementById('btnPlan9999');
+                        btn.className = 'btn-invest btn-invest-gold';
+                        btn.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                    }
                 }
-
-                if (p9999 && p9999.value === '1') {
-                    isPlan9999Unlocked = true;
-                    document.getElementById('badge9999').className = "ribbon-badge ribbon-gold";
-                    document.getElementById('badge9999').innerText = "👑 VIP Active";
-                    const btn2 = document.getElementById('btnPlan9999');
-                    btn2.className = "btn-invest btn-invest-green";
-                    btn2.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
-                }
+            } catch (e) {
+                console.warn("Settings check error:", e);
             }
         }
 
         async function loadDashboard() {
             if (!activeUser) return;
-
             const sb = getSupabase();
             if (!sb) return;
 
             try {
-                await sb.rpc('process_daily_crop_yields');
-            } catch (e) {
-                console.log("Daily income sync check:", e);
-            }
-
-            const { data: liveData } = await sb
-                .from('profiles')
-                .select('*')
-                .eq('id', activeUser.id)
-                .maybeSingle();
-
-            if (liveData) {
-                setSessionUser(liveData);
-                document.getElementById('totalBalText').innerText = "₹" + parseFloat(liveData.balance || 0).toFixed(2);
-                document.getElementById('teamIncText').innerText = "₹" + parseFloat(liveData.team_income || 0).toFixed(2);
+                const { data: profile } = await sb.from('profiles').select('balance, team_income').eq('id', activeUser.id).single();
+                if (profile) {
+                    document.getElementById('totalBalDisplay').innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
+                    document.getElementById('teamIncDisplay').innerText = '₹' + parseFloat(profile.team_income || 0).toFixed(2);
+                }
+            } catch (err) {
+                console.error("Dashboard balance error:", err);
             }
         }
 
-        function tryBuyVipPlan(title, price, daily, days, key) {
-            const isUnlocked = key === 'plan_4999_open' ? isPlan4999Unlocked : isPlan9999Unlocked;
-            if (!isUnlocked) {
-                return alert(`🔒 Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh khareeda ja sakega.`);
-            }
-            buySeedPlan(title, price, daily, days);
+        function tryBuyUpPlan(title, price, daily, days, settingKey) {
+            alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
         }
 
         async function buySeedPlan(title, price, daily, days) {
-            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) activate karna chahte hain?`)) return;
+            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = getSupabase();
-            if (!sb) return alert("Database connecting... Kripya dobara try karein!");
+            if (!sb) return alert("Database connection error. Kripya page refresh karein!");
 
             try {
                 const { data: userProfile, error: uErr } = await sb
@@ -476,11 +426,11 @@
                     .eq('id', activeUser.id)
                     .single();
 
-                if (uErr || !userProfile) throw new Error("Balance check failed.");
+                if (uErr || !userProfile) throw new Error("Balance check failed. Please re-login.");
 
                 const curBal = parseFloat(userProfile.balance || 0);
                 if (curBal < price) {
-                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
+                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle wallet recharge karein!`);
                     window.location.href = 'recharge.html';
                     return;
                 }
@@ -522,22 +472,11 @@
                     details: `Activated ${title}`
                 }]);
 
-                try {
-                    await sb.rpc('distribute_plan_commission', {
-                        buyer_id: activeUser.id,
-                        buyer_phone: activeUser.phone,
-                        plan_price: price,
-                        plan_title: title
-                    });
-                } catch (commErr) {
-                    console.warn("Commission RPC notice:", commErr);
-                }
-
                 activeUser.balance = newBal;
                 localStorage.setItem('agro_user', JSON.stringify(activeUser));
 
-                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily}`);
-                window.location.href = 'orders.html';
+                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} credit hoga.`);
+                window.location.href = 'crops.html';
 
             } catch (err) {
                 alert("Purchase Error: " + err.message);
@@ -545,175 +484,123 @@
         }
 
         function openInviteModal() {
-            const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            fullReferralLink = `${currentPath}register.html?ref=${activeUser.referral_code}`;
-            document.getElementById('refLinkText').innerText = fullReferralLink;
-            document.getElementById('inviteModal').style.display = 'flex';
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'flex';
         }
 
-        function closeInviteModal(event) {
-            if (event && event.target.id !== 'inviteModal' && !event.target.closest('button')) return;
-            document.getElementById('inviteModal').style.display = 'none';
+        function closeInviteModal(e) {
+            if (e.target.id === 'inviteModal') {
+                e.target.style.display = 'none';
+            }
         }
 
-        function copyInvite() {
-            navigator.clipboard.writeText(fullReferralLink).then(() => {
-                alert("✅ Referral Link Copied Successfully!");
-                document.getElementById('inviteModal').style.display = 'none';
+        function closeInviteModalForce() {
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function copyRefLink() {
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Referral link copied to clipboard!");
             });
         }
 
         function shareViaWhatsApp() {
-            const message = encodeURIComponent(`🌾 Join AgroHarvest Smart Farming today & Claim ₹50 Instant Bonus! Daily guaranteed harvest returns.\n\nRegister here: ${fullReferralLink}`);
-            window.open(`https://api.whatsapp.com/send?text=${message}`, '_blank');
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`);
         }
 
         function shareViaTelegram() {
-            const message = encodeURIComponent(`🌾 Join AgroHarvest Smart Farming today & Claim ₹50 Instant Bonus! Daily guaranteed harvest returns.`);
-            window.open(`https://t.me/share/url?url=${encodeURIComponent(fullReferralLink)}&text=${message}`, '_blank');
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+            window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
         }
 
         function shareViaFacebook() {
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
-        
-
-        // ================= LIVE TRANSACTIONS FEED =================
-        const nowTime = new Date();
-        const todayDayNum = nowTime.getDay(); // 1 = Monday, 4 = Thursday
-        const currentHour = nowTime.getHours();
-
-        // Payout time: Monday & Thursday, Subah 7 se Shaam 5 baje tak
-        const isWithdrawTime = (todayDayNum === 1 || todayDayNum === 4) && (currentHour >= 7 && currentHour < 17);
-
-        // Sirf active 3 plans (4999 aur 9999 poori tarah bahar hain)
-        const txPool = [
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
-        ];
-
-        // Sirf time window ke andar withdrawal add hoga
-        if (isWithdrawTime) {
-            txPool.push(
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
-            );
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
         }
 
-        function getFakePhone() {
-            const series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
-            const p = series[Math.floor(Math.random() * series.length)];
-            const end = Math.floor(1000 + Math.random() * 9000);
-            return `${p}****${end}`;
-        }
+        // ================= LIVE TRANSACTIONS TICKER =================
+        (function() {
+            const now = new Date();
+            const day = now.getDay(); // 1 = Monday, 4 = Thursday
+            const hr = now.getHours();
+            const isWithdrawOpen = (day === 1 || day === 4) && (hr >= 7 && hr < 17);
 
-        function makeTxRow() {
-            const item = txPool[Math.floor(Math.random() * txPool.length)];
-            const div = document.createElement('div');
-            div.className = 'tx-item';
-            div.innerHTML = `
-                <div class="tx-left">
-                    <div class="tx-icon-box ${item.iconClass}">
-                        <i class="fa-solid ${item.icon}"></i>
-                    </div>
-                    <div class="tx-details">
-                        <strong>User ${getFakePhone()}</strong>
-                        <span>${item.type}</span>
-                    </div>
-                </div>
-                <div class="tx-amount ${item.type === 'Withdrawal' ? 'amt-withdraw' : 'amt-plan'}">
-                    ${item.amt}
-                </div>
-            `;
-            return div;
-        }
+            const txList = [
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
+            ];
 
-        function startTransactionsFeed() {
-            const target = document.getElementById('liveTxContainer') || document.getElementById('txContainer');
-            if (!target) return;
-
-            target.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                target.appendChild(makeTxRow());
+            if (isWithdrawOpen) {
+                txList.push(
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
+                );
             }
 
-            setInterval(() => {
-                const newEntry = makeTxRow();
-                target.prepend(newEntry);
-                if (target.children.length > 4) {
-                    target.removeChild(target.lastChild);
+            function getRandomPhone() {
+                const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
+                const p = prefix[Math.floor(Math.random() * prefix.length)];
+                const last4 = Math.floor(1000 + Math.random() * 9000);
+                return `${p}****${last4}`;
+            }
+
+            function generateRow() {
+                const item = txList[Math.floor(Math.random() * txList.length)];
+                const div = document.createElement('div');
+                div.className = 'tx-item';
+                div.innerHTML = `
+                    <div class="tx-left">
+                        <div class="tx-icon-box ${item.iconClass}">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <div class="tx-details">
+                            <strong>User ${getRandomPhone()}</strong>
+                            <span>${item.type}</span>
+                        </div>
+                    </div>
+                    <div class="tx-amount ${item.type === 'Withdrawal' ? 'amt-withdraw' : 'amt-plan'}">
+                        ${item.amt}
+                    </div>
+                `;
+                return div;
+            }
+
+            function startTicker() {
+                const target = document.getElementById('liveTxContainer');
+                if (!target) return;
+
+                target.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    target.appendChild(generateRow());
                 }
-            }, 2500);
-        }
 
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            startTransactionsFeed();
-        } else {
-            document.addEventListener('DOMContentLoaded', startTransactionsFeed);
-        }
-        setTimeout(startTransactionsFeed, 600);
-            
-    </script>
-    <script>
-(function() {
-    function startTickerNow() {
-        var box = document.getElementById('liveTxContainer') || 
-                  document.getElementById('txContainer') || 
-                  document.querySelector('.tx-list');
-        if (!box) return;
-
-        var plans = [
-            { amt: 'Rs.499' },
-            { amt: 'Rs.1,499' },
-            { amt: 'Rs.2,499' }
-        ];
-
-        var series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
-
-        function addCard() {
-            var p = series[Math.floor(Math.random() * series.length)];
-            var last4 = Math.floor(1000 + Math.random() * 9000);
-            var plan = plans[Math.floor(Math.random() * plans.length)];
-
-            var card = document.createElement('div');
-            card.className = 'tx-item';
-            card.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid #f1f5f9; border-radius:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.02);';
-            card.innerHTML = 
-                '<div style="display:flex; align-items:center; gap:10px;">' +
-                    '<div style="width:36px; height:36px; border-radius:10px; background:#fef3c7; color:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:14px;">' +
-                        '<i class="fa-solid fa-cart-shopping"></i>' +
-                    '</div>' +
-                    '<div>' +
-                        '<div style="font-size:13px; font-weight:800; color:#1e293b;">User ' + p + '****' + last4 + '</div>' +
-                        '<div style="font-size:11px; color:#64748b; font-weight:600;">Purchased Plan</div>' +
-                    '</div>' +
-                '</div>' +
-                '<div style="font-size:14px; font-weight:800; color:#d97706;">' +
-                    plan.amt +
-                '</div>';
-
-            box.insertBefore(card, box.firstChild);
-            if (box.children.length > 4) {
-                box.removeChild(box.lastChild);
+                setInterval(() => {
+                    const row = generateRow();
+                    target.prepend(row);
+                    if (target.children.length > 4) {
+                        target.removeChild(target.lastChild);
+                    }
+                }, 2500);
             }
-        }
 
-        box.innerHTML = '';
-        addCard();
-        addCard();
-        addCard();
-        setInterval(addCard, 2200);
-    }
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        startTickerNow();
-    } else {
-        window.addEventListener('load', startTickerNow);
-    }
-    setTimeout(startTickerNow, 500);
-})();
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                startTicker();
+            } else {
+                document.addEventListener('DOMContentLoaded', startTicker);
+            }
+            setTimeout(startTicker, 500);
+        })();
     </script>
-    
 </body>
 </html>
