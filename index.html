@@ -575,30 +575,32 @@
 
         function shareViaFacebook() {
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
-        }
+        
 
-        // ================= LIVE FAKE TRANSACTIONS =================
-        const todayDayNum = new Date().getDay(); // 1 = Mon, 4 = Thu
-        const isWdDay = (todayDayNum === 1 || todayDayNum === 4);
+        // ================= LIVE TRANSACTIONS FEED =================
+        const nowTime = new Date();
+        const todayDayNum = nowTime.getDay(); // 1 = Monday, 4 = Thursday
+        const currentHour = nowTime.getHours();
 
-        // Daily sirf Plan Purchase
+        // Payout time: Monday & Thursday, Subah 7 se Shaam 5 baje tak
+        const isWithdrawTime = (todayDayNum === 1 || todayDayNum === 4) && (currentHour >= 7 && currentHour < 17);
+
+        // Sirf active 3 plans (4999 aur 9999 poori tarah bahar hain)
         const txPool = [
             { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
             { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' },
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.4,999' }
-            
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
+        ];
 
-// Sirf Monday (1) ya Thursday (4) ko subha 07:00 AM se shaam 05:00 PM tak hi withdrawal judegi
-const currentHourNow = new Date().getHours();
-if (isWdDay && currentHourNow >= 7 && currentHourNow < 17) {
-    txPool.push(
-        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
-        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
-        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
-    );
-}
-            
+        // Sirf time window ke andar withdrawal add hoga
+        if (isWithdrawTime) {
+            txPool.push(
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
+                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
+            );
+        }
+
         function getFakePhone() {
             const series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
             const p = series[Math.floor(Math.random() * series.length)];
@@ -628,17 +630,14 @@ if (isWdDay && currentHourNow >= 7 && currentHourNow < 17) {
         }
 
         function startTransactionsFeed() {
-            // Dono id check karega taaki miss na ho
             const target = document.getElementById('liveTxContainer') || document.getElementById('txContainer');
             if (!target) return;
 
             target.innerHTML = '';
-            // Pehle se 3 rows dikha dega
             for (let i = 0; i < 3; i++) {
                 target.appendChild(makeTxRow());
             }
 
-            // Har 2.5 second mein nayi fake entry scroll karegi
             setInterval(() => {
                 const newEntry = makeTxRow();
                 target.prepend(newEntry);
@@ -648,14 +647,12 @@ if (isWdDay && currentHourNow >= 7 && currentHourNow < 17) {
             }, 2500);
         }
 
-        // Auto Run
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             startTransactionsFeed();
         } else {
             document.addEventListener('DOMContentLoaded', startTransactionsFeed);
         }
-        // Safety call
-        setTimeout(startTransactionsFeed, 800);
+        setTimeout(startTransactionsFeed, 600);
             
     </script>
 </body>
