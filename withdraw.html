@@ -93,7 +93,10 @@
             </div>
 
             <div class="rules-tag">
-                ⏰ Payout Time: 07:00 AM to 05:00 PM | Limit: 1 request per day.
+                <p style="color: #dc2626; font-size: 12px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+    ⏰ Payout Days: Monday & Thursday (07:00 AM to 05:00 PM) | Limit: 1 per day.
+                </p>
+                
                 
             </div>
 
@@ -168,12 +171,22 @@ async function submitWithdrawalRequest() {
     const acc = document.getElementById('accNumber').value.trim();
     const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
     const btn = document.getElementById('btnSubmitWd');
-    // Strict Payout Time Check (07:00 AM to 05:00 PM)
-    const currentHour = new Date().getHours();
-    if (currentHour < 7 || currentHour >= 17) {
-        return alert("⏰ Payout Service abhi band hai!\nWithdrawal subha 07:00 AM se shaam 05:00 PM ke beech hi uplabdh hai.");
+    
+    // Strict Day & Time Check (Only Monday & Thursday, 07:00 AM to 05:00 PM)
+    const now = new Date();
+    const currentDay = now.getDay(); // 1 = Monday, 4 = Thursday
+    const currentHour = now.getHours();
+
+    // Check karein agar aaj Monday (1) ya Thursday (4) nahi hai
+    if (currentDay !== 1 && currentDay !== 4) {
+        return alert("⚠️ Withdrawals are only available on Monday and Thursday!");
     }
 
+    // Check karein time subha 7 se shaam 5 baje ke beech hai ya nahi
+    if (currentHour < 7 || currentHour >= 17) {
+        return alert("⏰ Payout service is closed!\nWithdrawals are open between 07:00 AM and 05:00 PM on Monday and Thursday.");
+                           }
+        
     if (isNaN(amt) || amt < 199) return alert("Minimum withdrawal amount ₹199 hai!");
     if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
     if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
