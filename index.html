@@ -589,15 +589,16 @@
             { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.4,999' }
         ];
 
-        // Monday aur Thursday ko hi withdrawal include hoga
-        if (isWdDay) {
-            txPool.push(
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
-                { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
-            );
-        }
-
+// Sirf Monday (1) ya Thursday (4) ko subha 07:00 AM se shaam 05:00 PM tak hi withdrawal judegi
+const currentHourNow = new Date().getHours();
+if (isWdDay && currentHourNow >= 7 && currentHourNow < 17) {
+    txPool.push(
+        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
+        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
+        { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
+    );
+}
+            
         function getFakePhone() {
             const series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
             const p = series[Math.floor(Math.random() * series.length)];
