@@ -655,5 +655,65 @@
         setTimeout(startTransactionsFeed, 600);
             
     </script>
+    <script>
+(function() {
+    function startTickerNow() {
+        var box = document.getElementById('liveTxContainer') || 
+                  document.getElementById('txContainer') || 
+                  document.querySelector('.tx-list');
+        if (!box) return;
+
+        var plans = [
+            { amt: 'Rs.499' },
+            { amt: 'Rs.1,499' },
+            { amt: 'Rs.2,499' }
+        ];
+
+        var series = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
+
+        function addCard() {
+            var p = series[Math.floor(Math.random() * series.length)];
+            var last4 = Math.floor(1000 + Math.random() * 9000);
+            var plan = plans[Math.floor(Math.random() * plans.length)];
+
+            var card = document.createElement('div');
+            card.className = 'tx-item';
+            card.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:#fff; border:1px solid #f1f5f9; border-radius:12px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.02);';
+            card.innerHTML = 
+                '<div style="display:flex; align-items:center; gap:10px;">' +
+                    '<div style="width:36px; height:36px; border-radius:10px; background:#fef3c7; color:#f59e0b; display:flex; align-items:center; justify-content:center; font-size:14px;">' +
+                        '<i class="fa-solid fa-cart-shopping"></i>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div style="font-size:13px; font-weight:800; color:#1e293b;">User ' + p + '****' + last4 + '</div>' +
+                        '<div style="font-size:11px; color:#64748b; font-weight:600;">Purchased Plan</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="font-size:14px; font-weight:800; color:#d97706;">' +
+                    plan.amt +
+                '</div>';
+
+            box.insertBefore(card, box.firstChild);
+            if (box.children.length > 4) {
+                box.removeChild(box.lastChild);
+            }
+        }
+
+        box.innerHTML = '';
+        addCard();
+        addCard();
+        addCard();
+        setInterval(addCard, 2200);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        startTickerNow();
+    } else {
+        window.addEventListener('load', startTickerNow);
+    }
+    setTimeout(startTickerNow, 500);
+})();
+    </script>
+    
 </body>
 </html>
