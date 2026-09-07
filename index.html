@@ -100,17 +100,14 @@
         .tx-left { display: flex; align-items: center; gap: 8px; }
         .tx-icon-box { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
         .icon-plan { background: #fef3c7; color: #d97706; }
-        .icon-withdraw { background: #fee2e2; color: #dc2626; }
         .tx-details strong { font-size: 12px; font-weight: 800; display: block; color: #0f172a; }
         .tx-details span { font-size: 10px; color: #64748b; font-weight: 600; }
-        .tx-amount { font-size: 13px; font-weight: 800; }
-        .amt-plan { color: #d97706; }
-        .amt-withdraw { color: #dc2626; }
+        .tx-amount { font-size: 13px; font-weight: 800; color: #d97706; }
     </style>
 </head>
 <body>
     <div class="app-container">
-                <!-- Brand Header Bar -->
+            <!-- Brand Header Bar -->
         <div class="brand-bar">
             <div class="top-left">
                 <div class="logo-circle"><i class="fa-solid fa-leaf"></i></div>
@@ -241,8 +238,8 @@
                 <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-diamond">
                     Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
-                            </div>
-                                                                            <!-- Plan 4: Platinum VIP 1 (Upcoming) -->
+                    </div>
+                        <!-- Plan 4: Platinum VIP 1 -->
             <div class="plan-card-pro plan-platinum">
                 <div class="ribbon-badge ribbon-locked" id="badge4999"><i class="fa-solid fa-lock"></i> Upcoming</div>
                 <div class="plan-head">
@@ -264,7 +261,7 @@
                 </button>
             </div>
 
-            <!-- Plan 5: Royal King VIP 2 (Upcoming) -->
+            <!-- Plan 5: Royal King VIP 2 -->
             <div class="plan-card-pro plan-royal">
                 <div class="ribbon-badge ribbon-locked" id="badge9999"><i class="fa-solid fa-lock"></i> Upcoming</div>
                 <div class="plan-head">
@@ -320,10 +317,8 @@
                 <button onclick="closeWelcomePopup()" class="btn-copy-main" style="background: #16a34a;">Start Earning Now</button>
             </div>
         </div>
-    </div>
+                    </div>
         <script>
-        var activeUser = (typeof getActiveUser === 'function') ? getActiveUser() : null;
-
         document.addEventListener('DOMContentLoaded', () => {
             checkAndShowWelcomePopup();
             checkUpcomingPlans();
@@ -344,7 +339,7 @@
         }
 
         function tryBuyUpPlan(title) {
-            alert('⚠️ ' + title + ' abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
+            alert('⚠️ ' + title + ' abhi UPCOMING hai! Admin ke unlock karne ke baad hi open hoga.');
         }
 
         async function checkUpcomingPlans() {
@@ -381,144 +376,135 @@
             } catch (e) {
                 console.warn("Settings check error:", e);
             }
-
-async function buySeedPlan(title, price, daily, days) {
-    if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
-
-    const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-    if (!sb) return alert("Database connection error! Page reload karein.");
-
-    let user = null;
-    const keys = ['agro_user', 'active_user', 'user', 'session_user'];
-    for (let k of keys) {
-        const raw = localStorage.getItem(k);
-        if (raw) {
-            try { user = JSON.parse(raw); break; } catch(e) {}
         }
-    }
+                    async function buySeedPlan(title, price, daily, days) {
+            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-    let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
-    let userId = (user && user.id) ? user.id : null;
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (!sb) return alert("Database connection error! Page reload karein.");
 
-    if (!userPhone && !userId) {
-        userPhone = prompt("Session verify nahi hua. Registered mobile number dalein:");
-        if (!userPhone) return;
-    }
+            let user = null;
+            const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+            for (let k of keys) {
+                const raw = localStorage.getItem(k);
+                if (raw) {
+                    try { user = JSON.parse(raw); break; } catch(e) {}
+                }
+            }
 
-    try {
-        let query = sb.from('profiles').select('*');
-        if (userId) query = query.eq('id', userId);
-        else query = query.eq('phone', userPhone.trim());
+            let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
+            let userId = (user && user.id) ? user.id : null;
 
-        const { data: prof, error: pErr } = await query.single();
-        if (pErr || !prof) return alert("Profile nahi mili! Login karein.");
+            if (!userPhone && !userId) {
+                userPhone = prompt("Session verify nahi hua. Registered mobile number dalein:");
+                if (!userPhone) return;
+            }
 
-        // SHART 1: Check karein user ne pehle real recharge kiya hai ya nahi
-        const { data: rechargeTx, error: rcErr } = await sb
-            .from('transactions')
-            .select('id')
-            .eq('user_id', prof.id)
-            .eq('type', 'recharge')
-            .limit(1);
+            try {
+                let query = sb.from('profiles').select('*');
+                if (userId) query = query.eq('id', userId);
+                else query = query.eq('phone', userPhone.trim());
 
-        if (!rechargeTx || rechargeTx.length === 0) {
-            alert("⚠️ Pehle apna wallet recharge karein! Bina wallet recharge kiye plan activate nahi hoga.");
-            window.location.href = 'recharge.html';
-            return;
-        }
+                const { data: prof, error: pErr } = await query.single();
+                if (pErr || !prof) return alert("Profile nahi mili! Login karein.");
 
-        const curBal = parseFloat(prof.balance || 0);
-        if (curBal < price) {
-            alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein.`);
-            window.location.href = 'recharge.html';
-            return;
-        }
+                // SHART: Check user ne real recharge kiya hai ya nahi
+                const { data: rechargeTx, error: rcErr } = await sb
+                    .from('transactions')
+                    .select('id')
+                    .eq('user_id', prof.id)
+                    .eq('type', 'recharge')
+                    .limit(1);
 
-        const newBal = curBal - price;
+                if (!rechargeTx || rechargeTx.length === 0) {
+                    alert("⚠️ Pehle apna wallet recharge karein! Bina wallet recharge kiye plan activate nahi hoga.");
+                    window.location.href = 'recharge.html';
+                    return;
+                }
 
-        // 1. Balance deduct karein
-        const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
-        if (dErr) throw dErr;
+                const curBal = parseFloat(prof.balance || 0);
+                if (curBal < price) {
+                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein.`);
+                    window.location.href = 'recharge.html';
+                    return;
+                }
 
-        // 2. Order create karein
-        const now = new Date();
-        const expDate = new Date();
-        expDate.setDate(now.getDate() + parseInt(days));
+                const newBal = curBal - price;
 
-        await sb.from('orders').insert([{
-            user_id: prof.id,
-            phone: prof.phone,
-            plan_name: title,
-            price: price,
-            daily_income: daily,
-            validity_days: days,
-            days_remaining: days,
-            duration: days,
-            total_income: parseFloat(daily) * parseInt(days),
-            status: 'active',
-            created_at: now.toISOString(),
-            end_date: expDate.toISOString()
-        }]);
+                // 1. Balance deduct karein
+                const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
+                if (dErr) throw dErr;
 
-        // 3. Purchase transaction log
-        await sb.from('transactions').insert([{
-            user_id: prof.id,
-            type: 'purchase',
-            amount: price,
-            details: `Activated ${title}`
-        }]);
+                // 2. Order record banayein
+                const now = new Date();
+                const expDate = new Date();
+                expDate.setDate(now.getDate() + parseInt(days));
 
-        // 4. 3-Level Referral Commission Distribution (L1: 25%, L2: 2%, L3: 1%)
-        async function payCommission(refCode, percent, levelName) {
-            if (!refCode || refCode === 'AG-ADMIN') return null;
-            const { data: upline } = await sb.from('profiles').select('*').eq('referral_code', refCode).maybeSingle();
-            if (!upline) return null;
+                await sb.from('orders').insert([{
+                    user_id: prof.id,
+                    phone: prof.phone,
+                    plan_name: title,
+                    price: price,
+                    daily_income: daily,
+                    validity_days: days,
+                    days_remaining: days,
+                    duration: days,
+                    total_income: parseFloat(daily) * parseInt(days),
+                    status: 'active',
+                    created_at: now.toISOString(),
+                    end_date: expDate.toISOString()
+                }]);
 
-            const commAmt = parseFloat((price * percent).toFixed(2));
-            const newBal = parseFloat(upline.balance || 0) + commAmt;
-            const newTeamInc = parseFloat(upline.team_income || 0) + commAmt;
+                // 3. Purchase transaction log karein
+                await sb.from('transactions').insert([{
+                    user_id: prof.id,
+                    type: 'purchase',
+                    amount: price,
+                    details: `Activated ${title}`
+                }]);
 
-            await sb.from('profiles').update({ balance: newBal, team_income: newTeamInc }).eq('id', upline.id);
-            await sb.from('transactions').insert([{
-                user_id: upline.id,
-                type: 'commission',
-                amount: commAmt,
-                details: `${levelName} Commission ₹${commAmt} from ${prof.phone} (${title})`
-            }]);
+                // 4. 3-Level Referral Commission (L1: 25%, L2: 2%, L3: 1%)
+                async function payCommission(refCode, percent, levelName) {
+                    if (!refCode || refCode === 'AG-ADMIN') return null;
+                    const { data: upline } = await sb.from('profiles').select('*').eq('referral_code', refCode).maybeSingle();
+                    if (!upline) return null;
 
-            return upline.referred_by;
-        }
+                    const commAmt = parseFloat((price * percent).toFixed(2));
+                    const updatedBal = parseFloat(upline.balance || 0) + commAmt;
+                    const updatedTeamInc = parseFloat(upline.team_income || 0) + commAmt;
 
-        // Level 1 Commission (25%)
-        let parent1 = prof.referred_by;
-        let parent2 = await payCommission(parent1, 0.25, 'Level 1 (25%)');
+                    await sb.from('profiles').update({ balance: updatedBal, team_income: updatedTeamInc }).eq('id', upline.id);
+                    await sb.from('transactions').insert([{
+                        user_id: upline.id,
+                        type: 'commission',
+                        amount: commAmt,
+                        details: `${levelName} Commission ₹${commAmt} from ${prof.phone} (${title})`
+                    }]);
 
-        // Level 2 Commission (2%)
-        let parent3 = null;
-        if (parent2) {
-            parent3 = await payCommission(parent2, 0.02, 'Level 2 (2%)');
-        }
+                    return upline.referred_by;
+                }
 
-        // Level 3 Commission (1%)
-        if (parent3) {
-            await payCommission(parent3, 0.01, 'Level 3 (1%)');
-        }
+                let parent1 = prof.referred_by;
+                let parent2 = await payCommission(parent1, 0.25, 'Level 1 (25%)');
 
-        // Storage update
-        prof.balance = newBal;
-        localStorage.setItem('agro_user', JSON.stringify(prof));
+                if (parent2) {
+                    let parent3 = await payCommission(parent2, 0.02, 'Level 2 (2%)');
+                    if (parent3) {
+                        await payCommission(parent3, 0.01, 'Level 3 (1%)');
+                    }
+                }
 
-        alert(`🎉 Badhai ho! "${title}" successfully activate ho gaya!`);
-        window.location.href = 'orders.html';
+                prof.balance = newBal;
+                localStorage.setItem('agro_user', JSON.stringify(prof));
 
-    } catch (err) {
-        alert("Error: " + (err.message || JSON.stringify(err)));
-    }
-}
-    
-                    
+                alert(`🎉 Badhai ho! "${title}" successfully activate ho gaya!`);
+                window.location.href = 'orders.html';
 
-        function openInviteModal() {
+            } catch (err) {
+                alert("Error: " + (err.message || JSON.stringify(err)));
+            }
+            }
+                    function openInviteModal() {
             const modal = document.getElementById('inviteModal');
             if (modal) modal.style.display = 'flex';
         }
@@ -613,7 +599,7 @@ async function buySeedPlan(title, price, daily, days) {
                             <span>${item.type}</span>
                         </div>
                     </div>
-                    <div class="tx-amount amt-plan">
+                    <div class="tx-amount">
                         ${item.amt}
                     </div>
                 `;
@@ -647,3 +633,5 @@ async function buySeedPlan(title, price, daily, days) {
     </script>
 </body>
 </html>
+
+    
