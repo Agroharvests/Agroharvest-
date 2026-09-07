@@ -410,74 +410,66 @@
             }
         }
 
-        function tryBuyUpPlan(title, price, daily, days, settingKey) {
-            alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
-                }
-        
-            // Agar auth se na mile toh localStorage ke alag alag keys check karein
-      
-                
-                async function buySeedPlan(title, price, daily, days) {
+            // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
+            
+                            async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) {
-                alert("Database Error! Page refresh karein.");
+                alert("Database connection error! Page reload karein.");
                 return;
             }
 
-            // Sabhi storage keys check karein
-            let user = null;
-            const possibleKeys = ['agro_user', 'user', 'active_user', 'session_user', 'agroUser'];
-            for (let k of possibleKeys) {
-                const val = localStorage.getItem(k);
-                if (val) {
-                    try { user = JSON.parse(val); break; } catch(e) {}
-                }
+            // Standard login check (wallet.js standard)
+            let user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+            if (!user) {
+                try {
+                    user = JSON.parse(localStorage.getItem('agro_user'));
+                } catch(e) {}
             }
 
-            // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
-            let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
-            let userId = (user && user.id) ? user.id : null;
-
-            if (!userPhone && !userId) {
-                userPhone = prompt("Aap logged-out hain. Kripya apna registered Mobile Number dalein:");
-                if (!userPhone) return;
+            if (!user || !user.id) {
+                alert("Aapka account login nahi hai. Kripya pehle login karein!");
+                window.location.href = 'login.html';
+                return;
             }
 
             try {
-                // Profile check
-                let query = sb.from('profiles').select('id, phone, balance');
-                if (userId) query = query.eq('id', userId);
-                else query = query.eq('phone', userPhone.trim());
+                // 1. Balance check
+                const { data: userProfile, error: uErr } = await sb
+                    .from('profiles')
+                    .select('id, phone, balance')
+                    .eq('id', user.id)
+                    .single();
 
-                const { data: profileData, error: profErr } = await query.single();
-                if (profErr || !profileData) {
-                    alert("Account nahi mila! Pehle register/login karein.");
-                    window.location.href = 'login.html';
-                    return;
-                }
+                if (uErr || !userProfile) throw new Error("Profile load nahi ho saki. Please re-login.");
 
-                const curBal = parseFloat(profileData.balance || 0);
+                const curBal = parseFloat(userProfile.balance || 0);
                 if (curBal < price) {
-                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle recharge karein.`);
+                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein.`);
                     window.location.href = 'recharge.html';
                     return;
                 }
 
                 const newBal = curBal - price;
 
-                // 1. Balance Minus
-                await sb.from('profiles').update({ balance: newBal }).eq('id', profileData.id);
+                // 2. Deduct Balance
+                const { error: deductErr } = await sb
+                    .from('profiles')
+                    .update({ balance: newBal })
+                    .eq('id', userProfile.id);
 
-                // 2. Orders Table Entry
+                if (deductErr) throw deductErr;
+
+                // 3. Insert Order
                 const now = new Date();
-                const expDate = new Date();
-                expDate.setDate(now.getDate() + parseInt(days));
+                const expiryDate = new Date();
+                expiryDate.setDate(now.getDate() + parseInt(days));
 
-                await sb.from('orders').insert([{
-                    user_id: profileData.id,
-                    phone: profileData.phone,
+                const { error: ordErr } = await sb.from('orders').insert([{
+                    user_id: userProfile.id,
+                    phone: userProfile.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -487,28 +479,33 @@
                     total_income: parseFloat(daily) * parseInt(days),
                     status: 'active',
                     created_at: now.toISOString(),
-                    end_date: expDate.toISOString()
+                    end_date: expiryDate.toISOString()
                 }]);
 
-                // 3. Transactions Entry
+                if (ordErr) throw ordErr;
+
+                // 4. Log Transaction
                 await sb.from('transactions').insert([{
-                    user_id: profileData.id,
+                    user_id: userProfile.id,
                     type: 'purchase',
                     amount: price,
                     details: `Activated ${title}`
                 }]);
 
-                // Local user update
-                localStorage.setItem('agro_user', JSON.stringify(profileData));
-                alert(`🎉 Badhai ho! "${title}" plan activate ho gaya!`);
+                // Update local storage & UI
+                user.balance = newBal;
+                localStorage.setItem('agro_user', JSON.stringify(user));
+                const balEl = document.getElementById('totalBalDisplay');
+                if (balEl) balEl.innerText = '₹' + newBal.toFixed(2);
+
+                alert(`🎉 Badhai ho! "${title}" plan successfully activate ho gaya!`);
                 window.location.href = 'crops.html';
 
             } catch (err) {
-                alert("Error: " + (err.message || JSON.stringify(err)));
+                alert("Purchase Error: " + (err.message || err));
             }
-                }
+                            }
                     
-
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
             if (modal) modal.style.display = 'flex';
