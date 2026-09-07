@@ -395,21 +395,55 @@
         }
 
         async function loadDashboard() {
-            if (!activeUser) return;
-            const sb = getSupabase();
-            if (!sb) return;
+    var sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+    if (!sb) return;
 
-            try {
-                const { data: profile } = await sb.from('profiles').select('balance, team_income').eq('id', activeUser.id).single();
-                if (profile) {
-                    document.getElementById('totalBalDisplay').innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
-                    document.getElementById('teamIncDisplay').innerText = '₹' + parseFloat(profile.team_income || 0).toFixed(2);
-                }
-            } catch (err) {
-                console.error("Dashboard balance error:", err);
+    // 1. Session dhoondein
+    var user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+    if (!user) {
+        var keys = ['agro_user', 'active_user', 'user', 'session_user'];
+        for (var i = 0; i < keys.length; i++) {
+            var raw = localStorage.getItem(keys[i]);
+            if (raw) {
+                try { user = JSON.parse(raw); break; } catch(e) {}
             }
         }
+    }
 
+    if (!user) return;
+
+    try {
+        // 2. Database se fresh balance fetch karein
+        var query = sb.from('profiles').select('balance, team_income');
+        if (user.id) {
+            query = query.eq('id', user.id);
+        } else if (user.phone) {
+            query = query.eq('phone', user.phone);
+        }
+
+        var { data: profile, error: err } = await query.single();
+
+        if (profile && !err) {
+            // 3. Screen par balance print karein
+            var balElem = document.getElementById('totalBalDisplay');
+            var incElem = document.getElementById('teamIncDisplay');
+
+            if (balElem) {
+                balElem.innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
+            }
+            if (incElem) {
+                incElem.innerText = '₹' + parseFloat(profile.team_income || 0).toFixed(2);
+            }
+
+            // LocalStorage sync
+            user.balance = profile.balance;
+            localStorage.setItem('agro_user', JSON.stringify(user));
+        }
+    } catch (e) {
+        console.error("Dashboard error:", e);
+    }
+            }
+            
             // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
             
                 async function buySeedPlan(title, price, daily, days) {
