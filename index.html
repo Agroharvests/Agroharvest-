@@ -412,40 +412,48 @@
 
             // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
             
-                            async function buySeedPlan(title, price, daily, days) {
+                            
+                        async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) {
-                alert("Database connection error! Page reload karein.");
+                alert("Database Error! Page reload karein.");
                 return;
             }
 
-            // Standard login check (wallet.js standard)
-            let user = (typeof getActiveUser === 'function') ? getActiveUser() : null;
+            // 1. Check user from localStorage or direct Auth
+            let user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('agro_user')) || JSON.parse(localStorage.getItem('active_user'));
+            } catch(e) {}
+
+            // Agar storage me nahi mila to Supabase Auth se nikal lo
             if (!user) {
-                try {
-                    user = JSON.parse(localStorage.getItem('agro_user'));
-                } catch(e) {}
+                const { data: authData } = await sb.auth.getUser();
+                if (authData && authData.user) {
+                    user = authData.user;
+                }
             }
 
-            if (!user || !user.id) {
-                alert("Aapka account login nahi hai. Kripya pehle login karein!");
+            if (!user) {
+                alert("Pehle Login karein!");
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // 1. Balance check
-                const { data: userProfile, error: uErr } = await sb
-                    .from('profiles')
-                    .select('id, phone, balance')
-                    .eq('id', user.id)
-                    .single();
+                // 2. Profile fetch
+                const uid = user.id;
+                const { data: prof, error: pErr } = await sb.from('profiles').select('*').eq('id', uid).single();
+                
+                if (pErr || !prof) {
+                    alert("Profile load nahi hui. Dobara login karein!");
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-                if (uErr || !userProfile) throw new Error("Profile load nahi ho saki. Please re-login.");
-
-                const curBal = parseFloat(userProfile.balance || 0);
+                const curBal = parseFloat(prof.balance || 0);
                 if (curBal < price) {
                     alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein.`);
                     window.location.href = 'recharge.html';
@@ -454,22 +462,17 @@
 
                 const newBal = curBal - price;
 
-                // 2. Deduct Balance
-                const { error: deductErr } = await sb
-                    .from('profiles')
-                    .update({ balance: newBal })
-                    .eq('id', userProfile.id);
+                // 3. Balance katna
+                await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
 
-                if (deductErr) throw deductErr;
-
-                // 3. Insert Order
+                // 4. Order add karna
                 const now = new Date();
-                const expiryDate = new Date();
-                expiryDate.setDate(now.getDate() + parseInt(days));
+                const expDate = new Date();
+                expDate.setDate(now.getDate() + parseInt(days));
 
-                const { error: ordErr } = await sb.from('orders').insert([{
-                    user_id: userProfile.id,
-                    phone: userProfile.phone,
+                await sb.from('orders').insert([{
+                    user_id: prof.id,
+                    phone: prof.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -479,20 +482,18 @@
                     total_income: parseFloat(daily) * parseInt(days),
                     status: 'active',
                     created_at: now.toISOString(),
-                    end_date: expiryDate.toISOString()
+                    end_date: expDate.toISOString()
                 }]);
 
-                if (ordErr) throw ordErr;
-
-                // 4. Log Transaction
+                // 5. Transaction add karna
                 await sb.from('transactions').insert([{
-                    user_id: userProfile.id,
+                    user_id: prof.id,
                     type: 'purchase',
                     amount: price,
                     details: `Activated ${title}`
                 }]);
 
-                // Update local storage & UI
+                // Update Local UI
                 user.balance = newBal;
                 localStorage.setItem('agro_user', JSON.stringify(user));
                 const balEl = document.getElementById('totalBalDisplay');
@@ -504,7 +505,8 @@
             } catch (err) {
                 alert("Purchase Error: " + (err.message || err));
             }
-                            }
+            }
+                    
                     
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
