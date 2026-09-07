@@ -338,4 +338,271 @@
             </div>
         </div>
     </div>
-    
+        <script>
+        const activeUser = getActiveUser();
+        if (!activeUser) {
+            window.location.replace('login.html');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAndShowWelcomePopup();
+            loadDashboard();
+            checkUpcomingPlans();
+        });
+
+        function checkAndShowWelcomePopup() {
+            const hasSeen = localStorage.getItem('agro_welcome_shown');
+            if (!hasSeen) {
+                const modal = document.getElementById('welcomePopup');
+                if (modal) modal.style.display = 'flex';
+            }
+        }
+
+        function closeWelcomePopup() {
+            const modal = document.getElementById('welcomePopup');
+            if (modal) modal.style.display = 'none';
+            localStorage.setItem('agro_welcome_shown', 'true');
+        }
+
+        async function checkUpcomingPlans() {
+            const sb = getSupabase();
+            if (!sb) return;
+            try {
+                const { data: settings } = await sb.from('admin_settings').select('*');
+                if (settings) {
+                    const p4999 = settings.find(s => s.key === 'plan_4999_open');
+                    const p9999 = settings.find(s => s.key === 'plan_9999_open');
+
+                    if (p4999 && p4999.value == '1') {
+                        document.getElementById('badge4999').className = 'ribbon-badge ribbon-green';
+                        document.getElementById('badge4999').innerText = 'VIP Active';
+                        const btn = document.getElementById('btnPlan4999');
+                        btn.className = 'btn-invest btn-invest-green';
+                        btn.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                    }
+
+                    if (p9999 && p9999.value == '1') {
+                        document.getElementById('badge9999').className = 'ribbon-badge ribbon-gold';
+                        document.getElementById('badge9999').innerText = '👑 VIP Active';
+                        const btn = document.getElementById('btnPlan9999');
+                        btn.className = 'btn-invest btn-invest-gold';
+                        btn.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                    }
+                }
+            } catch (e) {
+                console.warn("Settings check error:", e);
+            }
+        }
+
+        async function loadDashboard() {
+            if (!activeUser) return;
+            const sb = getSupabase();
+            if (!sb) return;
+
+            try {
+                const { data: profile } = await sb.from('profiles').select('balance, team_income').eq('id', activeUser.id).single();
+                if (profile) {
+                    document.getElementById('totalBalDisplay').innerText = '₹' + parseFloat(profile.balance || 0).toFixed(2);
+                    document.getElementById('teamIncDisplay').innerText = '₹' + parseFloat(profile.team_income || 0).toFixed(2);
+                }
+            } catch (err) {
+                console.error("Dashboard balance error:", err);
+            }
+        }
+
+        function tryBuyUpPlan(title, price, daily, days, settingKey) {
+            alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
+        }
+
+        async function buySeedPlan(title, price, daily, days) {
+            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
+
+            const sb = getSupabase();
+            if (!sb) return alert("Database connection error. Kripya page refresh karein!");
+
+            try {
+                const { data: userProfile, error: uErr } = await sb
+                    .from('profiles')
+                    .select('balance, id, phone')
+                    .eq('id', activeUser.id)
+                    .single();
+
+                if (uErr || !userProfile) throw new Error("Balance check failed. Please re-login.");
+
+                const curBal = parseFloat(userProfile.balance || 0);
+                if (curBal < price) {
+                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle wallet recharge karein!`);
+                    window.location.href = 'recharge.html';
+                    return;
+                }
+
+                const now = new Date();
+                const expiryDate = new Date();
+                expiryDate.setDate(now.getDate() + parseInt(days));
+                const totalYield = parseFloat(daily) * parseInt(days);
+
+                const newBal = curBal - price;
+                const { error: deductErr } = await sb
+                    .from('profiles')
+                    .update({ balance: newBal })
+                    .eq('id', activeUser.id);
+
+                if (deductErr) throw deductErr;
+
+                const { error: ordErr } = await sb.from('orders').insert([{
+                    user_id: activeUser.id,
+                    phone: activeUser.phone,
+                    plan_name: title,
+                    price: price,
+                    daily_income: daily,
+                    validity_days: days,
+                    days_remaining: days,
+                    duration: days,
+                    total_income: totalYield,
+                    status: 'active',
+                    created_at: now.toISOString(),
+                    end_date: expiryDate.toISOString()
+                }]);
+
+                if (ordErr) throw ordErr;
+
+                await sb.from('transactions').insert([{
+                    user_id: activeUser.id,
+                    type: 'purchase',
+                    amount: price,
+                    details: `Activated ${title}`
+                }]);
+
+                activeUser.balance = newBal;
+                localStorage.setItem('agro_user', JSON.stringify(activeUser));
+
+                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} credit hoga.`);
+                window.location.href = 'crops.html';
+
+            } catch (err) {
+                alert("Purchase Error: " + err.message);
+            }
+        }
+
+        function openInviteModal() {
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeInviteModal(e) {
+            if (e.target.id === 'inviteModal') {
+                e.target.style.display = 'none';
+            }
+        }
+
+        function closeInviteModalForce() {
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function copyRefLink() {
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Referral link copied to clipboard!");
+            });
+        }
+
+        function shareViaWhatsApp() {
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`);
+        }
+
+        function shareViaTelegram() {
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+            window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
+        }
+
+        function shareViaFacebook() {
+            const base = window.location.origin + window.location.pathname.replace('index.html', '');
+            const link = `${base}register.html?ref=${activeUser.referral_code || ''}`;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
+        }
+
+        // ================= LIVE TRANSACTIONS TICKER =================
+        (function() {
+            const now = new Date();
+            const day = now.getDay(); // 1 = Monday, 4 = Thursday
+            const hr = now.getHours();
+            const isWithdrawOpen = (day === 1 || day === 4) && (hr >= 7 && hr < 17);
+
+            const txList = [
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
+            ];
+
+            if (isWithdrawOpen) {
+                txList.push(
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.390' },
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.710' },
+                    { type: 'Withdrawal', icon: 'fa-money-bill-transfer', iconClass: 'icon-withdraw', amt: 'Rs.1,420' }
+                );
+            }
+
+            function getRandomPhone() {
+                const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
+                const p = prefix[Math.floor(Math.random() * prefix.length)];
+                const last4 = Math.floor(1000 + Math.random() * 9000);
+                return `${p}****${last4}`;
+            }
+
+            function generateRow() {
+                const item = txList[Math.floor(Math.random() * txList.length)];
+                const div = document.createElement('div');
+                div.className = 'tx-item';
+                div.innerHTML = `
+                    <div class="tx-left">
+                        <div class="tx-icon-box ${item.iconClass}">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </div>
+                        <div class="tx-details">
+                            <strong>User ${getRandomPhone()}</strong>
+                            <span>${item.type}</span>
+                        </div>
+                    </div>
+                    <div class="tx-amount ${item.type === 'Withdrawal' ? 'amt-withdraw' : 'amt-plan'}">
+                        ${item.amt}
+                    </div>
+                `;
+                return div;
+            }
+
+            function startTicker() {
+                const target = document.getElementById('liveTxContainer');
+                if (!target) return;
+
+                target.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    target.appendChild(generateRow());
+                }
+
+                setInterval(() => {
+                    const row = generateRow();
+                    target.prepend(row);
+                    if (target.children.length > 4) {
+                        target.removeChild(target.lastChild);
+                    }
+                }, 2500);
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                startTicker();
+            } else {
+                document.addEventListener('DOMContentLoaded', startTicker);
+            }
+            setTimeout(startTicker, 500);
+        })();
+    </script>
+</body>
+    </html>
+
