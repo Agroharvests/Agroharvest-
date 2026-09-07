@@ -413,50 +413,39 @@
         function tryBuyUpPlan(title, price, daily, days, settingKey) {
             alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
         }
-        async function buySeedPlan(title, price, daily, days) {
+                async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = getSupabase();
             if (!sb) return alert("Database connection error. Kripya page refresh karein!");
 
-            // wallet.js ke getActiveUser() se ya local storage se safely user fetch karein
-            let user = null;
-            try {
-                if (typeof getActiveUser === 'function') {
-                    user = getActiveUser();
-                }
-            } catch(e) {}
+            // Direct activeUser check (jo index page ke top par define hai)
+            const curUser = window.activeUser || (typeof activeUser !== 'undefined' ? activeUser : null) || (typeof getActiveUser === 'function' ? getActiveUser() : null);
 
-            if (!user) {
-                try {
-                    user = JSON.parse(localStorage.getItem('agro_user')) || 
-                           JSON.parse(localStorage.getItem('active_user')) || 
-                           JSON.parse(localStorage.getItem('user'));
-                } catch(e) {}
-            }
-
-            if (!user || (!user.id && !user.phone)) {
-                alert("Session expire ho gaya hai. Kripya dobara login karein!");
+            if (!curUser) {
+                alert("Session expire ho gaya hai. Kripya login karein!");
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // User query: ID se ya Phone number se
-                let query = sb.from('profiles').select('balance, id, phone');
-                if (user.id) {
-                    query = query.eq('id', user.id);
-                } else {
-                    query = query.eq('phone', user.phone);
+                // Balance check: ID ya phone number match
+                let req = sb.from('profiles').select('id, phone, balance');
+                if (curUser.id) {
+                    req = req.eq('id', curUser.id);
+                } else if (curUser.phone) {
+                    req = req.eq('phone', curUser.phone);
                 }
 
-                const { data: userProfile, error: uErr } = await query.single();
+                const { data: userProfile, error: uErr } = await req.single();
 
-                if (uErr || !userProfile) throw new Error("Balance check failed. Please re-login.");
+                if (uErr || !userProfile) {
+                    throw new Error("Profile record nahi mila. Login dobara karein.");
+                }
 
                 const curBal = parseFloat(userProfile.balance || 0);
                 if (curBal < price) {
-                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle wallet recharge karein!`);
+                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
                     window.location.href = 'recharge.html';
                     return;
                 }
@@ -467,7 +456,7 @@
                 const totalYield = parseFloat(daily) * parseInt(days);
                 const newBal = curBal - price;
 
-                // 1. Balance deduct karein
+                // 1. Balance minus karein
                 const { error: deductErr } = await sb
                     .from('profiles')
                     .update({ balance: newBal })
@@ -475,10 +464,10 @@
 
                 if (deductErr) throw deductErr;
 
-                // 2. Order insert karein
+                // 2. Orders table me entry dalein
                 const { error: ordErr } = await sb.from('orders').insert([{
                     user_id: userProfile.id,
-                    phone: userProfile.phone,
+                    phone: userProfile.phone || curUser.phone,
                     plan_name: title,
                     price: price,
                     daily_income: daily,
@@ -493,7 +482,7 @@
 
                 if (ordErr) throw ordErr;
 
-                // 3. Transaction log karein
+                // 3. Transactions me log karein
                 await sb.from('transactions').insert([{
                     user_id: userProfile.id,
                     type: 'purchase',
@@ -501,10 +490,10 @@
                     details: `Activated ${title}`
                 }]);
 
-                // Local balance update
-                user.balance = newBal;
-                if (localStorage.getItem('agro_user')) localStorage.setItem('agro_user', JSON.stringify(user));
-                if (localStorage.getItem('active_user')) localStorage.setItem('active_user', JSON.stringify(user));
+                // Screen display balance update
+                curUser.balance = newBal;
+                const balEl = document.getElementById('totalBalDisplay');
+                if (balEl) balEl.innerText = '₹' + newBal.toFixed(2);
 
                 alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} credit hoga.`);
                 window.location.href = 'crops.html';
@@ -512,8 +501,8 @@
             } catch (err) {
                 alert("Purchase Error: " + err.message);
             }
-        }
-            
+            }
+                
 
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
