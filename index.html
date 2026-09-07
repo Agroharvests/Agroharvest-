@@ -577,42 +577,26 @@
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
         }
 
+            // Check day: 1 = Monday, 4 = Thursday
+        const todayDay = new Date().getDay();
+        const isWithdrawalDay = (todayDay === 1 || todayDay === 4);
+
+        // Monday & Thursday ko withdrawal transactions add hongi, baaki din sirf Plan Buy
         const txTypes = [
-            { type: 'Recharged Wallet', icon: 'fa-wallet', class: 'tx-icon-recharge', amtClass: 'amt-recharge', prefix: '+Rs.', amounts: [500, 1000, 1499, 2499, 4999] },
-            { type: 'Purchased Plan', icon: 'fa-cart-shopping', class: 'tx-icon-plan', amtClass: 'amt-plan', prefix: 'Rs.', amounts: [499, 1499, 2499, 4999] },
-            { type: 'Withdrawal', icon: 'fa-money-bill-transfer', class: 'tx-icon-withdraw', amtClass: 'amt-withdraw', prefix: '-Rs.', amounts: [249, 390, 520, 710, 1250, 2400] }
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', prefix: '', amounts: [499, 1499, 2499, 4999] }
         ];
 
-        function getRandomPhone() {
-            const prefixes = ['98', '97', '99', '96', '91', '89', '88', '79', '70', '63'];
-            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-            const lastDigits = Math.floor(1000 + Math.random() * 9000);
-            return `User ****${lastDigits}`;
+        if (isWithdrawalDay) {
+            txTypes.push({
+                type: 'Withdrawal',
+                icon: 'fa-money-bill-transfer',
+                iconClass: 'icon-withdraw',
+                prefix: 'Rs.',
+                amounts: [199, 390, 710, 1420, 2500]
+            });
         }
+            
 
-        function createTxElement() {
-            const tx = txTypes[Math.floor(Math.random() * txTypes.length)];
-            const amt = tx.amounts[Math.floor(Math.random() * tx.amounts.length)].toLocaleString('en-IN');
-            const user = getRandomPhone();
-
-            const item = document.createElement('div');
-            item.className = 'tx-item';
-            item.innerHTML = `
-                <div class="tx-left">
-                    <div class="tx-icon-box ${tx.class}">
-                        <i class="fa-solid ${tx.icon}"></i>
-                    </div>
-                    <div class="tx-user-info">
-                        <strong>${user}</strong>
-                        <span>${tx.type}</span>
-                    </div>
-                </div>
-                <div class="tx-amt ${tx.amtClass}">
-                    ${tx.prefix}${amt}
-                </div>
-            `;
-            return item;
-        }
 
         function startLiveTxFeed() {
             const container = document.getElementById('liveTxContainer');
