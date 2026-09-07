@@ -104,7 +104,7 @@
             return code;
         }
 
-        async function handleRegister(e) {
+                async function handleRegister(e) {
             e.preventDefault();
             const phone = document.getElementById('regPhone').value.trim();
             const password = document.getElementById('regPassword').value.trim();
@@ -122,10 +122,10 @@
             btn.innerText = "Creating Account...";
 
             try {
-                // Verify Sponsor Code Exists
+                // 1. Verify Sponsor Code
                 const { data: sponsor, error: spErr } = await sb
                     .from('profiles')
-                    .select('id, referral_code')
+                    .select('*')
                     .eq('referral_code', refBy)
                     .maybeSingle();
 
@@ -138,6 +138,7 @@
 
                 const myNewRefCode = generateUniqueRefCode();
 
+                // 2. Naya user create karein
                 const { data: newUser, error: regErr } = await sb
                     .from('profiles')
                     .insert([{
@@ -158,12 +159,32 @@
                     throw regErr;
                 }
 
+                // 3. User ko Signup Bonus (₹50)
                 await sb.from('transactions').insert([{
                     user_id: newUser.id,
                     type: 'bonus',
                     amount: 50.00,
                     details: 'Welcome Signup Bonus'
                 }]);
+
+                // 4. Sponsor ko Direct Referral Bonus / Credit (Agar sponsor mila)
+                if (sponsor) {
+                    const refBonus = 10.00; // Har direct referral registration par ₹10 bonus (ya aap jo rakhna chahein)
+                    const updatedSponsorBal = parseFloat(sponsor.balance || 0) + refBonus;
+                    const updatedTeamInc = parseFloat(sponsor.team_income || 0) + refBonus;
+
+                    await sb.from('profiles').update({
+                        balance: updatedSponsorBal,
+                        team_income: updatedTeamInc
+                    }).eq('id', sponsor.id);
+
+                    await sb.from('transactions').insert([{
+                        user_id: sponsor.id,
+                        type: 'referral_bonus',
+                        amount: refBonus,
+                        details: `Referral Bonus from ${phone}`
+                    }]);
+                }
 
                 if (typeof setSessionUser === 'function') {
                     setSessionUser(newUser);
@@ -179,7 +200,8 @@
                 btn.disabled = false;
                 btn.innerText = "Register & Get ₹50";
             }
-        }
+                }
+        
     </script>
 </body>
 </html>
