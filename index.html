@@ -413,58 +413,51 @@
         function tryBuyUpPlan(title, price, daily, days, settingKey) {
             alert('⚠️ Yeh plan abhi UPCOMING hai! Admin ke unlock karne ke baad hi yeh open hoga.');
         }
-                async function buySeedPlan(title, price, daily, days) {
+                        async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = getSupabase();
-            if (!sb) return alert("Database connection error. Kripya page refresh karein!");
+            if (!sb) return alert("Database error: Connection nahi mila. Page refresh karein!");
 
-            // Direct activeUser check (jo index page ke top par define hai)
             const curUser = window.activeUser || (typeof activeUser !== 'undefined' ? activeUser : null) || (typeof getActiveUser === 'function' ? getActiveUser() : null);
 
             if (!curUser) {
-                alert("Session expire ho gaya hai. Kripya login karein!");
+                alert("Session expire ho gaya hai! Kripya dobara login karein.");
                 window.location.href = 'login.html';
                 return;
             }
 
             try {
-                // Balance check: ID ya phone number match
-                let req = sb.from('profiles').select('id, phone, balance');
-                if (curUser.id) {
-                    req = req.eq('id', curUser.id);
-                } else if (curUser.phone) {
-                    req = req.eq('phone', curUser.phone);
-                }
+                // 1. Balance verify karein
+                let query = sb.from('profiles').select('*');
+                if (curUser.id) query = query.eq('id', curUser.id);
+                else query = query.eq('phone', curUser.phone);
 
-                const { data: userProfile, error: uErr } = await req.single();
-
-                if (uErr || !userProfile) {
-                    throw new Error("Profile record nahi mila. Login dobara karein.");
-                }
+                const { data: userProfile, error: uErr } = await query.single();
+                if (uErr || !userProfile) throw new Error("Profile record nahi mila.");
 
                 const curBal = parseFloat(userProfile.balance || 0);
                 if (curBal < price) {
-                    alert(`Balance kam hai (Available: ₹${curBal.toFixed(2)}). Pehle recharge karein!`);
+                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein!`);
                     window.location.href = 'recharge.html';
                     return;
                 }
 
-                const now = new Date();
-                const expiryDate = new Date();
-                expiryDate.setDate(now.getDate() + parseInt(days));
-                const totalYield = parseFloat(daily) * parseInt(days);
                 const newBal = curBal - price;
 
-                // 1. Balance minus karein
+                // 2. Balance deduct karein
                 const { error: deductErr } = await sb
                     .from('profiles')
                     .update({ balance: newBal })
                     .eq('id', userProfile.id);
 
-                if (deductErr) throw deductErr;
+                if (deductErr) throw new Error("Balance deduct nahi ho paya: " + deductErr.message);
 
-                // 2. Orders table me entry dalein
+                // 3. Orders table me order insert karein
+                const now = new Date();
+                const expiryDate = new Date();
+                expiryDate.setDate(now.getDate() + parseInt(days));
+
                 const { error: ordErr } = await sb.from('orders').insert([{
                     user_id: userProfile.id,
                     phone: userProfile.phone || curUser.phone,
@@ -474,35 +467,41 @@
                     validity_days: days,
                     days_remaining: days,
                     duration: days,
-                    total_income: totalYield,
+                    total_income: parseFloat(daily) * parseInt(days),
                     status: 'active',
                     created_at: now.toISOString(),
                     end_date: expiryDate.toISOString()
                 }]);
 
-                if (ordErr) throw ordErr;
+                if (ordErr) {
+                    console.warn("Order insert issue:", ordErr);
+                }
 
-                // 3. Transactions me log karein
-                await sb.from('transactions').insert([{
-                    user_id: userProfile.id,
-                    type: 'purchase',
-                    amount: price,
-                    details: `Activated ${title}`
-                }]);
+                // 4. Transactions me entry log karein
+                try {
+                    await sb.from('transactions').insert([{
+                        user_id: userProfile.id,
+                        type: 'purchase',
+                        amount: price,
+                        details: `Activated ${title}`
+                    }]);
+                } catch (txE) {
+                    console.warn("Tx log notice:", txE);
+                }
 
-                // Screen display balance update
+                // 5. Local storage & UI update
                 curUser.balance = newBal;
-                const balEl = document.getElementById('totalBalDisplay');
-                if (balEl) balEl.innerText = '₹' + newBal.toFixed(2);
+                localStorage.setItem('agro_user', JSON.stringify(curUser));
+                localStorage.setItem('active_user', JSON.stringify(curUser));
 
-                alert(`🎉 ${title} successfully activate ho gaya! Daily ₹${daily} credit hoga.`);
+                alert(`🎉 Badhai ho! "${title}" plan successfully activate ho gaya!`);
                 window.location.href = 'crops.html';
 
             } catch (err) {
-                alert("Purchase Error: " + err.message);
+                alert("Order Failed: " + (err.message || JSON.stringify(err)));
             }
-            }
-                
+                          }
+                                          
 
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
