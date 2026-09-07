@@ -504,72 +504,75 @@
                 alert("Error: " + (err.message || JSON.stringify(err)));
             }
             }
-                    function openInviteModal() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'flex';
+                    async function getDirectReferralCode() {
+    // 1. LocalStorage check
+    const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+    for (let k of keys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+            try {
+                const u = JSON.parse(raw);
+                if (u && (u.referral_code || u.ref_code)) return (u.referral_code || u.ref_code);
+            } catch(e) {}
         }
+    }
 
-        function closeInviteModal(e) {
-            if (e.target.id === 'inviteModal') {
-                e.target.style.display = 'none';
+    // 2. Supabase live session fallback
+    const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+    if (sb && sb.auth) {
+        try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session && session.user) {
+                const { data: prof } = await sb.from('profiles').select('referral_code').eq('id', session.user.id).maybeSingle();
+                if (prof && prof.referral_code) return prof.referral_code;
             }
-        }
+        } catch(e) {}
+    }
 
-        function closeInviteModalForce() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'none';
-        }
+    return '';
+}
 
-        function getDirectReferralCode() {
-            let u = (typeof getActiveUser === 'function') ? getActiveUser() : null;
-            if (!u) {
-                const keys = ['agro_user', 'active_user', 'user', 'session_user'];
-                for (let k of keys) {
-                    const raw = localStorage.getItem(k);
-                    if (raw) {
-                        try { u = JSON.parse(raw); break; } catch(e) {}
-                    }
-                }
-            }
-            return (u && (u.referral_code || u.ref_code)) ? (u.referral_code || u.ref_code) : '';
+async function copyRefLink() {
+    let code = await getDirectReferralCode();
+    if (!code) {
+        code = prompt("Referral code load nahi hua. Apna Registered Mobile Number dalein:");
+        if (!code) return;
+        const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+        if (sb) {
+            const { data: p } = await sb.from('profiles').select('referral_code').eq('phone', code.trim()).maybeSingle();
+            if (p && p.referral_code) code = p.referral_code;
+            else return alert("User verify nahi hua!");
         }
+    }
+    const link = `https://agroharvests.github.io/Agroharvest-/register.html?ref=${code}`;
+    navigator.clipboard.writeText(link).then(() => {
+        alert("Referral link copied: " + link);
+    });
+}
 
-        function copyRefLink() {
-            const code = getDirectReferralCode();
-            if (!code) {
-                alert("Session load nahi hua. Ek baar page refresh karein!");
-                return;
-            }
-            const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${code}`;
-            navigator.clipboard.writeText(link).then(() => {
-                alert("Referral link copied: " + link);
-            });
-        }
+async function shareViaWhatsApp() {
+    const code = await getDirectReferralCode();
+    if (!code) return alert("Pehle Login karein ya page refresh karein!");
+    const link = `https://agroharvests.github.io/Agroharvest-/register.html?ref=${code}`;
+    const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+    window.open(`https://api.whatsapp.com/send?text=${msg}`);
+}
 
-        function shareViaWhatsApp() {
-            const code = getDirectReferralCode();
-            const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${code}`;
-            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
-            window.open(`https://api.whatsapp.com/send?text=${msg}`);
-        }
+async function shareViaTelegram() {
+    const code = await getDirectReferralCode();
+    if (!code) return alert("Pehle Login karein ya page refresh karein!");
+    const link = `https://agroharvests.github.io/Agroharvest-/register.html?ref=${code}`;
+    const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+    window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
+}
 
-        function shareViaTelegram() {
-            const code = getDirectReferralCode();
-            const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${code}`;
-            const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
-            window.open(`https://t.me/share/url?url=${link}&text=${msg}`);
-        }
-
-        function shareViaFacebook() {
-            const code = getDirectReferralCode();
-            const base = window.location.origin + window.location.pathname.replace('index.html', '');
-            const link = `${base}register.html?ref=${code}`;
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
-        }
-
+async function shareViaFacebook() {
+    const code = await getDirectReferralCode();
+    if (!code) return alert("Pehle Login karein ya page refresh karein!");
+    const link = `https://agroharvests.github.io/Agroharvest-/register.html?ref=${code}`;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
+}
+            
         // Live Transactions Ticker
         (function() {
             const txList = [
