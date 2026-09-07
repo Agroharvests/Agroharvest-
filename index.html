@@ -471,7 +471,9 @@
                 alert("Error: " + (err.message || JSON.stringify(err)));
             }
         }
-                    function openInviteModal() {
+                    
+
+        function openInviteModal() {
             const modal = document.getElementById('inviteModal');
             if (modal) modal.style.display = 'flex';
         }
@@ -487,7 +489,7 @@
             if (modal) modal.style.display = 'none';
         }
 
-                function getDirectReferralCode() {
+        function getDirectReferralCode() {
             let u = (typeof getActiveUser === 'function') ? getActiveUser() : null;
             if (!u) {
                 const keys = ['agro_user', 'active_user', 'user', 'session_user'];
@@ -535,8 +537,16 @@
             const base = window.location.origin + window.location.pathname.replace('index.html', '');
             const link = `${base}register.html?ref=${code}`;
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`);
-                    }
-                
+        }
+
+        // Live Transactions Ticker
+        (function() {
+            const txList = [
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
+                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
+            ];
+
             function getRandomPhone() {
                 const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
                 const p = prefix[Math.floor(Math.random() * prefix.length)];
