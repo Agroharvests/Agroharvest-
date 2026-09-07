@@ -61,10 +61,9 @@
             </div>
 
             <div class="input-group">
-    <label>Withdrawal Amount (Min ₹199)</label>
-    <input type="number" id="wdAmount" class="input-box" placeholder="Min ₹199" oninput="calculateNetPayout()">
+                <label>Withdrawal Amount (Min ₹199)</label>
+                <input type="number" id="wdAmount" class="input-box" placeholder="Min ₹199" oninput="calculateNetPayout()">
             </div>
-            
 
             <div class="input-group">
                 <label>Account Holder Name</label>
@@ -94,17 +93,16 @@
 
             <div class="rules-tag">
                 <p style="color: #dc2626; font-size: 12px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
-    ⏰ Payout Days: Monday & Thursday (07:00 AM to 05:00 PM) | Limit: 1 per day.
+                    ⏰ Payout Days: Monday & Thursday (07:00 AM to 05:00 PM) | Limit: 1 per day.
                 </p>
-                
-                
             </div>
 
             <button onclick="submitWithdrawalRequest()" id="btnSubmitWd" class="btn-withdraw">
                 Confirm Bank Withdrawal
             </button>
         </div>
-                <!-- Withdrawal History Section -->
+
+        <!-- Withdrawal History Section -->
         <div class="history-card">
             <h3 style="font-size: 15px; font-weight: 900; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <span>Withdrawal History</span>
@@ -117,7 +115,7 @@
     </div>
 
     <script>
-        const activeUser = requireAuth();
+        const activeUser = (typeof requireAuth === 'function') ? requireAuth() : (typeof getActiveUser === 'function' ? getActiveUser() : null);
         let userCurrentBalance = 0;
 
         document.addEventListener("DOMContentLoaded", async () => {
@@ -127,7 +125,7 @@
 
         async function loadUserProfileAndBank() {
             if (!activeUser) return;
-            const sb = getSupabase();
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) return;
 
             try {
@@ -142,12 +140,11 @@
                 userCurrentBalance = parseFloat(profile.balance || 0);
                 document.getElementById('displayBal').innerText = "₹" + userCurrentBalance.toFixed(2);
 
-                // Auto-fill saved bank details if available
                 if (profile.holder_name) document.getElementById('holderName').value = profile.holder_name;
                 if (profile.account_number) {
                     const accInput = document.getElementById('accNumber');
                     accInput.value = profile.account_number;
-                    accInput.disabled = true; // Lock bank account after first save
+                    accInput.disabled = true;
                 }
                 if (profile.ifsc_code) document.getElementById('ifscCode').value = profile.ifsc_code;
 
@@ -165,133 +162,147 @@
             document.getElementById('netPayoutDisplay').innerText = `₹${net.toFixed(2)}`;
         }
 
-async function submitWithdrawalRequest() {
-    const amt = parseFloat(document.getElementById('wdAmount').value);
-    const name = document.getElementById('holderName').value.trim();
-    const acc = document.getElementById('accNumber').value.trim();
-    const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
-    const btn = document.getElementById('btnSubmitWd');
-    
-    // Strict Day & Time Check (Only Monday & Thursday, 07:00 AM to 05:00 PM)
-    const now = new Date();
-    const currentDay = now.getDay(); // 1 = Monday, 4 = Thursday
-    const currentHour = now.getHours();
+        async function submitWithdrawalRequest() {
+            const amt = parseFloat(document.getElementById('wdAmount').value);
+            const name = document.getElementById('holderName').value.trim();
+            const acc = document.getElementById('accNumber').value.trim();
+            const ifsc = document.getElementById('ifscCode').value.trim().toUpperCase();
+            const btn = document.getElementById('btnSubmitWd');
+            
+            // 1. Strict Day & Time Check (Monday & Thursday, 07:00 AM to 05:00 PM)
+            const now = new Date();
+            const currentDay = now.getDay(); // 1 = Monday, 4 = Thursday
+            const currentHour = now.getHours();
 
-    // Check karein agar aaj Monday (1) ya Thursday (4) nahi hai
-    if (currentDay !== 1 && currentDay !== 4) {
-        return alert("⚠️ Withdrawals are only available on Monday and Thursday!");
-    }
+            if (currentDay !== 1 && currentDay !== 4) {
+                return alert("⚠️ Withdrawals are only available on Monday and Thursday!");
+            }
 
-    // Check karein time subha 7 se shaam 5 baje ke beech hai ya nahi
-    if (currentHour < 7 || currentHour >= 17) {
-        return alert("⏰ Payout service is closed!\nWithdrawals are open between 07:00 AM and 05:00 PM on Monday and Thursday.");
-                           }
-        
-    if (isNaN(amt) || amt < 199) return alert("Minimum withdrawal amount ₹199 hai!");
-    if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
-    if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
-    if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
-    if (!ifsc || ifsc.length < 6) return alert("Kripya sahi IFSC Code dalein!");
+            if (currentHour < 7 || currentHour >= 17) {
+                return alert("⏰ Payout service is closed!\nWithdrawals are open between 07:00 AM and 05:00 PM on Monday and Thursday.");
+            }
+                
+            if (isNaN(amt) || amt < 199) return alert("Minimum withdrawal amount ₹199 hai!");
+            if (amt > userCurrentBalance) return alert(`Balance kam hai! Aapka withdrawable balance ₹${userCurrentBalance.toFixed(2)} hai.`);
+            if (!name || name.length < 3) return alert("Kripya sahi Account Holder Name dalein!");
+            if (!acc || acc.length < 8) return alert("Kripya sahi Bank Account Number dalein!");
+            if (!ifsc || ifsc.length < 6) return alert("Kripya sahi IFSC Code dalein!");
 
-    const sb = getSupabase();
-    if (!sb) return alert("Database connection error.");
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (!sb) return alert("Database connection error.");
 
-    btn.disabled = true;
-    btn.innerText = "Checking Rules & Plan...";
+            btn.disabled = true;
+            btn.innerText = "Checking Rules & Recharge...";
 
-    try {
-        // 1. Strict Check: Aaj ka withdrawal ho chuka hai ya nahi (1 Request Per Day Limit)
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+            try {
+                // 2. SHART 1: Check karein user ne kabhi Real Recharge kiya hai ya nahi
+                const { data: rechargeTx, error: rcErr } = await sb
+                    .from('transactions')
+                    .select('id')
+                    .eq('user_id', activeUser.id)
+                    .eq('type', 'recharge')
+                    .limit(1);
 
-        const { data: todayWithdrawals, error: wdCheckErr } = await sb
-            .from('withdrawals')
-            .select('id, created_at')
-            .eq('user_id', activeUser.id)
-            .gte('created_at', todayStart.toISOString());
+                if (rcErr) throw rcErr;
 
-        if (wdCheckErr) throw wdCheckErr;
+                if (!rechargeTx || rechargeTx.length === 0) {
+                    alert("⚠️ Withdrawal Blocked!\n\nWithdrawal lene ke liye pehle wallet recharge karna zaroori hai. Bina recharge ke payout allow nahi hai.");
+                    window.location.href = 'recharge.html';
+                    return;
+                }
 
-        if (todayWithdrawals && todayWithdrawals.length > 0) {
-            alert("⚠️ Daily Withdrawal Limit Reached!\n\nAap aaj ka 1 withdrawal request pehle hi laga chuke hain. Kripya agla withdrawal kal (Next Day) try karein.");
-            btn.disabled = false;
-            btn.innerText = "Confirm Bank Withdrawal";
-            return;
+                // 3. SHART 2: Check karein active crop plan mojood hai ya nahi
+                const { data: activePlans, error: planErr } = await sb
+                    .from('orders')
+                    .select('id')
+                    .eq('user_id', activeUser.id)
+                    .eq('status', 'active');
+
+                if (planErr) throw planErr;
+
+                if (!activePlans || activePlans.length === 0) {
+                    alert("⚠️ Withdrawal Blocked!\n\nAapka koi active plan nahi mila. Withdrawal lene ke liye active crop plan hona aniwarya hai.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                // 4. SHART 3: Daily Withdrawal Limit (1 Request Per Day Limit)
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+
+                const { data: todayWithdrawals, error: wdCheckErr } = await sb
+                    .from('withdrawals')
+                    .select('id, created_at')
+                    .eq('user_id', activeUser.id)
+                    .gte('created_at', todayStart.toISOString());
+
+                if (wdCheckErr) throw wdCheckErr;
+
+                if (todayWithdrawals && todayWithdrawals.length > 0) {
+                    alert("⚠️ Daily Withdrawal Limit Reached!\n\nAap aaj ka 1 withdrawal request pehle hi laga chuke hain. Agla request agle payout day par try karein.");
+                    btn.disabled = false;
+                    btn.innerText = "Confirm Bank Withdrawal";
+                    return;
+                }
+
+                btn.innerText = "Processing Request...";
+
+                const feeAmt = Math.round(amt * 0.10 * 100) / 100;
+                const finalAmt = amt - feeAmt;
+                const remainingBal = userCurrentBalance - amt;
+
+                // 5. Balance deduct karein & Bank details permanently lock karein
+                const { error: pErr } = await sb.from('profiles').update({
+                    balance: remainingBal,
+                    holder_name: name,
+                    account_number: acc,
+                    ifsc_code: ifsc
+                }).eq('id', activeUser.id);
+
+                if (pErr) throw pErr;
+
+                // 6. Insert into withdrawals table
+                const { error: wErr } = await sb.from('withdrawals').insert([{
+                    user_id: activeUser.id,
+                    phone: activeUser.phone,
+                    amount: amt,
+                    fee_amount: feeAmt,
+                    final_amount: finalAmt,
+                    holder_name: name,
+                    account_number: acc,
+                    ifsc_code: ifsc,
+                    status: 'pending'
+                }]);
+
+                if (wErr) throw wErr;
+
+                // 7. Log transaction
+                await sb.from('transactions').insert([{
+                    user_id: activeUser.id,
+                    type: 'withdrawal',
+                    amount: amt,
+                    details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
+                }]);
+
+                alert(`✅ ₹${amt} ka withdrawal request submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} aapke bank account me bhej diya jayega.`);
+                
+                document.getElementById('wdAmount').value = '';
+                calculateNetPayout();
+                await loadUserProfileAndBank();
+                await loadWithdrawalHistory();
+
+            } catch (err) {
+                alert("Withdrawal Error: " + (err.message || JSON.stringify(err)));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Confirm Bank Withdrawal";
+            }
         }
-
-        // 2. Strict Check: Active Crop Plan Verification
-        const { data: activePlans, error: planErr } = await sb
-            .from('orders')
-            .select('id')
-            .eq('user_id', activeUser.id)
-            .eq('status', 'active');
-
-        if (planErr) throw planErr;
-
-        if (!activePlans || activePlans.length === 0) {
-            alert("⚠️ Withdrawal Blocked!\n\nWithdrawal lene ke liye pehle account me koi bhi ek Crop Plan recharge karke activate karna zaroori hai.");
-            window.location.href = 'index.html';
-            return;
-        }
-
-        btn.innerText = "Processing Request...";
-
-        const feeAmt = Math.round(amt * 0.10 * 100) / 100;
-        const finalAmt = amt - feeAmt;
-        const remainingBal = userCurrentBalance - amt;
-
-        // 3. Deduct balance from user profile & save bank details
-        const { error: pErr } = await sb.from('profiles').update({
-            balance: remainingBal,
-            holder_name: name,
-            account_number: acc,
-            ifsc_code: ifsc
-        }).eq('id', activeUser.id);
-
-        if (pErr) throw pErr;
-
-        // 4. Insert into withdrawals table
-        const { error: wErr } = await sb.from('withdrawals').insert([{
-            user_id: activeUser.id,
-            phone: activeUser.phone,
-            amount: amt,
-            fee_amount: feeAmt,
-            final_amount: finalAmt,
-            holder_name: name,
-            account_number: acc,
-            ifsc_code: ifsc,
-            status: 'pending'
-        }]);
-
-        if (wErr) throw wErr;
-
-        // 5. Log transaction
-        await sb.from('transactions').insert([{
-            user_id: activeUser.id,
-            type: 'withdrawal',
-            amount: amt,
-            details: `Withdrawal to A/C ending with ${acc.slice(-4)}`
-        }]);
-
-        alert(`✅ ₹${amt} ka withdrawal request submit ho gaya!\nNet Payout: ₹${finalAmt.toFixed(2)} aapke bank account me bhej diya jayega.`);
-        
-        document.getElementById('wdAmount').value = '';
-        calculateNetPayout();
-        await loadUserProfileAndBank();
-        await loadWithdrawalHistory();
-
-    } catch (err) {
-        alert("Withdrawal Error: " + err.message);
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "Confirm Bank Withdrawal";
-    }
-}
 
         async function loadWithdrawalHistory() {
             const box = document.getElementById('wdHistoryList');
-            const sb = getSupabase();
-            if (!sb) return;
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (!sb || !activeUser) return;
 
             try {
                 const { data: list, error } = await sb
