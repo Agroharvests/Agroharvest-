@@ -412,101 +412,99 @@
 
             // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
             
-                            
-                        async function buySeedPlan(title, price, daily, days) {
-            if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
+                async function buySeedPlan(title, price, daily, days) {
+    if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-            if (!sb) {
-                alert("Database Error! Page reload karein.");
-                return;
-            }
+    var sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+    if (!sb) {
+        alert("Database connection error! Page refresh karein.");
+        return;
+    }
 
-            // 1. Check user from localStorage or direct Auth
-            let user = null;
-            try {
-                user = JSON.parse(localStorage.getItem('agro_user')) || JSON.parse(localStorage.getItem('active_user'));
-            } catch(e) {}
+    // 1. Storage se session check karein
+    var user = null;
+    var keys = ['agro_user', 'active_user', 'user', 'session_user'];
+    for (var i = 0; i < keys.length; i++) {
+        var raw = localStorage.getItem(keys[i]);
+        if (raw) {
+            try { user = JSON.parse(raw); break; } catch(e) {}
+        }
+    }
 
-            // Agar storage me nahi mila to Supabase Auth se nikal lo
-            if (!user) {
-                const { data: authData } = await sb.auth.getUser();
-                if (authData && authData.user) {
-                    user = authData.user;
+    var userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
+    var userId = (user && user.id) ? user.id : null;
+
+    // Agar storage empty ho toh user se direct number lein (bina 404 redirect ke)
+    if (!userPhone && !userId) {
+        userPhone = prompt("Session verify nahi hua. Apna registered mobile number dalein:");
+        if (!userPhone) return;
+    }
+
+    try {
+        var query = sb.from('profiles').select('*');
+        if (userId) query = query.eq('id', userId);
+        else query = query.eq('phone', userPhone.trim());
+
+        var { data: prof, error: pErr } = await query.single();
+        if (pErr || !prof) {
+            alert("Record nahi mila! Kripya sahi mobile number dalein.");
+            return;
+        }
+
+        var curBal = parseFloat(prof.balance || 0);
+        if (curBal < price) {
+            alert("Balance kam hai! Available: ₹" + curBal.toFixed(2));
+            return;
+        }
+
+        var newBal = curBal - price;
+
+        // 2. Balance deduct
+        var { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
+        if (dErr) throw dErr;
+
+        // 3. Order create
+        var now = new Date();
+        var expDate = new Date();
+        expDate.setDate(now.getDate() + parseInt(days));
+
+        await sb.from('orders').insert([{
+            user_id: prof.id,
+            phone: prof.phone,
+            plan_name: title,
+            price: price,
+            daily_income: daily,
+            validity_days: days,
+            days_remaining: days,
+            duration: days,
+            total_income: parseFloat(daily) * parseInt(days),
+            status: 'active',
+            created_at: now.toISOString(),
+            end_date: expDate.toISOString()
+        }]);
+
+        // 4. Transaction log
+        await sb.from('transactions').insert([{
+            user_id: prof.id,
+            type: 'purchase',
+            amount: price,
+            details: 'Activated ' + title
+        }]);
+
+        // Local store restore
+        localStorage.setItem('agro_user', JSON.stringify(prof));
+
+        var balText = document.getElementById('totalBalDisplay');
+        if (balText) balText.innerText = '₹' + newBal.toFixed(2);
+
+        alert("🎉 Badhai ho! " + title + " plan successfully activate ho gaya!");
+        window.location.href = 'crops.html';
+
+    } catch (err) {
+        alert("Purchase Error: " + (err.message || JSON.stringify(err)));
+    }
                 }
-            }
-
-            if (!user) {
-                alert("Pehle Login karein!");
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                // 2. Profile fetch
-                const uid = user.id;
-                const { data: prof, error: pErr } = await sb.from('profiles').select('*').eq('id', uid).single();
-                
-                if (pErr || !prof) {
-                    alert("Profile load nahi hui. Dobara login karein!");
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                const curBal = parseFloat(prof.balance || 0);
-                if (curBal < price) {
-                    alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}. Pehle wallet recharge karein.`);
-                    window.location.href = 'recharge.html';
-                    return;
-                }
-
-                const newBal = curBal - price;
-
-                // 3. Balance katna
-                await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
-
-                // 4. Order add karna
-                const now = new Date();
-                const expDate = new Date();
-                expDate.setDate(now.getDate() + parseInt(days));
-
-                await sb.from('orders').insert([{
-                    user_id: prof.id,
-                    phone: prof.phone,
-                    plan_name: title,
-                    price: price,
-                    daily_income: daily,
-                    validity_days: days,
-                    days_remaining: days,
-                    duration: days,
-                    total_income: parseFloat(daily) * parseInt(days),
-                    status: 'active',
-                    created_at: now.toISOString(),
-                    end_date: expDate.toISOString()
-                }]);
-
-                // 5. Transaction add karna
-                await sb.from('transactions').insert([{
-                    user_id: prof.id,
-                    type: 'purchase',
-                    amount: price,
-                    details: `Activated ${title}`
-                }]);
-
-                // Update Local UI
-                user.balance = newBal;
-                localStorage.setItem('agro_user', JSON.stringify(user));
-                const balEl = document.getElementById('totalBalDisplay');
-                if (balEl) balEl.innerText = '₹' + newBal.toFixed(2);
-
-                alert(`🎉 Badhai ho! "${title}" plan successfully activate ho gaya!`);
-                window.location.href = 'crops.html';
-
-            } catch (err) {
-                alert("Purchase Error: " + (err.message || err));
-            }
-            }
-                    
+        
                     
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
