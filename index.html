@@ -577,7 +577,7 @@
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullReferralLink)}`, '_blank');
         }
 
-            // Check day: 1 = Monday, 4 = Thursday
+                    // Check day: 1 = Monday, 4 = Thursday
         const todayDay = new Date().getDay();
         const isWithdrawalDay = (todayDay === 1 || todayDay === 4);
 
@@ -596,35 +596,6 @@
             });
         }
             
-
-
-        function startLiveTxFeed() {
-            const container = document.getElementById('liveTxContainer');
-            if (!container) return;
-
-            for (let i = 0; i < 5; i++) {
-                container.appendChild(createTxElement());
-            }
-
-            setInterval(() => {
-                const newItem = createTxElement();
-                container.appendChild(newItem);
-
-                container.style.transform = 'translateY(-58px)';
-                
-                setTimeout(() => {
-                    container.style.transition = 'none';
-                    if (container.children.length > 5) {
-                        container.removeChild(container.firstElementChild);
-                    }
-                    container.style.transform = 'translateY(0)';
-                    setTimeout(() => {
-                        container.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-                    }, 50);
-                }, 600);
-
-            }, 2500);
-        }
     </script>
 </body>
 </html>
