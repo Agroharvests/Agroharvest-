@@ -436,60 +436,58 @@
             
             // Agar fir bhi na mile toh manual prompt le lega taaki ruk na sake
             
-                async function buySeedPlan(title, price, daily, days) {
+async function buySeedPlan(title, price, daily, days) {
     if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
-    var sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+    const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
     if (!sb) {
-        alert("Database connection error! Page refresh karein.");
+        alert("Database connection error! Page reload karein.");
         return;
     }
 
-    // 1. Storage se session check karein
-    var user = null;
-    var keys = ['agro_user', 'active_user', 'user', 'session_user'];
-    for (var i = 0; i < keys.length; i++) {
-        var raw = localStorage.getItem(keys[i]);
+    let user = null;
+    const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+    for (let k of keys) {
+        const raw = localStorage.getItem(k);
         if (raw) {
             try { user = JSON.parse(raw); break; } catch(e) {}
         }
     }
 
-    var userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
-    var userId = (user && user.id) ? user.id : null;
+    let userPhone = (user && (user.phone || user.mobile)) ? (user.phone || user.mobile) : null;
+    let userId = (user && user.id) ? user.id : null;
 
-    // Agar storage empty ho toh user se direct number lein (bina 404 redirect ke)
     if (!userPhone && !userId) {
-        userPhone = prompt("Session verify nahi hua. Apna registered mobile number dalein:");
+        userPhone = prompt("Session verify nahi hua. Registered mobile number dalein:");
         if (!userPhone) return;
     }
 
     try {
-        var query = sb.from('profiles').select('*');
+        let query = sb.from('profiles').select('*');
         if (userId) query = query.eq('id', userId);
         else query = query.eq('phone', userPhone.trim());
 
-        var { data: prof, error: pErr } = await query.single();
+        const { data: prof, error: pErr } = await query.single();
         if (pErr || !prof) {
-            alert("Record nahi mila! Kripya sahi mobile number dalein.");
+            alert("Record nahi mila! Sahi number dalein.");
             return;
         }
 
-        var curBal = parseFloat(prof.balance || 0);
+        const curBal = parseFloat(prof.balance || 0);
         if (curBal < price) {
-            alert("Balance kam hai! Available: ₹" + curBal.toFixed(2));
+            alert(`Balance kam hai! Available: ₹${curBal.toFixed(2)}`);
             return;
         }
 
-        var newBal = curBal - price;
+        const newBal = curBal - price;
 
-        // 2. Balance deduct
-        var { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
+        // Balance katna
+        const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
         if (dErr) throw dErr;
 
-        // 3. Order create
-        var now = new Date();
-        var expDate = new Date();
+        // Order insert
+        const now = new Date();
+        const expDate = new Date();
         expDate.setDate(now.getDate() + parseInt(days));
 
         await sb.from('orders').insert([{
@@ -507,27 +505,25 @@
             end_date: expDate.toISOString()
         }]);
 
-        // 4. Transaction log
+        // Transaction log
         await sb.from('transactions').insert([{
             user_id: prof.id,
             type: 'purchase',
             amount: price,
-            details: 'Activated ' + title
+            details: `Activated ${title}`
         }]);
 
-        // Local store restore
+        // Storage update
         localStorage.setItem('agro_user', JSON.stringify(prof));
 
-        var balText = document.getElementById('totalBalDisplay');
-        if (balText) balText.innerText = '₹' + newBal.toFixed(2);
-
-        alert("🎉 Badhai ho! " + title + " plan successfully activate ho gaya!");
-        window.location.href = 'crops.html';
+        alert(`🎉 Badhai ho! "${title}" plan activate ho gaya!`);
+        window.location.href = 'orders.html';
 
     } catch (err) {
-        alert("Purchase Error: " + (err.message || JSON.stringify(err)));
+        alert("Error: " + (err.message || JSON.stringify(err)));
     }
-                }
+                  }
+            
         
                     
         function openInviteModal() {
