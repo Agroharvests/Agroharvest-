@@ -74,6 +74,22 @@
     </div>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+    // URL se ?ref= parameter nikalna
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+
+    if (ref) {
+        const refInput = document.getElementById('refCode') || document.querySelector('input[name="ref"]');
+        if (refInput) {
+            refInput.value = ref.trim();
+            refInput.readOnly = true; // Taaki user ise badal na sake
+            refInput.style.backgroundColor = '#f1f5f9';
+        }
+    }
+});
+        
         requireGuest();
         const urlParams = new URLSearchParams(window.location.search);
         const refParam = urlParams.get('ref');
