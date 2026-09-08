@@ -191,7 +191,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹3,900</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">30 Days</h4></div>
                 </div>
-                <button onclick="buySeedPlan('Green Starter', 499, 130, 30)" class="btn-invest btn-invest-green">
+                <button type="button" onclick="buySeedPlan('Green Starter', 499, 130, 30)" class="btn-invest btn-invest-green">
                     Invest ₹499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
@@ -213,7 +213,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹17,550</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">45 Days</h4></div>
                 </div>
-                <button onclick="buySeedPlan('Gold Harvest', 1499, 390, 45)" class="btn-invest btn-invest-gold">
+                <button type="button" onclick="buySeedPlan('Gold Harvest', 1499, 390, 45)" class="btn-invest btn-invest-gold">
                     Invest ₹1,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
@@ -235,7 +235,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹42,600</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">60 Days</h4></div>
                 </div>
-                <button onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-diamond">
+                <button type="button" onclick="buySeedPlan('Diamond Crop', 2499, 710, 60)" class="btn-invest btn-invest-diamond">
                     Invest ₹2,499 <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </div>
@@ -257,7 +257,7 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹1,05,000</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">70 Days</h4></div>
                 </div>
-                <button id="btnPlan4999" onclick="tryBuyUpPlan('Platinum Agro')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan4999" type="button" onclick="tryBuyUpPlan('Platinum Agro')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
@@ -279,12 +279,12 @@
                     <div class="spec-col"><p>Total Yield</p><h4 style="color: #0f172a;">₹2,88,000</h4></div>
                     <div class="spec-col"><p>Duration</p><h4 style="color: #64748b;">90 Days</h4></div>
                 </div>
-                <button id="btnPlan9999" onclick="tryBuyUpPlan('Royal Empire')" class="btn-invest btn-invest-locked">
+                <button id="btnPlan9999" type="button" onclick="tryBuyUpPlan('Royal Empire')" class="btn-invest btn-invest-locked">
                     <i class="fa-solid fa-lock"></i> Upcoming Soon
                 </button>
             </div>
-    </div>
-                       <!-- Bottom Navigation -->
+                </div>
+            <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
             <a href="orders.html" class="nav-item"><i class="fa-solid fa-seedling"></i><span>Seeds</span></a>
@@ -536,8 +536,7 @@
         }
 
         function getActiveRefCode() {
-        async function getActiveRefCode() {
-            const keys = ['agro_user', 'active_user', 'user', 'session_user', 'sb-wdchtaltpmxfvknjyour-auth-token'];
+            const keys = ['agro_user', 'active_user', 'user', 'session_user'];
             for (let k of keys) {
                 const raw = localStorage.getItem(k);
                 if (raw) {
@@ -549,56 +548,27 @@
                             if (parsed.phone && parsed.phone.length >= 6) {
                                 return 'AG-' + parsed.phone.slice(-6);
                             }
-                            if (parsed.user && parsed.user.phone) {
-                                return 'AG-' + parsed.user.phone.slice(-6);
-                            }
                         }
                     } catch(e) {}
                 }
             }
-
-            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-            if (sb) {
-                try {
-                    if (typeof requireAuth === 'function') {
-                        const au = requireAuth();
-                        if (au && (au.referral_code || au.ref_code)) return (au.referral_code || au.ref_code).trim().toUpperCase();
-                        if (au && au.phone) return 'AG-' + au.phone.slice(-6);
-                    }
-
-                    const { data: { session } } = await sb.auth.getSession();
-                    if (session && session.user) {
-                        const { data: prof } = await sb.from('profiles').select('referral_code, phone').eq('id', session.user.id).maybeSingle();
-                        if (prof) {
-                            if (prof.referral_code) return prof.referral_code.trim().toUpperCase();
-                            if (prof.phone) return 'AG-' + prof.phone.slice(-6);
-                        }
-                    }
-                } catch(err) {}
-            }
-
-            const promptPhone = prompt("Apna referral link generate karne ke liye registered mobile number dalein:");
-            if (promptPhone && promptPhone.trim().length >= 6) {
-                return 'AG-' + promptPhone.trim().slice(-6);
-            }
-
-            return 'AG-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            return 'AG-COMMUNITY';
         }
 
-        async function doShare(platform) {
-            const code = await getActiveRefCode();
+        function doShare(platform) {
+            const code = getActiveRefCode();
             const link = 'https://agroharvests.github.io/Agroharvest-/register.html?ref=' + encodeURIComponent(code);
             const shareText = '🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ' + link;
 
             if (platform === 'copy') {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(link).then(() => {
-                        alert("✅ Referral link copy ho gaya:\n" + link);
+                        alert("✅ Aapka Personal Referral Link copy ho gaya:\n" + link);
                     }).catch(() => {
-                        prompt("Copy karein yeh link:", link);
+                        prompt("Copy karein apna referral link:", link);
                     });
                 } else {
-                    prompt("Copy karein yeh link:", link);
+                    prompt("Copy karein apna referral link:", link);
                 }
             } else if (platform === 'wa') {
                 window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText), '_blank');
@@ -607,8 +577,7 @@
             } else if (platform === 'fb') {
                 window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
             }
-                           }
-            
+        }
 
         // Live Transactions Ticker
         (function() {
@@ -671,5 +640,3 @@
     </script>
 </body>
 </html>
-
-        
