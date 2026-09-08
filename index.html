@@ -536,24 +536,52 @@
         }
 
         function getActiveRefCode() {
-            const keys = ['agro_user', 'active_user', 'user', 'session_user'];
-            for (let k of keys) {
-                const raw = localStorage.getItem(k);
-                if (raw) {
-                    try {
-                        const parsed = JSON.parse(raw);
-                        if (parsed) {
-                            const code = parsed.referral_code || parsed.ref_code;
-                            if (code && code !== 'AG-ADMIN') return code.trim().toUpperCase();
-                            if (parsed.phone && parsed.phone.length >= 6) {
-                                return 'AG-' + parsed.phone.slice(-6);
-                            }
-                        }
-                    } catch(e) {}
-                }
+                async function getActiveRefCode() {
+            // 1. Agar auth.js ka helper function mojood ho
+            if (typeof getActiveUser === 'function') {
+                const u = getActiveUser();
+                if (u && (u.referral_code || u.ref_code)) return (u.referral_code || u.ref_code).trim().toUpperCase();
+                if (u && u.phone) return 'AG-' + u.phone.slice(-6);
             }
-            return 'AG-COMMUNITY';
-        }
+
+            // 2. LocalStorage ke sabhi possible formats check karein
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                try {
+                    const item = JSON.parse(localStorage.getItem(key));
+                    if (item) {
+                        const code = item.referral_code || item.ref_code;
+                        if (code && code !== 'AG-ADMIN' && code !== 'AG-COMMUNITY') return code.trim().toUpperCase();
+                        if (item.phone && item.phone.length >= 6) return 'AG-' + item.phone.slice(-6);
+                        if (item.user && item.user.phone) return 'AG-' + item.user.phone.slice(-6);
+                    }
+                } catch(e) {}
+            }
+
+            // 3. Supabase Live Session se fetch karein
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (sb && sb.auth) {
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session && session.user) {
+                        const { data: prof } = await sb.from('profiles').select('referral_code, phone').eq('id', session.user.id).maybeSingle();
+                        if (prof && prof.referral_code) return prof.referral_code.trim().toUpperCase();
+                        if (prof && prof.phone) return 'AG-' + prof.phone.slice(-6);
+                    }
+                } catch(err) {}
+            }
+
+            // 4. Fallback: User se number pooch kar hamesha USKA personal code banayein
+            const phoneInput = prompt("Referral link generate karne ke liye apna 10 digit mobile number dalein:");
+            if (phoneInput && phoneInput.trim().length >= 6) {
+                const cleanCode = 'AG-' + phoneInput.trim().slice(-6);
+                localStorage.setItem('agro_user', JSON.stringify({ phone: phoneInput.trim(), referral_code: cleanCode }));
+                return cleanCode;
+            }
+
+            return 'AG-' + Math.floor(100000 + Math.random() * 900000);
+                            }
+            
 
         function doShare(platform) {
             const code = getActiveRefCode();
