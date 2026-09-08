@@ -318,7 +318,25 @@
             </div>
         </div>
     </div>
-
+        <!-- Telegram Channel Join Popup Modal -->
+        <div id="telegramPopup" class="modal-overlay" style="display: none;">
+            <div class="modal-box">
+                <div class="modal-gift-icon" style="background: #e0f2fe; color: #0284c7; border-color: #bae6fd;">
+                    <i class="fa-brands fa-telegram" style="font-size: 26px;"></i>
+                </div>
+                <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Join Official Telegram Channel</h3>
+                <p style="font-size: 11px; color: #64748b; font-weight: 600; line-height: 1.4; margin-bottom: 14px;">
+                    Daily payment proofs, upcoming plans update, aur withdrawal alerts sabse pehle paane ke liye hamara official channel join karein!
+                </p>
+                <a href="https://t.me/Agroharvestofficial" target="_blank" onclick="closeTelegramPopup()" class="btn-copy-main" style="background: #0088cc; text-decoration: none; margin-bottom: 8px;">
+                    <i class="fa-brands fa-telegram"></i> Join Telegram Channel
+                </a>
+                <button type="button" onclick="closeTelegramPopup()" style="width: 100%; background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 12px; cursor: pointer;">
+                    Skip / Baad me join karein
+                </button>
+            </div>
+        </div>
+    
                 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -327,11 +345,16 @@
             startTicker();
         });
 
-        function checkAndShowWelcomePopup() {
-            const hasSeen = localStorage.getItem('agro_welcome_shown');
-            if (!hasSeen) {
+                function checkAndShowWelcomePopup() {
+            const hasSeenWelcome = localStorage.getItem('agro_welcome_shown');
+            const hasSeenTg = localStorage.getItem('agro_tg_shown');
+
+            if (!hasSeenWelcome) {
                 const modal = document.getElementById('welcomePopup');
                 if (modal) modal.style.display = 'flex';
+            } else if (!hasSeenTg) {
+                const tgModal = document.getElementById('telegramPopup');
+                if (tgModal) tgModal.style.display = 'flex';
             }
         }
 
@@ -339,7 +362,18 @@
             const modal = document.getElementById('welcomePopup');
             if (modal) modal.style.display = 'none';
             localStorage.setItem('agro_welcome_shown', 'true');
+
+            // Welcome band hote hi Telegram khulega
+            const tgModal = document.getElementById('telegramPopup');
+            if (tgModal) tgModal.style.display = 'flex';
         }
+
+        function closeTelegramPopup() {
+            const tgModal = document.getElementById('telegramPopup');
+            if (tgModal) tgModal.style.display = 'none';
+            localStorage.setItem('agro_tg_shown', 'true');
+        }
+        
 
         function openInviteModal() {
             const modal = document.getElementById('inviteModal');
