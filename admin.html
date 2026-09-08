@@ -591,6 +591,9 @@ window.rejectWithdrawal = async function(wdId, userId, amount) {
                     </div>
                     <span class="user-ref-badge">${user.referral_code || user.ref_code || 'N/A'}</span>
                 </div>
+<div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 3px;">
+    📅 Joined: ${new Date(user.created_at).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}
+</div>
 
                 <div class="user-stats-mini-grid">
                     <div class="mini-stat-box">
@@ -714,7 +717,18 @@ async function runDailyIncomeCron() {
         alert("Income cron error: " + err.message);
     }
 }
-
+function formatJoinDate(dateStr) {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+        
 async function rollbackExtraDailyIncome() {
     if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh aaj ki duplicate/extra daily income ko wapas minus kar dega.")) return;
     const sb = getSupabase();
