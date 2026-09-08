@@ -692,6 +692,97 @@ function toggleVipPlan(amt) {
 }
 
 document.addEventListener("DOMContentLoaded", loadAdminDashboard);
+                    async function rollbackExtraDailyIncome() {
+    if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh function sabhi users ke account se aaj ki duplicate/extra daily income ko wapas minus kar dega aur unka balance sahi kar dega.")) return;
+
+    const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+    if (!sb) return alert("Database connect nahi hua!");
+
+    try {
+        const todayStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+        // 1. Aaj ki sabhi Daily Income transactions fetch karein
+        const { data: txs, error: txErr } = await sb
+            .from('transactions')
+            .select('*')
+            .eq('type', 'daily_income')
+            .gte('created_at', todayStr + 'T00:00:00.000Z')
+            .order('created_at', { ascending: true });
+
+        if (txErr) throw txErr;
+
+        if (!txs || txs.length === 0) {
+            alert("Aaj ki koi daily income transaction nahi mili!");
+            return;
+        }
+
+        // 2. Duplicate entries identify karein (Pehli transaction valid rahegi, uske baad wali rollback hongi)
+        const userTxMap = {};
+        const duplicates = [];
+
+        for (const tx of txs) {
+            const uId = tx.user_id;
+            if (!userTxMap[uId]) {
+                // Pehli baar aayi entry ko safe rakhein
+                userTxMap[uId] = tx;
+            } else {
+                // Doosri ya teesri baar aayi entry ko duplicate mark karein
+                duplicates.push(tx);
+            }
+        }
+
+        if (duplicates.length === 0) {
+            alert("✅ Koi duplicate income nahi mili! Sabhi users ko sirf ek hi baar credit hua hai.");
+            return;
+        }
+
+        let rolledBackCount = 0;
+
+        for (const dup of duplicates) {
+            const extraAmt = parseFloat(dup.amount || 0);
+
+            // User ka current balance fetch karein
+            const { data: prof } = await sb
+                .from('profiles')
+                .select('id, balance')
+                .eq('id', dup.user_id)
+                .single();
+
+            if (prof) {
+                // Balance se extra amount minus karein
+                const correctedBal = Math.max(0, parseFloat(prof.balance || 0) - extraAmt);
+                await sb.from('profiles').update({ balance: correctedBal }).eq('id', prof.id);
+            }
+
+            // Order table mein plan ka 1 din wapas badhayein
+            const { data: order } = await sb
+                .from('orders')
+                .select('id, days_remaining, status')
+                .eq('user_id', dup.user_id)
+                .eq('status', 'active')
+                .limit(1)
+                .maybeSingle();
+
+            if (order) {
+                await sb.from('orders').update({
+                    days_remaining: parseInt(order.days_remaining || 0) + 1
+                }).eq('id', order.id);
+            }
+
+            // Duplicate transaction row ko delete karein
+            await sb.from('transactions').delete().eq('id', dup.id);
+
+            rolledBackCount++;
+        }
+
+        alert(`✅ Rollback Successful!\n\nKul ${rolledBackCount} duplicate transactions delete ki gayi hain aur sabhi users ka balance wapas theek kar diya gaya hai.`);
+        location.reload();
+
+    } catch (err) {
+        alert("Rollback Error: " + (err.message || JSON.stringify(err)));
+    }
+                    }
+        
 </script>
 </body>
 </html>
