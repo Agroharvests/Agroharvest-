@@ -536,28 +536,58 @@
         }
 
         function getActiveRefCode() {
-            const keys = ['agro_user', 'active_user', 'user', 'session_user'];
+        async function getActiveRefCode() {
+            const keys = ['agro_user', 'active_user', 'user', 'session_user', 'sb-wdchtaltpmxfvknjyour-auth-token'];
             for (let k of keys) {
                 const raw = localStorage.getItem(k);
                 if (raw) {
                     try {
                         const parsed = JSON.parse(raw);
                         if (parsed) {
-                            const c = parsed.referral_code || parsed.ref_code;
-                            if (c) return c.trim().toUpperCase();
+                            const code = parsed.referral_code || parsed.ref_code;
+                            if (code && code !== 'AG-ADMIN') return code.trim().toUpperCase();
                             if (parsed.phone && parsed.phone.length >= 6) {
                                 return 'AG-' + parsed.phone.slice(-6);
+                            }
+                            if (parsed.user && parsed.user.phone) {
+                                return 'AG-' + parsed.user.phone.slice(-6);
                             }
                         }
                     } catch(e) {}
                 }
             }
-            return 'AG-ADMIN';
+
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (sb) {
+                try {
+                    if (typeof requireAuth === 'function') {
+                        const au = requireAuth();
+                        if (au && (au.referral_code || au.ref_code)) return (au.referral_code || au.ref_code).trim().toUpperCase();
+                        if (au && au.phone) return 'AG-' + au.phone.slice(-6);
+                    }
+
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session && session.user) {
+                        const { data: prof } = await sb.from('profiles').select('referral_code, phone').eq('id', session.user.id).maybeSingle();
+                        if (prof) {
+                            if (prof.referral_code) return prof.referral_code.trim().toUpperCase();
+                            if (prof.phone) return 'AG-' + prof.phone.slice(-6);
+                        }
+                    }
+                } catch(err) {}
+            }
+
+            const promptPhone = prompt("Apna referral link generate karne ke liye registered mobile number dalein:");
+            if (promptPhone && promptPhone.trim().length >= 6) {
+                return 'AG-' + promptPhone.trim().slice(-6);
+            }
+
+            return 'AG-' + Math.random().toString(36).substring(2, 8).toUpperCase();
         }
 
-        function doShare(platform) {
-            const code = getActiveRefCode();
-            const link = 'https://agroharvests.github.io/Agroharvest-/register.html?ref=' + code;
+        async function doShare(platform) {
+            const code = await getActiveRefCode();
+            const link = 'https://agroharvests.github.io/Agroharvest-/register.html?ref=' + encodeURIComponent(code);
             const shareText = '🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ' + link;
 
             if (platform === 'copy') {
@@ -577,7 +607,8 @@
             } else if (platform === 'fb') {
                 window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
             }
-        }
+                           }
+            
 
         // Live Transactions Ticker
         (function() {
