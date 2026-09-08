@@ -690,7 +690,10 @@ async function runDailyIncomeCron() {
 function toggleVipPlan(amt) {
     alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
 }
-
+<button onclick="rollbackExtraDailyIncome()" style="background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; margin-left: 8px; box-shadow: 0 4px 12px rgba(220,38,38,0.3);">
+    <i class="fa-solid fa-rotate-left"></i> Rollback Extra Income
+</button>
+                    
 document.addEventListener("DOMContentLoaded", loadAdminDashboard);
                     async function rollbackExtraDailyIncome() {
     if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh function sabhi users ke account se aaj ki duplicate/extra daily income ko wapas minus kar dega aur unka balance sahi kar dega.")) return;
