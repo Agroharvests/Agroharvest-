@@ -464,17 +464,29 @@
                     details: `Activated ${title}`
                 }]);
 
-                // 4. 3-Level Referral Commission (L1: 25%, L2: 2%, L3: 1%)
+                                // 4. Robust 3-Level Referral Commission Distribution (L1: 25%, L2: 2%, L3: 1%)
                 async function payCommission(refCode, percent, levelName) {
-                    if (!refCode || refCode === 'AG-ADMIN') return null;
-                    const { data: upline } = await sb.from('profiles').select('*').eq('referral_code', refCode).maybeSingle();
-                    if (!upline) return null;
+                    if (!refCode) return null;
+                    const cleanCode = refCode.trim().toUpperCase();
+                    if (cleanCode === 'AG-ADMIN' || cleanCode === 'DIRECT' || cleanCode === '') return null;
 
-                    const commAmt = parseFloat((price * percent).toFixed(2));
-                    const updatedBal = parseFloat(upline.balance || 0) + commAmt;
-                    const updatedTeamInc = parseFloat(upline.team_income || 0) + commAmt;
+                    const { data: upline, error: upErr } = await sb
+                        .from('profiles')
+                        .select('*')
+                        .ilike('referral_code', cleanCode)
+                        .maybeSingle();
 
-                    await sb.from('profiles').update({ balance: updatedBal, team_income: updatedTeamInc }).eq('id', upline.id);
+                    if (upErr || !upline) return null;
+
+                    const commAmt = Math.round((parseFloat(price) * percent) * 100) / 100;
+                    const currentBal = parseFloat(upline.balance || 0);
+                    const currentTeamInc = parseFloat(upline.team_income || 0);
+
+                    await sb.from('profiles').update({
+                        balance: currentBal + commAmt,
+                        team_income: currentTeamInc + commAmt
+                    }).eq('id', upline.id);
+
                     await sb.from('transactions').insert([{
                         user_id: upline.id,
                         type: 'commission',
@@ -486,14 +498,16 @@
                 }
 
                 let parent1 = prof.referred_by;
-                let parent2 = await payCommission(parent1, 0.25, 'Level 1 (25%)');
-
-                if (parent2) {
-                    let parent3 = await payCommission(parent2, 0.02, 'Level 2 (2%)');
-                    if (parent3) {
-                        await payCommission(parent3, 0.01, 'Level 3 (1%)');
+                if (parent1) {
+                    let parent2 = await payCommission(parent1, 0.25, 'Level 1 (25%)');
+                    if (parent2) {
+                        let parent3 = await payCommission(parent2, 0.02, 'Level 2 (2%)');
+                        if (parent3) {
+                            await payCommission(parent3, 0.01, 'Level 3 (1%)');
+                        }
                     }
                 }
+                
 
                 prof.balance = newBal;
                 localStorage.setItem('agro_user', JSON.stringify(prof));
