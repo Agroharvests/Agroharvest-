@@ -33,7 +33,6 @@
             padding-bottom: 90px;
             box-shadow: 0 0 25px rgba(0,0,0,0.05);
         }
-        /* Top Navigation Header */
         .top-header {
             background: #ffffff;
             padding: 16px 20px;
@@ -55,18 +54,35 @@
             font-weight: 700;
             color: #64748b;
         }
+        .header-actions {
+            display: flex;
+            gap: 6px;
+        }
         .btn-income-cron {
             background: #eab308;
             color: #0f172a;
             border: none;
-            padding: 8px 14px;
+            padding: 8px 12px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+        }
+        .btn-rollback {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .admin-body {
             padding: 18px 20px;
@@ -74,7 +90,6 @@
             flex-direction: column;
             gap: 16px;
         }
-        /* 4 Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -103,7 +118,6 @@
         .stat-value.red { color: #dc2626; }
         .stat-value.dark { color: #0284c7; }
         
-        /* Shared Card Component */
         .card {
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
@@ -149,7 +163,6 @@
             font-weight: 800;
             cursor: pointer;
         }
-        /* VIP Controls */
         .vip-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -166,7 +179,6 @@
             cursor: pointer;
             text-align: center;
         }
-        /* User Card Detailed Box */
         .user-detail-card {
             background: #f8fafc;
             border: 1.5px solid #e2e8f0;
@@ -239,9 +251,14 @@
             <h2>AgroHarvest Admin</h2>
             <p>Platform Control & Moderation</p>
         </div>
-        <button type="button" onclick="runDailyIncomeCron()" class="btn-income-cron">
-            <i class="fa-solid fa-bolt"></i> Run 12 AM Income
-        </button>
+        <div class="header-actions">
+            <button type="button" onclick="runDailyIncomeCron()" class="btn-income-cron">
+                <i class="fa-solid fa-bolt"></i> 12 AM
+            </button>
+            <button type="button" onclick="rollbackExtraDailyIncome()" class="btn-rollback" title="Duplicate Income Rollback">
+                <i class="fa-solid fa-rotate-left"></i> Fix
+            </button>
+        </div>
     </div>
 
     <div class="admin-body">
@@ -264,8 +281,7 @@
                 <span id="statTotalWithdrawals" class="stat-value red">₹0</span>
             </div>
         </div>
-
-        <!-- Update Receiver UPI ID (Single Input) -->
+                <!-- Update Receiver UPI ID -->
         <div class="card">
             <div class="card-title-row">
                 <h3>Update Receiver UPI ID</h3>
@@ -318,17 +334,6 @@
             </div>
         </div>
 
-        <!-- Community Proofs Moderation -->
-        <div class="card">
-            <div class="card-title-row">
-                <h3>Community Proofs Moderation</h3>
-                <span id="proofsCountBadge" class="badge-pill" style="background:#fee2e2; color:#b91c1c;">0 Proofs</span>
-            </div>
-            <div id="proofsContainer">
-                <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No community proofs found.</p>
-            </div>
-        </div>
-
         <!-- User Investments & Downlines Detailed Card List -->
         <div class="card">
             <div class="card-title-row">
@@ -341,9 +346,8 @@
             </div>
         </div>
     </div>
-                    </div>
-                <script>
-// Supabase Configuration
+                </div>
+    <script>
 const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
@@ -366,46 +370,50 @@ async function loadAdminDashboard() {
     }
 
     try {
-        // 1. Fetch live UPI from settings
-        const { data: upiSetting } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
-        if (upiSetting && upiSetting.value) {
-            document.getElementById('currentUpiBadge').innerText = upiSetting.value;
-            document.getElementById('targetUpiInput').value = upiSetting.value;
-        } else {
+        // 1. Live UPI
+        try {
+            let { data: upiSetting } = await sb.from('admin_settings').select('*').eq('key', 'receiver_upi').maybeSingle();
+            if (!upiSetting) {
+                const res = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
+                upiSetting = res.data;
+            }
+            if (upiSetting && upiSetting.value) {
+                document.getElementById('currentUpiBadge').innerText = upiSetting.value;
+                document.getElementById('targetUpiInput').value = upiSetting.value;
+            } else {
+                document.getElementById('currentUpiBadge').innerText = "8433184062@axl";
+                document.getElementById('targetUpiInput').value = "8433184062@axl";
+            }
+        } catch(e) {
             document.getElementById('currentUpiBadge').innerText = "8433184062@axl";
-            document.getElementById('targetUpiInput').value = "8433184062@axl";
         }
 
-        // 2. Fetch all profiles
+        // 2. Fetch Profiles
         let { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
         if (!profiles || profiles.length === 0) {
             const res = await sb.from('users').select('*').order('created_at', { ascending: false });
             profiles = res.data || [];
         }
-        allUsersList = profiles;
+        allUsersList = profiles || [];
         document.getElementById('statTotalUsers').innerText = allUsersList.length;
         document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
 
-        // 3. Fetch all orders (active plans)
-        let { data: orders } = await sb.from('orders').select('*');
-        if (!orders || orders.length === 0) {
-            const resOrders = await sb.from('investments').select('*');
-            orders = resOrders.data || [];
-        }
-        allOrdersList = orders;
+        // 3. Fetch Active Orders
+        let { data: orders } = await sb.from('orders').select('*').eq('status', 'active');
+        allOrdersList = orders || [];
         document.getElementById('statActivePlans').innerText = allOrdersList.length;
         
-        // 4. Fetch Approved Recharges Sum
-        const { data: approvedRecharges } = await sb.from('recharges').select('amount').eq('status', 'approved');
+        // 4. Approved Recharges
+        const { data: approvedRecharges } = await sb.from('transactions').select('amount').eq('type', 'recharge');
         const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
         document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
 
-        // 5. Fetch Approved Withdrawals Sum
+        // 5. Approved Withdrawals
         const { data: approvedWithdrawals } = await sb.from('withdrawals').select('amount').eq('status', 'approved');
         const totalWith = (approvedWithdrawals || []).reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
         document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
         
-        // 6. Fetch Pending Recharges List
+        // 6. Pending Recharges
         const { data: pendingRecharges } = await sb
             .from('recharges')
             .select('*')
@@ -424,7 +432,7 @@ async function loadAdminDashboard() {
                         <strong style="font-size:14px; color:#0f172a;">📱 ${r.phone}</strong>
                         <strong style="color:#16a34a; font-size:15px;">₹${r.amount}</strong>
                     </div>
-                    <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr}</b></div>
+                    <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr || 'N/A'}</b></div>
                     <div style="display:flex; gap:6px; margin-top:6px;">
                         <button type="button" onclick="window.approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
                         <button type="button" onclick="window.rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
@@ -433,7 +441,37 @@ async function loadAdminDashboard() {
             `).join('');
         }
 
-        // 7. Render Detailed User Cards
+        // 7. Pending Withdrawals
+        const { data: pendingWd } = await sb
+            .from('withdrawals')
+            .select('*')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+
+        const wdContainer = document.getElementById('pendingWithdrawalsContainer');
+        document.getElementById('withdrawalCountBadge').innerText = pendingWd ? pendingWd.length : 0;
+
+        if (!pendingWd || pendingWd.length === 0) {
+            wdContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending withdrawal requests.</p>';
+        } else {
+            wdContainer.innerHTML = pendingWd.map(w => `
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
+                        <strong style="color:#dc2626; font-size:15px;">₹${w.amount}</strong>
+                    </div>
+                    <div style="font-size:11px; color:#64748b; margin:4px 0;">
+                        Bank: <b>${w.account_number}</b> | IFSC: <b>${w.ifsc_code}</b> (${w.holder_name})
+                    </div>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <button type="button" onclick="window.approveWithdrawal('${w.id}')" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Mark Paid</button>
+                        <button type="button" onclick="window.rejectWithdrawal('${w.id}', '${w.user_id}', ${w.amount})" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject & Refund</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 8. Render Detailed Users
         renderUserDetailedCards(allUsersList);
 
     } catch (err) {
@@ -441,36 +479,24 @@ async function loadAdminDashboard() {
     }
 }
 
-// 1. APPROVE RECHARGE HANDLER (Global Scope)
 window.approveRecharge = async function(rechargeId, phone, amount) {
     if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
-
     const sb = getSupabase();
     if (!sb) return alert("Database connection error!");
 
     try {
-        // Find User Profile
         let { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
-        if (!user) {
-            const res = await sb.from('users').select('*').eq('phone', phone).maybeSingle();
-            user = res.data;
-        }
-
         if (user) {
             const newBal = (parseFloat(user.balance) || 0) + parseFloat(amount);
-            const newTotalRec = (parseFloat(user.total_recharge) || 0) + parseFloat(amount);
-
-            // Update user balance in profiles
-            await sb.from('profiles').update({
-                balance: newBal,
-                total_recharge: newTotalRec
-            }).eq('phone', phone);
+            await sb.from('profiles').update({ balance: newBal }).eq('phone', phone);
+            await sb.from('transactions').insert([{
+                user_id: user.id,
+                type: 'recharge',
+                amount: parseFloat(amount),
+                details: `Recharge Approved by Admin`
+            }]);
         }
-
-        // Update Recharge Request Status
-        const { error: recErr } = await sb.from('recharges').update({ status: 'approved' }).eq('id', rechargeId);
-        if (recErr) throw recErr;
-
+        await sb.from('recharges').update({ status: 'approved' }).eq('id', rechargeId);
         alert(`✅ ₹${amount} user (${phone}) ke wallet me add ho gaye!`);
         loadAdminDashboard();
     } catch (err) {
@@ -478,17 +504,11 @@ window.approveRecharge = async function(rechargeId, phone, amount) {
     }
 };
 
-// 2. REJECT RECHARGE HANDLER (Global Scope)
 window.rejectRecharge = async function(rechargeId) {
     if (!confirm("Kya aap is recharge request ko reject karna chahte hain?")) return;
-
     const sb = getSupabase();
-    if (!sb) return alert("Database connection error!");
-
     try {
-        const { error } = await sb.from('recharges').update({ status: 'rejected' }).eq('id', rechargeId);
-        if (error) throw error;
-
+        await sb.from('recharges').update({ status: 'rejected' }).eq('id', rechargeId);
         alert("❌ Recharge Request Rejected.");
         loadAdminDashboard();
     } catch (err) {
@@ -496,60 +516,70 @@ window.rejectRecharge = async function(rechargeId) {
     }
 };
 
-// Render User Investments & 3-Level Downlines Tree Box
-function renderUserDetailedCards(users) {
+window.approveWithdrawal = async function(wdId) {
+    if (!confirm("Confirm karein ki aapne bank se payout transfer kar diya hai?")) return;
+    const sb = getSupabase();
+    try {
+        await sb.from('withdrawals').update({ status: 'approved' }).eq('id', wdId);
+        alert("✅ Withdrawal marked as APPROVED / PAID.");
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+};
+
+window.rejectWithdrawal = async function(wdId, userId, amount) {
+    if (!confirm(`Withdrawal reject karke ₹${amount} user ko wapas refund karein?`)) return;
+    const sb = getSupabase();
+    try {
+        const { data: prof } = await sb.from('profiles').select('balance').eq('id', userId).single();
+        if (prof) {
+            const newBal = (parseFloat(prof.balance) || 0) + parseFloat(amount);
+            await sb.from('profiles').update({ balance: newBal }).eq('id', userId);
+        }
+        await sb.from('withdrawals').update({ status: 'rejected' }).eq('id', wdId);
+        alert("❌ Withdrawal Rejected and Refunded to User Wallet.");
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+};
+        function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!users || users.length === 0) {
         container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>';
         return;
     }
 
-    // Helper: Match downlines for a given user or list of users
     function getDirectDownlines(parentUsers) {
         const parentCodes = new Set();
-        const parentPhones = new Set();
-        const parentShortCodes = new Set();
-
         parentUsers.forEach(u => {
-            if (u.ref_code) parentCodes.add(u.ref_code.trim().toLowerCase());
-            if (u.phone) {
-                const p = u.phone.trim();
-                parentPhones.add(p);
-                if (p.length >= 6) parentShortCodes.add(p.slice(-6));
-            }
+            const code = (u.referral_code || u.ref_code || '').trim().toLowerCase();
+            if (code) parentCodes.add(code);
         });
 
         return allUsersList.filter(candidate => {
-            // Avoid cycle/self-match
             if (parentUsers.some(p => p.id === candidate.id)) return false;
-            const inv = (candidate.invited_by || '').trim().toLowerCase();
-            if (!inv || inv === 'direct') return false;
-
-            return parentCodes.has(inv) || 
-                   parentPhones.has(inv) || 
-                   Array.from(parentShortCodes).some(short => inv.includes(short));
+            const refBy = (candidate.referred_by || candidate.invited_by || '').trim().toLowerCase();
+            return refBy && parentCodes.has(refBy);
         });
     }
 
     container.innerHTML = users.map(user => {
-        // 1. Calculate Active Investments
         const userOrders = allOrdersList.filter(o => o.user_id === user.id);
-        const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.amount || 0), 0);
+        const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || 0), 0);
 
-        // 2. Multi-Tier Downline Calculations (L1, L2, L3)
         const l1Members = getDirectDownlines([user]);
         const l2Members = l1Members.length > 0 ? getDirectDownlines(l1Members) : [];
         const l3Members = l2Members.length > 0 ? getDirectDownlines(l2Members) : [];
-
         const totalTeamCount = l1Members.length + l2Members.length + l3Members.length;
 
-        // Render phone badges
         const renderBadges = (list, bg, fg) => list.length > 0
             ? list.map(m => `<span style="display:inline-block; background:${bg}; color:${fg}; padding:2px 6px; border-radius:4px; margin:2px; font-size:10px; font-weight:800;">📱 ${m.phone}</span>`).join('')
             : '<span style="color:#94a3b8; font-size:10px; font-weight:600;">None</span>';
 
         const plansHtml = userOrders.length > 0
-            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name || 'Green Starter'} (₹${o.price || 499})</span>`).join('')
+            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name} (₹${o.price})</span>`).join('')
             : '<span style="color:#94a3b8; font-weight:700;">No active plan</span>';
 
         return `
@@ -557,9 +587,9 @@ function renderUserDetailedCards(users) {
                 <div class="user-top-row">
                     <div>
                         <div class="user-phone">+91 ${user.phone}</div>
-                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Invited By: <b style="color:#0f172a;">${user.invited_by || 'Direct / Admin'}</b></span>
+                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Invited By: <b style="color:#0f172a;">${user.referred_by || user.invited_by || 'Direct'}</b></span>
                     </div>
-                    <span class="user-ref-badge">${user.ref_code || ('AG-' + user.phone.slice(-6))}</span>
+                    <span class="user-ref-badge">${user.referral_code || user.ref_code || 'N/A'}</span>
                 </div>
 
                 <div class="user-stats-mini-grid">
@@ -568,8 +598,8 @@ function renderUserDetailedCards(users) {
                         <span class="mini-stat-val">₹${parseFloat(user.balance || 0).toFixed(2)}</span>
                     </div>
                     <div class="mini-stat-box">
-                        <span class="mini-stat-label">TOTAL WITHDRAWN</span>
-                        <span class="mini-stat-val red">₹${parseFloat(user.total_withdrawn || 0).toFixed(2)}</span>
+                        <span class="mini-stat-label">TEAM INCOME</span>
+                        <span class="mini-stat-val red">₹${parseFloat(user.team_income || 0).toFixed(2)}</span>
                     </div>
                     <div class="mini-stat-box">
                         <span class="mini-stat-label">TOTAL NETWORK (L1-L3)</span>
@@ -581,22 +611,18 @@ function renderUserDetailedCards(users) {
                     </div>
                 </div>
 
-                <!-- Downline Tree Breakdown -->
                 <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin-bottom:8px;">
                     <span style="font-size:10px; font-weight:800; color:#0f172a; text-transform:uppercase; display:block; margin-bottom:6px;">
                         <i class="fa-solid fa-sitemap"></i> Team Network Tree:
                     </span>
-
                     <div style="margin-bottom:6px; font-size:11px;">
                         <b style="color:#0369a1;">Level 1 (${l1Members.length}):</b>
                         <div>${renderBadges(l1Members, '#e0f2fe', '#0369a1')}</div>
                     </div>
-
                     <div style="margin-bottom:6px; font-size:11px;">
                         <b style="color:#7c3aed;">Level 2 (${l2Members.length}):</b>
                         <div>${renderBadges(l2Members, '#f3e8ff', '#6b21a8')}</div>
                     </div>
-
                     <div style="font-size:11px;">
                         <b style="color:#b45309;">Level 3 (${l3Members.length}):</b>
                         <div>${renderBadges(l3Members, '#fef3c7', '#92400e')}</div>
@@ -610,29 +636,25 @@ function renderUserDetailedCards(users) {
             </div>
         `;
     }).join('');
-        }
-            
-              
+}
 
-// Filter Users by Search
 function filterUserCards() {
     const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
     const filtered = allUsersList.filter(u => 
         (u.phone && u.phone.includes(q)) || 
-        (u.ref_code && u.ref_code.toLowerCase().includes(q)) ||
-        (u.invited_by && u.invited_by.toLowerCase().includes(q))
+        (u.referral_code && u.referral_code.toLowerCase().includes(q)) ||
+        (u.referred_by && u.referred_by.toLowerCase().includes(q))
     );
     renderUserDetailedCards(filtered);
 }
 
-// Save Single UPI
 async function saveSingleUpi() {
     const newUpi = document.getElementById('targetUpiInput').value.trim();
     if (!newUpi) return alert("Kripya UPI ID dalein!");
 
     const sb = getSupabase();
     try {
-        await sb.from('settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
+        await sb.from('admin_settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
         alert("✅ New UPI ID Saved: " + newUpi);
         document.getElementById('currentUpiBadge').innerText = newUpi;
     } catch (err) {
@@ -640,7 +662,6 @@ async function saveSingleUpi() {
     }
 }
 
-// Manual Balance Adjust
 async function applyManualBalance() {
     const phone = document.getElementById('manualUserPhone').value.trim();
     const amt = parseFloat(document.getElementById('manualAmount').value);
@@ -662,37 +683,87 @@ async function applyManualBalance() {
     }
 }
 
-// 12 AM Daily Income Cron Trigger
 async function runDailyIncomeCron() {
-    if (!confirm("Kya aap sabhi active plans ki daily harvest income users ke wallet me add karna chahte hain?")) return;
+    if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
     const sb = getSupabase();
     try {
-        const { data: orders } = await sb.from('orders').select('*');
+        const { data: orders } = await sb.from('orders').select('*').eq('status', 'active');
         if (!orders || orders.length === 0) return alert("Koi active plan nahi mila.");
 
+        let count = 0;
         for (const order of orders) {
             const dailyInc = parseFloat(order.daily_income || 0);
             if (dailyInc > 0) {
-                const { data: prof } = await sb.from('profiles').select('balance').eq('id', order.user_id).single();
+                const { data: prof } = await sb.from('profiles').select('balance').eq('id', order.user_id).maybeSingle();
                 if (prof) {
                     const newBal = (parseFloat(prof.balance) || 0) + dailyInc;
                     await sb.from('profiles').update({ balance: newBal }).eq('id', order.user_id);
+                    await sb.from('transactions').insert([{
+                        user_id: order.user_id,
+                        type: 'daily_income',
+                        amount: dailyInc,
+                        details: `Daily Yield from ${order.plan_name}`
+                    }]);
+                    count++;
                 }
             }
         }
-        alert("✅ 12 AM Daily Income successfully credited to all active users!");
+        alert(`✅ Success! ${count} active plans ki daily income credit ho gayi.`);
         loadAdminDashboard();
     } catch (err) {
         alert("Income cron error: " + err.message);
     }
 }
-                    
+
+async function rollbackExtraDailyIncome() {
+    if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh aaj ki duplicate/extra daily income ko wapas minus kar dega.")) return;
+    const sb = getSupabase();
+    try {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data: txs } = await sb
+            .from('transactions')
+            .select('*')
+            .eq('type', 'daily_income')
+            .gte('created_at', todayStr + 'T00:00:00.000Z')
+            .order('created_at', { ascending: true });
+
+        if (!txs || txs.length === 0) return alert("Aaj ki koi income transaction nahi mili!");
+
+        const userTxMap = {};
+        const duplicates = [];
+
+        for (const tx of txs) {
+            if (!userTxMap[tx.user_id]) {
+                userTxMap[tx.user_id] = tx;
+            } else {
+                duplicates.push(tx);
+            }
+        }
+
+        if (duplicates.length === 0) return alert("✅ Koi duplicate entry nahi hai!");
+
+        for (const dup of duplicates) {
+            const extraAmt = parseFloat(dup.amount || 0);
+            const { data: prof } = await sb.from('profiles').select('balance').eq('id', dup.user_id).single();
+            if (prof) {
+                const correctedBal = Math.max(0, parseFloat(prof.balance || 0) - extraAmt);
+                await sb.from('profiles').update({ balance: correctedBal }).eq('id', dup.user_id);
+            }
+            await sb.from('transactions').delete().eq('id', dup.id);
+        }
+
+        alert(`✅ Rollback Successful! ${duplicates.length} duplicate entries theek kar di gayi hain.`);
+        loadAdminDashboard();
+    } catch (err) {
+        alert("Rollback Error: " + err.message);
+    }
+}
+
 function toggleVipPlan(amt) {
     alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
 }
 
-
-        
+window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 </script>
 </body>
 </html>
