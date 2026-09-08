@@ -519,31 +519,19 @@
                 alert("Error: " + (err.message || JSON.stringify(err)));
             }
             }
-                             function openInviteModal() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        function closeInviteModal(e) {
-            if (e.target && e.target.id === 'inviteModal') {
-                e.target.style.display = 'none';
-            }
-        }
-
-        function closeInviteModalForce() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'none';
-        }
-
-        function fetchSavedRefCode() {
+                                     function fetchSavedRefCode() {
             const keys = ['agro_user', 'active_user', 'user', 'session_user'];
             for (let k of keys) {
                 const raw = localStorage.getItem(k);
                 if (raw) {
                     try {
                         const parsed = JSON.parse(raw);
-                        if (parsed && (parsed.referral_code || parsed.ref_code)) {
-                            return (parsed.referral_code || parsed.ref_code);
+                        if (parsed) {
+                            const c = parsed.referral_code || parsed.ref_code;
+                            if (c) return c.trim().toUpperCase();
+                            if (parsed.phone && parsed.phone.length >= 6) {
+                                return 'AG-' + parsed.phone.slice(-6);
+                            }
                         }
                     } catch(e) {}
                 }
@@ -551,16 +539,75 @@
             return '';
         }
 
-        function buildShareLink() {
+        async function getGuaranteedRefCode() {
             let code = fetchSavedRefCode();
-            if (!code) {
-                // Agar session load na hua ho toh prompt se code le lega taaki link khali na jaye
-                code = prompt("Referral code load nahi ho paya. Apna Referral Code dalein (e.g. AG-XXXXXX):");
+            if (code) return code;
+
+            // Agar LocalStorage khali ho to Supabase Session se fetch karein
+            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
+            if (sb && sb.auth) {
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session && session.user) {
+                        const { data: prof } = await sb.from('profiles').select('referral_code, phone').eq('id', session.user.id).maybeSingle();
+                        if (prof) {
+                            return prof.referral_code || ('AG-' + (prof.phone || '').slice(-6));
+                        }
+                    }
+                } catch(e) {}
             }
-            if (!code) return null;
-            return `https://agroharvests.github.io/Agroharvest-/register.html?ref=${encodeURIComponent(code.trim().toUpperCase())}`;
+            return 'AG-ADMIN';
         }
 
+        async function generateShareUrl() {
+            const code = await getGuaranteedRefCode();
+            return `https://agroharvests.github.io/Agroharvest-/register.html?ref=${code}`;
+        }
+
+        // Direct Click Listeners (No Popup, No Prompt)
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnWA = document.getElementById('btnShareWA');
+            const btnTG = document.getElementById('btnShareTG');
+            const btnFB = document.getElementById('btnShareFB');
+            const btnCopy = document.getElementById('btnCopyRef');
+
+            if (btnCopy) {
+                btnCopy.onclick = async function() {
+                    const link = await generateShareUrl();
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(link).then(() => {
+                            alert("✅ Referral link copy ho gaya:\n" + link);
+                        });
+                    } else {
+                        alert("Referral link:\n" + link);
+                    }
+                };
+            }
+
+            if (btnWA) {
+                btnWA.onclick = async function() {
+                    const link = await generateShareUrl();
+                    const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+                    window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+                };
+            }
+
+            if (btnTG) {
+                btnTG.onclick = async function() {
+                    const link = await generateShareUrl();
+                    const msg = encodeURIComponent(`🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ${link}`);
+                    window.open(`https://t.me/share/url?url=${link}&text=${msg}`, '_blank');
+                };
+            }
+
+            if (btnFB) {
+                btnFB.onclick = async function() {
+                    const link = await generateShareUrl();
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`, '_blank');
+                };
+            }
+        });
+                    
         // Direct Event Bindings (Button click guaranteed chalega)
         document.addEventListener('DOMContentLoaded', () => {
             const btnWA = document.getElementById('btnShareWA');
