@@ -319,10 +319,12 @@
         </div>
     </div>
 
+                
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             checkAndShowWelcomePopup();
             checkUpcomingPlans();
+            startTicker();
         });
 
         function checkAndShowWelcomePopup() {
@@ -337,6 +339,22 @@
             const modal = document.getElementById('welcomePopup');
             if (modal) modal.style.display = 'none';
             localStorage.setItem('agro_welcome_shown', 'true');
+        }
+
+        function openInviteModal() {
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeInviteModal(e) {
+            if (e.target && e.target.id === 'inviteModal') {
+                e.target.style.display = 'none';
+            }
+        }
+
+        function closeInviteModalForce() {
+            const modal = document.getElementById('inviteModal');
+            if (modal) modal.style.display = 'none';
         }
 
         function tryBuyUpPlan(title) {
@@ -378,7 +396,8 @@
                 console.warn("Settings check error:", e);
             }
         }
-                async function buySeedPlan(title, price, daily, days) {
+
+        async function buySeedPlan(title, price, daily, days) {
             if (!confirm(`Kya aap ₹${price} ka "${title}" (${days} Days) plan activate karna chahte hain?`)) return;
 
             const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
@@ -409,7 +428,6 @@
                 const { data: prof, error: pErr } = await query.single();
                 if (pErr || !prof) return alert("Profile nahi mili! Login karein.");
 
-                // Check real recharge verification
                 const { data: rechargeTx, error: rcErr } = await sb
                     .from('transactions')
                     .select('id')
@@ -432,11 +450,9 @@
 
                 const newBal = curBal - price;
 
-                // 1. Balance deduct
                 const { error: dErr } = await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
                 if (dErr) throw dErr;
 
-                // 2. Order record
                 const now = new Date();
                 const expDate = new Date();
                 expDate.setDate(now.getDate() + parseInt(days));
@@ -456,7 +472,6 @@
                     end_date: expDate.toISOString()
                 }]);
 
-                // 3. Purchase transaction log
                 await sb.from('transactions').insert([{
                     user_id: prof.id,
                     type: 'purchase',
@@ -464,7 +479,6 @@
                     details: `Activated ${title}`
                 }]);
 
-                // 4. Robust 3-Level Referral Commission (L1: 25%, L2: 2%, L3: 1%)
                 async function payCommission(refCode, percent, levelName) {
                     if (!refCode) return null;
                     const cleanCode = refCode.trim().toUpperCase();
@@ -519,72 +533,38 @@
             }
         }
 
-        function openInviteModal() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        function closeInviteModal(e) {
-            if (e.target && e.target.id === 'inviteModal') {
-                e.target.style.display = 'none';
-            }
-        }
-
-        function closeInviteModalForce() {
-            const modal = document.getElementById('inviteModal');
-            if (modal) modal.style.display = 'none';
-        }
-
         function getActiveRefCode() {
-                async function getActiveRefCode() {
-            // 1. Agar auth.js ka helper function mojood ho
-            if (typeof getActiveUser === 'function') {
-                const u = getActiveUser();
-                if (u && (u.referral_code || u.ref_code)) return (u.referral_code || u.ref_code).trim().toUpperCase();
-                if (u && u.phone) return 'AG-' + u.phone.slice(-6);
-            }
-
-            // 2. LocalStorage ke sabhi possible formats check karein
+            // 1. Direct auth / local profile check
             for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
+                const k = localStorage.key(i);
                 try {
-                    const item = JSON.parse(localStorage.getItem(key));
-                    if (item) {
-                        const code = item.referral_code || item.ref_code;
-                        if (code && code !== 'AG-ADMIN' && code !== 'AG-COMMUNITY') return code.trim().toUpperCase();
-                        if (item.phone && item.phone.length >= 6) return 'AG-' + item.phone.slice(-6);
-                        if (item.user && item.user.phone) return 'AG-' + item.user.phone.slice(-6);
+                    const parsed = JSON.parse(localStorage.getItem(k));
+                    if (parsed) {
+                        const code = parsed.referral_code || parsed.ref_code;
+                        if (code && code !== 'AG-ADMIN' && code !== 'AG-COMMUNITY') {
+                            return code.trim().toUpperCase();
+                        }
+                        if (parsed.phone && String(parsed.phone).length >= 6) {
+                            return 'AG-' + String(parsed.phone).slice(-6);
+                        }
                     }
                 } catch(e) {}
             }
-
-            // 3. Supabase Live Session se fetch karein
-            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-            if (sb && sb.auth) {
-                try {
-                    const { data: { session } } = await sb.auth.getSession();
-                    if (session && session.user) {
-                        const { data: prof } = await sb.from('profiles').select('referral_code, phone').eq('id', session.user.id).maybeSingle();
-                        if (prof && prof.referral_code) return prof.referral_code.trim().toUpperCase();
-                        if (prof && prof.phone) return 'AG-' + prof.phone.slice(-6);
-                    }
-                } catch(err) {}
-            }
-
-            // 4. Fallback: User se number pooch kar hamesha USKA personal code banayein
-            const phoneInput = prompt("Referral link generate karne ke liye apna 10 digit mobile number dalein:");
-            if (phoneInput && phoneInput.trim().length >= 6) {
-                const cleanCode = 'AG-' + phoneInput.trim().slice(-6);
-                localStorage.setItem('agro_user', JSON.stringify({ phone: phoneInput.trim(), referral_code: cleanCode }));
-                return cleanCode;
-            }
-
-            return 'AG-' + Math.floor(100000 + Math.random() * 900000);
-                            }
-            
+            return '';
+        }
 
         function doShare(platform) {
-            const code = getActiveRefCode();
+            let code = getActiveRefCode();
+            if (!code) {
+                const num = prompt("Apna Personal Referral Link pane ke liye apna 10 digit Mobile Number dalein:");
+                if (num && num.trim().length >= 6) {
+                    code = 'AG-' + num.trim().slice(-6);
+                    localStorage.setItem('agro_user', JSON.stringify({ phone: num.trim(), referral_code: code }));
+                } else {
+                    return;
+                }
+            }
+
             const link = 'https://agroharvests.github.io/Agroharvest-/register.html?ref=' + encodeURIComponent(code);
             const shareText = '🌾 AgroHarvest Smart Farming: Claim ₹50 instant bonus & daily returns: ' + link;
 
@@ -593,10 +573,10 @@
                     navigator.clipboard.writeText(link).then(() => {
                         alert("✅ Aapka Personal Referral Link copy ho gaya:\n" + link);
                     }).catch(() => {
-                        prompt("Copy karein apna referral link:", link);
+                        prompt("Copy karein yeh link:", link);
                     });
                 } else {
-                    prompt("Copy karein apna referral link:", link);
+                    prompt("Copy karein yeh link:", link);
                 }
             } else if (platform === 'wa') {
                 window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText), '_blank');
@@ -607,8 +587,7 @@
             }
         }
 
-        // Live Transactions Ticker
-        (function() {
+        function startTicker() {
             const txList = [
                 { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
                 { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
@@ -641,30 +620,23 @@
                 return div;
             }
 
-            function startTicker() {
-                const target = document.getElementById('liveTxContainer');
-                if (!target) return;
+            const target = document.getElementById('liveTxContainer');
+            if (!target) return;
 
-                target.innerHTML = '';
-                for (let i = 0; i < 3; i++) {
-                    target.appendChild(generateRow());
+            target.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                target.appendChild(generateRow());
+            }
+
+            setInterval(() => {
+                const row = generateRow();
+                target.prepend(row);
+                if (target.children.length > 4) {
+                    target.removeChild(target.lastChild);
                 }
-
-                setInterval(() => {
-                    const row = generateRow();
-                    target.prepend(row);
-                    if (target.children.length > 4) {
-                        target.removeChild(target.lastChild);
-                    }
-                }, 2500);
-            }
-
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                startTicker();
-            } else {
-                document.addEventListener('DOMContentLoaded', startTicker);
-            }
-        })();
-    </script>
+            }, 2500);
+        }
+                </script>
+    
 </body>
 </html>
