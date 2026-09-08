@@ -120,7 +120,8 @@
             <a href="profile.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Profile</span></a>
         </div>
     </div>
-        <script>
+
+    <script>
         const activeUser = requireAuth();
         let currentTabLevel = 1;
 
@@ -134,7 +135,7 @@
 
         async function initTeamData() {
             if (!activeUser) return;
-            document.getElementById('myRefBadge').innerText = "REF: " + activeUser.referral_code;
+            document.getElementById('myRefBadge').innerText = "REF: " + (activeUser.referral_code || activeUser.ref_code || '---');
 
             const sb = getSupabase();
             if (!sb) return;
@@ -145,29 +146,44 @@
                 document.getElementById('totalTeamIncome').innerText = "₹" + parseFloat(prof.team_income || 0).toFixed(2);
             }
 
-            // 2. Fetch all database profiles
+            // 2. Fetch all database profiles & data
             const { data: allProfiles } = await sb.from('profiles').select('*');
             const { data: orders } = await sb.from('orders').select('*');
-            const { data: comms } = await sb.from('transactions').select('*').eq('user_id', activeUser.id).eq('type', 'commission').order('created_at', { ascending: false });
+            const { data: comms } = await sb.from('transactions')
+                .select('*')
+                .eq('user_id', activeUser.id)
+                .eq('type', 'commission')
+                .order('created_at', { ascending: false });
 
             allOrders = orders || [];
             allCommissions = comms || [];
 
-            // Exclude current logged in user from downline candidates
+            const myRefCode = (activeUser.referral_code || activeUser.ref_code || '').trim().toUpperCase();
+
+            // Exclude logged in user
             const otherProfiles = (allProfiles || []).filter(u => u.id !== activeUser.id);
 
             // Level 1: Only users directly referred by activeUser
-            level1Users = otherProfiles.filter(u => u.referred_by === activeUser.referral_code);
-            const l1Codes = level1Users.map(u => u.referral_code);
+            level1Users = otherProfiles.filter(u => {
+                const ref = (u.referred_by || u.invited_by || '').trim().toUpperCase();
+                return ref === myRefCode;
+            });
+            const l1Codes = level1Users.map(u => (u.referral_code || u.ref_code || '').trim().toUpperCase());
             const l1Ids = level1Users.map(u => u.id);
 
-            // Level 2: Only users referred by L1 members (strictly excluding self and L1)
-            level2Users = otherProfiles.filter(u => l1Codes.includes(u.referred_by) && !l1Ids.includes(u.id));
-            const l2Codes = level2Users.map(u => u.referral_code);
+            // Level 2: Only users referred by L1 members
+            level2Users = otherProfiles.filter(u => {
+                const ref = (u.referred_by || u.invited_by || '').trim().toUpperCase();
+                return l1Codes.includes(ref) && !l1Ids.includes(u.id);
+            });
+            const l2Codes = level2Users.map(u => (u.referral_code || u.ref_code || '').trim().toUpperCase());
             const l2Ids = level2Users.map(u => u.id);
 
-            // Level 3: Only users referred by L2 members (strictly excluding self, L1 and L2)
-            level3Users = otherProfiles.filter(u => l2Codes.includes(u.referred_by) && !l1Ids.includes(u.id) && !l2Ids.includes(u.id));
+            // Level 3: Only users referred by L2 members
+            level3Users = otherProfiles.filter(u => {
+                const ref = (u.referred_by || u.invited_by || '').trim().toUpperCase();
+                return l2Codes.includes(ref) && !l1Ids.includes(u.id) && !l2Ids.includes(u.id);
+            });
 
             document.getElementById('l1Count').innerText = level1Users.length;
             document.getElementById('l2Count').innerText = level2Users.length;
@@ -208,14 +224,25 @@
                 const maskedPhone = `+91 ${phoneStr.substring(0, 3)}****${phoneStr.substring(7)}`;
                 const regDate = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'Recent';
 
-                // Fetch active crop plan
+                // 1. Fetch active crop plan
                 const mOrders = allOrders.filter(o => o.user_id === m.id && o.status === 'active');
                 const activePlanName = mOrders.length > 0 ? mOrders[0].plan_name + ` (₹${mOrders[0].price})` : "No Active Plan";
                 
-                // Calculate direct commission from this downline member
-                const commEarned = allCommissions
-                    .filter(c => c.from_user_id === m.id)
-                    .reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+                // 2. Commission Calculation (Transaction check OR Plan Formula fallback)
+                let commEarned = 0;
+                
+                const matchedComms = allCommissions.filter(c => 
+                    (c.details && c.details.includes(m.phone)) || 
+                    (c.from_user_id && c.from_user_id === m.id)
+                );
+
+                if (matchedComms.length > 0) {
+                    commEarned = matchedComms.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+                } else if (mOrders.length > 0) {
+                    const rate = level === 1 ? 0.25 : (level === 2 ? 0.02 : 0.01);
+                    const totalInvest = mOrders.reduce((sum, o) => sum + parseFloat(o.price || 0), 0);
+                    commEarned = totalInvest * rate;
+                }
 
                 const tagClass = level === 1 ? 'tag-l1' : (level === 2 ? 'tag-l2' : 'tag-l3');
 
@@ -226,7 +253,7 @@
                                 <div class="m-avatar"><i class="fa-solid fa-user-check"></i></div>
                                 <div class="m-meta">
                                     <strong>${maskedPhone}</strong>
-                                    <span>Joined: ${regDate} | Ref: ${m.referral_code}</span>
+                                    <span>Joined: ${regDate} | Ref: ${m.referral_code || m.ref_code || '---'}</span>
                                 </div>
                             </div>
                             <span class="level-tag ${tagClass}">Level ${level}</span>
@@ -260,13 +287,18 @@
 
             list.innerHTML = comms.map(c => {
                 const dateStr = c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN') : 'Recent';
+                let title = "Team Referral Reward";
+                if (c.details && c.details.includes("Level 1")) title = "Level 1 (25%) Reward";
+                else if (c.details && c.details.includes("Level 2")) title = "Level 2 (2%) Reward";
+                else if (c.details && c.details.includes("Level 3")) title = "Level 3 (1%) Reward";
+
                 return `
                     <div class="comm-item">
                         <div>
-                            <h4 style="font-size: 14px; font-weight: 800; color: #0f172a;">Level ${c.level || 1} Referral Reward</h4>
-                            <p style="font-size: 11px; color: #64748b; margin-top: 2px;">${c.details} • ${dateStr}</p>
+                            <h4 style="font-size: 14px; font-weight: 800; color: #0f172a;">${title}</h4>
+                            <p style="font-size: 11px; color: #64748b; margin-top: 2px;">${c.details || 'Commission Credited'} • ${dateStr}</p>
                         </div>
-                        <div style="font-size: 16px; font-weight: 900; color: #16a34a;">+ ₹${parseFloat(c.amount).toFixed(2)}</div>
+                        <div style="font-size: 16px; font-weight: 900; color: #16a34a;">+ ₹${parseFloat(c.amount || 0).toFixed(2)}</div>
                     </div>
                 `;
             }).join('');
