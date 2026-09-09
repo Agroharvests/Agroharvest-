@@ -938,6 +938,62 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
     }
         }
         
+        async function publishGlobalNotice() {
+    const btn = document.querySelector("button[onclick='publishGlobalNotice()']");
+    const originalText = btn ? btn.innerHTML : "🚀 Publish Notice Live";
+    
+    try {
+        if (btn) {
+            btn.innerHTML = "⏳ Publishing...";
+            btn.disabled = true;
+        }
+
+        // Har tarike ka Supabase client detect karein
+        const client = (typeof _supabase !== 'undefined') ? _supabase 
+                     : (typeof supabaseClient !== 'undefined') ? supabaseClient
+                     : (typeof supabase !== 'undefined' && typeof supabase.from === 'function') ? supabase
+                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient
+                     : null;
+
+        if (!client) {
+            alert("Error: Database connection nahi mila. Ek baar page refresh karein.");
+            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+            return;
+        }
+
+        const text = (document.getElementById('adminNoticeInput')?.value || '').trim();
+        const active = document.getElementById('noticeActiveCheckbox') ? document.getElementById('noticeActiveCheckbox').checked : true;
+
+        if (!text) {
+            alert("Kripya pehle notice box me kuchh text likhein!");
+            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+            return;
+        }
+
+        const { error } = await client
+            .from('app_settings')
+            .upsert({ 
+                id: 'global_notice', 
+                notice_text: text, 
+                is_active: active, 
+                updated_at: new Date().toISOString() 
+            });
+
+        if (error) {
+            alert("Database Error: " + error.message);
+        } else {
+            alert("✅ Notice successfully broadcast ho gaya hai!");
+        }
+
+    } catch (err) {
+        alert("Click Error: " + err.message);
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+        }
         
 </script>
 </body>
