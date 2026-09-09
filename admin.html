@@ -623,6 +623,7 @@ window.rejectWithdrawal = async function(wdId, userId, amount) {
                         <div class="user-phone">+91 ${user.phone}</div>
                         <span style="font-size: 10px; color: #64748b; font-weight: 700;">Invited By: <b style="color:#0f172a;">${user.referred_by || user.invited_by || 'Direct'}</b></span>
                     </div>
+                    <button onclick="exportFullUserStatement('${user.id}', '${user.phone}')" style="background:#0f172a; color:#fff; border:none; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer; margin-top:4px;">📊 Download Full History</button>
                     <span class="user-ref-badge">${user.referral_code || user.ref_code || 'N/A'}</span>
                 </div>
 <div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 3px;">
@@ -812,6 +813,88 @@ function toggleVipPlan(amt) {
 }
 
 window.addEventListener('DOMContentLoaded', loadAdminDashboard);
+        async function exportFullUserStatement(userId, userPhone) {
+    try {
+        const parentUser = (typeof allUsersList !== 'undefined' ? allUsersList : []).find(u => u.id === userId || u.phone === userPhone);
+        if (!parentUser) {
+            alert("User record nahi mila!");
+            return;
+        }
+
+        const { data: txList } = await _supabase
+            .from('transactions')
+            .select('*')
+            .eq('user_id', parentUser.id)
+            .order('created_at', { ascending: false });
+
+        const { data: wdList } = await _supabase
+            .from('withdrawals')
+            .select('*')
+            .eq('user_id', parentUser.id)
+            .order('created_at', { ascending: false });
+
+        let csv = "data:text/csv;charset=utf-8,";
+
+        csv += "=== USER ACCOUNT OVERVIEW ===\n";
+        csv += `Mobile Number,${parentUser.phone}\n`;
+        csv += `Referral Code,${parentUser.referral_code || 'N/A'}\n`;
+        csv += `Current Wallet Balance,Rs ${parentUser.balance || 0}\n`;
+        csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleString('en-IN') : 'N/A'}\n\n`;
+
+        csv += "=== EARNINGS & DAILY INCOME & COMMISSION ===\n";
+        csv += "Date & Time,Type,Amount (Rs)\n";
+        if (txList && txList.length > 0) {
+            txList.forEach(t => {
+                const dt = t.created_at ? new Date(t.created_at).toLocaleString('en-IN').replace(/,/g, '') : 'N/A';
+                csv += `"${dt}","${(t.type || 'income').toUpperCase()}","${t.amount || 0}"\n`;
+            });
+        } else {
+            csv += "No transactions found,,\n";
+        }
+        csv += "\n";
+
+        csv += "=== WITHDRAWAL HISTORY ===\n";
+        csv += "Date & Time,Amount (Rs),Status\n";
+        if (wdList && wdList.length > 0) {
+            wdList.forEach(w => {
+                const wDt = w.created_at ? new Date(w.created_at).toLocaleString('en-IN').replace(/,/g, '') : 'N/A';
+                csv += `"${wDt}","${w.amount || 0}","${(w.status || 'pending').toUpperCase()}"\n`;
+            });
+        } else {
+            csv += "No withdrawals found,,\n";
+        }
+        csv += "\n";
+
+        csv += "=== DOWNLINE MEMBERS TREE ===\n";
+        csv += "Level,Phone,Status,Active Plan\n";
+        const l1 = typeof getDirectDownlines === 'function' ? getDirectDownlines(parentUser) : [];
+        const l2 = l1.length > 0 ? getDirectDownlines(l1) : [];
+        const l3 = l2.length > 0 ? getDirectDownlines(l2) : [];
+
+        const addRows = (list, lvl) => {
+            list.forEach(m => {
+                const mOrders = (allOrdersList || []).filter(o => o.user_id === m.id && o.status === 'active');
+                const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
+                const pn = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' | ') : "None";
+                csv += `"${lvl}","${m.phone}","${st}","${pn}"\n`;
+            });
+        };
+        addRows(l1, "Level 1");
+        addRows(l2, "Level 2");
+        addRows(l3, "Level 3");
+
+        const encodedUri = encodeURI(csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `User_Full_Report_${parentUser.phone}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch(err) {
+        alert("Export error: " + err.message);
+    }
+    }
+        
 </script>
 </body>
 </html>
