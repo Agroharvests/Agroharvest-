@@ -815,37 +815,53 @@ function toggleVipPlan(amt) {
 window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         function exportFullUserStatement(userId, userPhone) {
     try {
-        const uList = typeof allUsersList !== 'undefined' ? allUsersList : (typeof users !== 'undefined' ? users : []);
-        const parentUser = uList.find(u => u && (u.id === userId || u.phone === userPhone));
+        const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList 
+                    : ((typeof users !== 'undefined' && Array.isArray(users)) ? users : []);
+        
+        const parentUser = uList.find(u => u && (u.id === userId || String(u.phone).trim() === String(userPhone).trim()));
         
         if (!parentUser) {
             alert("User record nahi mila!");
             return;
         }
 
-        // Direct & Downline Members
-        const l1 = typeof getDirectDownlines === 'function' ? getDirectDownlines(parentUser) : [];
-        const l2 = l1.length > 0 && typeof getDirectDownlines === 'function' ? getDirectDownlines(l1) : [];
-        const l3 = l2.length > 0 && typeof getDirectDownlines === 'function' ? getDirectDownlines(l2) : [];
+        const oList = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) ? allOrdersList : [];
 
-        // Orders list
-        const oList = typeof allOrdersList !== 'undefined' ? allOrdersList : [];
-        const userOwnOrders = oList.filter(o => o && o.user_id === parentUser.id);
+        // Direct matching logic for L1, L2, L3
+        const getChildren = (parents) => {
+            const pCodes = new Set();
+            parents.forEach(p => {
+                if (p.referral_code) pCodes.add(String(p.referral_code).trim().toUpperCase());
+                if (p.ref_code) pCodes.add(String(p.ref_code).trim().toUpperCase());
+                if (p.phone) pCodes.add(String(p.phone).trim());
+            });
+
+            return uList.filter(u => {
+                if (!u || parents.some(p => p.id === u.id)) return false;
+                const ref = String(u.referred_by || u.invited_by || u.parent_referral || '').trim().toUpperCase();
+                return ref && pCodes.has(ref);
+            });
+        };
+
+        const l1 = getChildren([parentUser]);
+        const l2 = l1.length > 0 ? getChildren(l1) : [];
+        const l3 = l2.length > 0 ? getChildren(l2) : [];
 
         let csv = "data:text/csv;charset=utf-8,";
 
         // 1. OVERVIEW
         csv += "=== USER ACCOUNT OVERVIEW ===\n";
-        csv += `Phone Number,+91 ${parentUser.phone || ''}\n`;
+        csv += `Phone Number,'+91 ${parentUser.phone || ''}\n`;
         csv += `Referral Code,${parentUser.referral_code || parentUser.ref_code || 'N/A'}\n`;
         csv += `Invited By,${parentUser.invited_by || parentUser.referred_by || 'Direct'}\n`;
         csv += `Wallet Balance,Rs ${parentUser.balance || 0}\n`;
         csv += `Team Commission Income,Rs ${parentUser.team_income || 0}\n`;
         csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleDateString('en-IN') : 'N/A'}\n\n`;
 
-        // 2. ACTIVE PURCHASED PLANS
+        // 2. PURCHASED PLANS
         csv += "=== PURCHASED PLANS HISTORY ===\n";
         csv += "Plan Name,Daily Yield (Rs),Status,Purchase Date\n";
+        const userOwnOrders = oList.filter(o => o && o.user_id === parentUser.id);
         if (userOwnOrders.length > 0) {
             userOwnOrders.forEach(o => {
                 const oDt = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'N/A';
@@ -859,8 +875,9 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         // 3. WITHDRAWALS
         csv += "=== WITHDRAWAL REQUESTS ===\n";
         csv += "Date,Amount (Rs),Status\n";
-        const wList = typeof allWithdrawalsList !== 'undefined' ? allWithdrawalsList : (typeof withdrawals !== 'undefined' ? withdrawals : []);
-        const userWd = wList.filter(w => w && (w.user_id === parentUser.id || w.phone === parentUser.phone));
+        const wList = (typeof allWithdrawalsList !== 'undefined' && Array.isArray(allWithdrawalsList)) ? allWithdrawalsList 
+                    : ((typeof withdrawals !== 'undefined' && Array.isArray(withdrawals)) ? withdrawals : []);
+        const userWd = wList.filter(w => w && (w.user_id === parentUser.id || String(w.phone) === String(parentUser.phone)));
         if (userWd.length > 0) {
             userWd.forEach(w => {
                 const wDt = w.created_at ? new Date(w.created_at).toLocaleDateString('en-IN') : 'N/A';
@@ -871,7 +888,7 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         }
         csv += "\n";
 
-        // 4. DOWNLINE MEMBERS FULL LIST
+        // 4. DOWNLINE MEMBERS (L1, L2, L3)
         csv += "=== DOWNLINE TEAM TREE (L1 - L3) ===\n";
         csv += "Level,Member Phone,Referral Code,Plan Status,Active Plans,Joined Date\n";
 
@@ -881,15 +898,18 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
                 const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
                 const pNames = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' + ') : "None";
                 const mDt = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${lvl}","+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
+                csv += `"${lvl}","'+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
             });
         };
 
-        appendRows(l1, "Level 1");
-        appendRows(l2, "Level 2");
-        appendRows(l3, "Level 3");
+        if (l1.length === 0 && l2.length === 0 && l3.length === 0) {
+            csv += "No Downline Members Found,,,,,\n";
+        } else {
+            appendRows(l1, "Level 1");
+            appendRows(l2, "Level 2");
+            appendRows(l3, "Level 3");
+        }
 
-        // Trigger CSV Download
         const encodedUri = encodeURI(csv);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -902,7 +922,7 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         alert("Export error: " + err.message);
     }
         }
-            
+        
         
 </script>
 </body>
