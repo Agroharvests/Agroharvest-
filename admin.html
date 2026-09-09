@@ -813,103 +813,96 @@ function toggleVipPlan(amt) {
 }
 
 window.addEventListener('DOMContentLoaded', loadAdminDashboard);
-        async function exportFullUserStatement(userId, userPhone) {
+        function exportFullUserStatement(userId, userPhone) {
     try {
-        // Safe Supabase client detection
-        const client = (typeof supabase !== 'undefined') ? supabase 
-                     : (typeof _supabase !== 'undefined') ? _supabase 
-                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient 
-                     : null;
-
-        const parentUser = (typeof allUsersList !== 'undefined' ? allUsersList : []).find(u => u.id === userId || u.phone === userPhone);
+        const uList = typeof allUsersList !== 'undefined' ? allUsersList : (typeof users !== 'undefined' ? users : []);
+        const parentUser = uList.find(u => u && (u.id === userId || u.phone === userPhone));
+        
         if (!parentUser) {
             alert("User record nahi mila!");
             return;
         }
 
-        let txList = [];
-        let wdList = [];
+        // Direct & Downline Members
+        const l1 = typeof getDirectDownlines === 'function' ? getDirectDownlines(parentUser) : [];
+        const l2 = l1.length > 0 && typeof getDirectDownlines === 'function' ? getDirectDownlines(l1) : [];
+        const l3 = l2.length > 0 && typeof getDirectDownlines === 'function' ? getDirectDownlines(l2) : [];
 
-        if (client) {
-            const { data: tData } = await client
-                .from('transactions')
-                .select('*')
-                .eq('user_id', parentUser.id)
-                .order('created_at', { ascending: false });
-            if (tData) txList = tData;
-
-            const { data: wData } = await client
-                .from('withdrawals')
-                .select('*')
-                .eq('user_id', parentUser.id)
-                .order('created_at', { ascending: false });
-            if (wData) wdList = wData;
-        }
+        // Orders list
+        const oList = typeof allOrdersList !== 'undefined' ? allOrdersList : [];
+        const userOwnOrders = oList.filter(o => o && o.user_id === parentUser.id);
 
         let csv = "data:text/csv;charset=utf-8,";
 
+        // 1. OVERVIEW
         csv += "=== USER ACCOUNT OVERVIEW ===\n";
-        csv += `Mobile Number,${parentUser.phone}\n`;
-        csv += `Referral Code,${parentUser.referral_code || 'N/A'}\n`;
-        csv += `Current Wallet Balance,Rs ${parentUser.balance || 0}\n`;
-        csv += `Team Income,Rs ${parentUser.team_income || 0}\n`;
-        csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleString('en-IN') : 'N/A'}\n\n`;
+        csv += `Phone Number,+91 ${parentUser.phone || ''}\n`;
+        csv += `Referral Code,${parentUser.referral_code || parentUser.ref_code || 'N/A'}\n`;
+        csv += `Invited By,${parentUser.invited_by || parentUser.referred_by || 'Direct'}\n`;
+        csv += `Wallet Balance,Rs ${parentUser.balance || 0}\n`;
+        csv += `Team Commission Income,Rs ${parentUser.team_income || 0}\n`;
+        csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleDateString('en-IN') : 'N/A'}\n\n`;
 
-        csv += "=== EARNINGS DAILY INCOME & COMMISSION ===\n";
-        csv += "Date & Time,Type,Amount (Rs)\n";
-        if (txList && txList.length > 0) {
-            txList.forEach(t => {
-                const dt = t.created_at ? new Date(t.created_at).toLocaleString('en-IN').replace(/,/g, '') : 'N/A';
-                csv += `"${dt}","${(t.type || 'income').toUpperCase()}","${t.amount || 0}"\n`;
+        // 2. ACTIVE PURCHASED PLANS
+        csv += "=== PURCHASED PLANS HISTORY ===\n";
+        csv += "Plan Name,Daily Yield (Rs),Status,Purchase Date\n";
+        if (userOwnOrders.length > 0) {
+            userOwnOrders.forEach(o => {
+                const oDt = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'N/A';
+                csv += `"${o.plan_name || 'Active Plan'}","${o.daily_income || 0}","${(o.status || 'active').toUpperCase()}","${oDt}"\n`;
             });
         } else {
-            csv += "No transactions found,,\n";
+            csv += "No Active Purchased Plans,,,\n";
         }
         csv += "\n";
 
-        csv += "=== WITHDRAWAL HISTORY ===\n";
-        csv += "Date & Time,Amount (Rs),Status\n";
-        if (wdList && wdList.length > 0) {
-            wdList.forEach(w => {
-                const wDt = w.created_at ? new Date(w.created_at).toLocaleString('en-IN').replace(/,/g, '') : 'N/A';
+        // 3. WITHDRAWALS
+        csv += "=== WITHDRAWAL REQUESTS ===\n";
+        csv += "Date,Amount (Rs),Status\n";
+        const wList = typeof allWithdrawalsList !== 'undefined' ? allWithdrawalsList : (typeof withdrawals !== 'undefined' ? withdrawals : []);
+        const userWd = wList.filter(w => w && (w.user_id === parentUser.id || w.phone === parentUser.phone));
+        if (userWd.length > 0) {
+            userWd.forEach(w => {
+                const wDt = w.created_at ? new Date(w.created_at).toLocaleDateString('en-IN') : 'N/A';
                 csv += `"${wDt}","${w.amount || 0}","${(w.status || 'pending').toUpperCase()}"\n`;
             });
         } else {
-            csv += "No withdrawals found,,\n";
+            csv += "No Withdrawals Recorded,,\n";
         }
         csv += "\n";
 
-        csv += "=== DOWNLINE MEMBERS TREE ===\n";
-        csv += "Level,Phone,Status,Active Plan\n";
-        const l1 = typeof getDirectDownlines === 'function' ? getDirectDownlines(parentUser) : [];
-        const l2 = l1.length > 0 ? getDirectDownlines(l1) : [];
-        const l3 = l2.length > 0 ? getDirectDownlines(l2) : [];
+        // 4. DOWNLINE MEMBERS FULL LIST
+        csv += "=== DOWNLINE TEAM TREE (L1 - L3) ===\n";
+        csv += "Level,Member Phone,Referral Code,Plan Status,Active Plans,Joined Date\n";
 
-        const addRows = (list, lvl) => {
+        const appendRows = (list, lvl) => {
             list.forEach(m => {
-                const mOrders = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) 
-                    ? allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active') 
-                    : [];
+                const mOrders = oList.filter(o => o && o.user_id === m.id && o.status === 'active');
                 const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
-                const pn = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' | ') : "None";
-                csv += `"${lvl}","${m.phone}","${st}","${pn}"\n`;
+                const pNames = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' + ') : "None";
+                const mDt = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'N/A';
+                csv += `"${lvl}","+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
             });
         };
-        addRows(l1, "Level 1");
-        addRows(l2, "Level 2");
-        addRows(l3, "Level 3");
 
+        appendRows(l1, "Level 1");
+        appendRows(l2, "Level 2");
+        appendRows(l3, "Level 3");
+
+        // Trigger CSV Download
         const encodedUri = encodeURI(csv);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `User_Report_${parentUser.phone}.csv`);
+        link.setAttribute("download", `Report_${parentUser.phone}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
     } catch(err) {
         alert("Export error: " + err.message);
     }
         }
+            
         
 </script>
 </body>
