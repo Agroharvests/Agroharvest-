@@ -815,23 +815,36 @@ function toggleVipPlan(amt) {
 window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         async function exportFullUserStatement(userId, userPhone) {
     try {
+        // Safe Supabase client detection
+        const client = (typeof supabase !== 'undefined') ? supabase 
+                     : (typeof _supabase !== 'undefined') ? _supabase 
+                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient 
+                     : null;
+
         const parentUser = (typeof allUsersList !== 'undefined' ? allUsersList : []).find(u => u.id === userId || u.phone === userPhone);
         if (!parentUser) {
             alert("User record nahi mila!");
             return;
         }
 
-        const { data: txList } = await _supabase
-            .from('transactions')
-            .select('*')
-            .eq('user_id', parentUser.id)
-            .order('created_at', { ascending: false });
+        let txList = [];
+        let wdList = [];
 
-        const { data: wdList } = await _supabase
-            .from('withdrawals')
-            .select('*')
-            .eq('user_id', parentUser.id)
-            .order('created_at', { ascending: false });
+        if (client) {
+            const { data: tData } = await client
+                .from('transactions')
+                .select('*')
+                .eq('user_id', parentUser.id)
+                .order('created_at', { ascending: false });
+            if (tData) txList = tData;
+
+            const { data: wData } = await client
+                .from('withdrawals')
+                .select('*')
+                .eq('user_id', parentUser.id)
+                .order('created_at', { ascending: false });
+            if (wData) wdList = wData;
+        }
 
         let csv = "data:text/csv;charset=utf-8,";
 
@@ -839,9 +852,10 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         csv += `Mobile Number,${parentUser.phone}\n`;
         csv += `Referral Code,${parentUser.referral_code || 'N/A'}\n`;
         csv += `Current Wallet Balance,Rs ${parentUser.balance || 0}\n`;
+        csv += `Team Income,Rs ${parentUser.team_income || 0}\n`;
         csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleString('en-IN') : 'N/A'}\n\n`;
 
-        csv += "=== EARNINGS & DAILY INCOME & COMMISSION ===\n";
+        csv += "=== EARNINGS DAILY INCOME & COMMISSION ===\n";
         csv += "Date & Time,Type,Amount (Rs)\n";
         if (txList && txList.length > 0) {
             txList.forEach(t => {
@@ -873,7 +887,9 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 
         const addRows = (list, lvl) => {
             list.forEach(m => {
-                const mOrders = (allOrdersList || []).filter(o => o.user_id === m.id && o.status === 'active');
+                const mOrders = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) 
+                    ? allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active') 
+                    : [];
                 const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
                 const pn = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' | ') : "None";
                 csv += `"${lvl}","${m.phone}","${st}","${pn}"\n`;
@@ -886,14 +902,14 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
         const encodedUri = encodeURI(csv);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `User_Full_Report_${parentUser.phone}.csv`);
+        link.setAttribute("download", `User_Report_${parentUser.phone}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     } catch(err) {
         alert("Export error: " + err.message);
     }
-    }
+        }
         
 </script>
 </body>
