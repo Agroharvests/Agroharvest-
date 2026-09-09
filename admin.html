@@ -262,6 +262,21 @@
     </div>
 
     <div class="admin-body">
+        <!-- GLOBAL NOTICE BROADCAST BOX -->
+<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:0 0 20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-weight:700; font-size:14px; color:#1e293b;">📢 Broadcast Notice to All Users</span>
+        <label style="font-size:12px; font-weight:600; color:#475569; display:flex; align-items:center; gap:5px; cursor:pointer;">
+            <input type="checkbox" id="noticeActiveCheckbox" checked> Show Notice
+        </label>
+    </div>
+    <textarea id="adminNoticeInput" rows="2" placeholder="Yahan notice likhein... (e.g. Aaj shaam 6 baje naya plan aayega!)" 
+        style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none; resize:none;"></textarea>
+    <button type="button" onclick="publishGlobalNotice()" style="width:100%; margin-top:8px; background:#059669; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px; border-radius:8px; cursor:pointer;">
+        🚀 Publish Notice Live
+    </button>
+</div>
+        
         <!-- 4 Stats Cards Grid -->
         <div class="stats-grid">
             <div class="stat-card">
