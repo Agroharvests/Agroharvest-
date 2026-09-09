@@ -115,7 +115,12 @@
             </div>
             <div class="live-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
-
+<!-- LIVE SCROLLING NOTICE BAR -->
+<div id="userNoticeBar" style="display:none; background:#ecfdf5; border-left:4px solid #10b981; padding:8px 12px; margin:8px 14px; border-radius:8px; font-size:12px; color:#065f46; font-weight:700; align-items:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size:15px;">📢</span>
+    <marquee id="userNoticeMarquee" scrollamount="5" behavior="scroll" direction="left"></marquee>
+</div>
+        
         <!-- Hero Banner Box -->
         <div class="hero-banner-box">
             <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=1200&q=80" alt="Harvest" class="hero-banner-img">
@@ -670,6 +675,43 @@
                 }
             }, 2500);
         }
+        async function fetchLiveNotice() {
+    try {
+        const client = (typeof _supabase !== 'undefined') ? _supabase 
+                     : (typeof supabaseClient !== 'undefined') ? supabaseClient
+                     : (typeof supabase !== 'undefined' && typeof supabase.from === 'function') ? supabase
+                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient
+                     : null;
+
+        if (!client) return;
+
+        const { data, error } = await client
+            .from('app_settings')
+            .select('*')
+            .eq('id', 'global_notice')
+            .single();
+
+        const bar = document.getElementById('userNoticeBar');
+        const marquee = document.getElementById('userNoticeMarquee');
+
+        if (data && data.is_active && data.notice_text && bar && marquee) {
+            marquee.innerText = data.notice_text;
+            bar.style.display = 'flex';
+        } else if (bar) {
+            bar.style.display = 'none';
+        }
+    } catch (e) {
+        console.log("Notice load error:", e);
+    }
+}
+
+// Page load par notice auto fetch karein
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchLiveNotice);
+} else {
+    fetchLiveNotice();
+    }
+        
                 </script>
     
 </body>
