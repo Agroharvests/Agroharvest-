@@ -115,11 +115,26 @@
             </div>
             <div class="live-btn" onclick="openInviteModal()"><i class="fa-solid fa-share-nodes"></i></div>
         </div>
-<!-- LIVE SCROLLING NOTICE BAR -->
-<div id="userNoticeBar" style="display:none; background:#ecfdf5; border-left:4px solid #10b981; padding:8px 12px; margin:8px 14px; border-radius:8px; font-size:12px; color:#065f46; font-weight:700; align-items:center; gap:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-    <span style="font-size:15px;">📢</span>
-    <marquee id="userNoticeMarquee" scrollamount="5" behavior="scroll" direction="left"></marquee>
+<!-- LIVE SMOOTH SCROLLING NOTICE BAR -->
+<div id="userNoticeBar" style="display:none; background:#ecfdf5; border-left:4px solid #10b981; padding:9px 12px; margin:8px 14px; border-radius:8px; font-size:12px; color:#065f46; font-weight:700; align-items:center; gap:8px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+    <span style="font-size:15px; flex-shrink:0;">📢</span>
+    <div style="flex:1; overflow:hidden; white-space:nowrap; position:relative;">
+        <div id="userNoticeText" class="smooth-ticker-text" style="display:inline-block; padding-left:100%;"></div>
+    </div>
 </div>
+
+<style>
+@keyframes liveTickerMove {
+    0%   { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+.smooth-ticker-text {
+    animation: liveTickerMove 18s linear infinite;
+}
+.smooth-ticker-text:hover {
+    animation-play-state: paused;
+}
+</style>
         
         <!-- Hero Banner Box -->
         <div class="hero-banner-box">
@@ -677,40 +692,40 @@
         }
         async function fetchLiveNotice() {
     try {
-        const client = (typeof _supabase !== 'undefined') ? _supabase 
-                     : (typeof supabaseClient !== 'undefined') ? supabaseClient
-                     : (typeof supabase !== 'undefined' && typeof supabase.from === 'function') ? supabase
-                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient
-                     : null;
+        let client = null;
+        if (typeof _supabase !== 'undefined') client = _supabase;
+        else if (typeof supabaseClient !== 'undefined') client = supabaseClient;
+        else if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') client = supabase;
+        else if (typeof window.supabaseClient !== 'undefined') client = window.supabaseClient;
 
         if (!client) return;
 
-        const { data, error } = await client
+        const { data } = await client
             .from('app_settings')
             .select('*')
             .eq('id', 'global_notice')
             .single();
 
         const bar = document.getElementById('userNoticeBar');
-        const marquee = document.getElementById('userNoticeMarquee');
+        const textContainer = document.getElementById('userNoticeText');
 
-        if (data && data.is_active && data.notice_text && bar && marquee) {
-            marquee.innerText = data.notice_text;
+        if (data && data.is_active && data.notice_text && bar && textContainer) {
+            textContainer.innerHTML = data.notice_text;
             bar.style.display = 'flex';
         } else if (bar) {
             bar.style.display = 'none';
         }
     } catch (e) {
-        console.log("Notice load error:", e);
+        console.log("Notice fetch error:", e);
     }
 }
 
-// Page load par notice auto fetch karein
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', fetchLiveNotice);
 } else {
     fetchLiveNotice();
-    }
+            }
+        
         
                 </script>
     
