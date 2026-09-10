@@ -744,6 +744,32 @@ async function applyManualBalance() {
 
         const newBal = (parseFloat(user.balance) || 0) + amt;
         await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
+
+        // --- AUTOMATIC TRANSACTION HISTORY LOG ---
+        if (amt > 0) {
+            const { data: userOrder } = await sb
+                .from('orders')
+                .select('plan_name')
+                .eq('user_id', user.id)
+                .eq('status', 'active')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            const pName = userOrder ? userOrder.plan_name : 'Daily Harvest';
+
+            await sb.from('transactions').insert([{
+                user_id: user.id,
+                amount: amt,
+                type: 'income',
+                status: 'success',
+                details: `Daily Harvest Income: ${pName} (₹${amt})`,
+                description: `Daily Harvest Income: ${pName} (₹${amt})`,
+                created_at: new Date().toISOString()
+            }]);
+        }
+        // ------------------------------------------
+
         alert(`✅ Balance Updated! New Balance: ₹${newBal.toFixed(2)}`);
         document.getElementById('manualUserPhone').value = '';
         document.getElementById('manualAmount').value = '';
@@ -752,6 +778,8 @@ async function applyManualBalance() {
         alert("Adjustment error: " + e.message);
     }
 }
+        
+
 
 async function runDailyIncomeCron() {
     if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
