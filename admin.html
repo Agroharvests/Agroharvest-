@@ -529,7 +529,7 @@ function filterUserCards() {
     renderUserDetailedCards(filtered);
 }
 
-// 10. Render Detailed User Cards with Downlines and Investments
+// 10. Render Detailed User Cards with Downlines, Investments & Joined Date
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!container) return;
@@ -543,6 +543,17 @@ function renderUserDetailedCards(users) {
         const userPhone = user.phone || 'N/A';
         const userRef = user.referral_code || user.ref_code || 'N/A';
         const balance = parseFloat(user.balance || 0).toFixed(2);
+
+        // Date and Time formatting
+        const joinDateFormatted = user.created_at 
+            ? new Date(user.created_at).toLocaleDateString('en-IN', {
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit'
+              })
+            : 'N/A';
 
         // Calculate Downlines (Direct referrals)
         const downlines = allUsersList.filter(u => 
@@ -575,8 +586,23 @@ function renderUserDetailedCards(users) {
         return `
         <div class="user-detail-card">
             <div class="user-top-row">
-                <span class="user-phone">📱 ${userPhone}</span>
-                <span class="user-ref-badge">Code: ${userRef}</span>
+                <div>
+                    <span class="user-phone">📱 +91 ${userPhone}</span>
+                    <div style="font-size: 10px; color: #64748b; font-weight: 700; margin-top: 2px;">
+                        Invited By: <b style="color:#0f172a;">${user.referred_by || user.invited_by || 'Direct'}</b>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                    <span class="user-ref-badge">Code: ${userRef}</span>
+                    <button onclick="exportFullUserStatement('${user.id}', '${userPhone}')" style="background:#0f172a; color:#fff; border:none; padding:3px 7px; border-radius:5px; font-size:9px; font-weight:700; cursor:pointer;">
+                        📊 Full History
+                    </button>
+                </div>
+            </div>
+
+            <!-- JOIN DATE & TIME ROW -->
+            <div style="font-size: 10px; color: #64748b; font-weight: 700; margin: 4px 0 8px 0;">
+                📅 Joined: <span style="color: #0f172a;">${joinDateFormatted}</span>
             </div>
 
             <div class="user-stats-mini-grid">
@@ -613,7 +639,8 @@ function renderUserDetailedCards(users) {
         </div>
         `;
     }).join('');
-}
+                                                                                                                                                                            }
+    
     // 11. Approve & Reject Action Handlers
 window.approveRecharge = async function(rechargeId, phone, amount) {
     if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
