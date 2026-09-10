@@ -641,13 +641,16 @@
             }
         }
 
-        function startTicker() {
-            const txList = [
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.499' },
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.1,499' },
-                { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: 'Rs.2,499' }
-            ];
-
+        
+        const txList = [
+            { type: 'Withdrawal Paid', icon: 'fa-arrow-down-long', iconClass: 'icon-withdraw', amt: '₹684.00' },
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: '₹499.00' },
+            { type: 'Withdrawal Paid', icon: 'fa-arrow-down-long', iconClass: 'icon-withdraw', amt: '₹1,098.00' },
+            { type: 'Purchased Plan', icon: 'fa-cart-shopping', iconClass: 'icon-plan', amt: '₹1,499.00' },
+            { type: 'Withdrawal Paid', icon: 'fa-arrow-down-long', iconClass: 'icon-withdraw', amt: '₹6,159.60' },
+            { type: 'Withdrawal Paid', icon: 'fa-arrow-down-long', iconClass: 'icon-withdraw', amt: '₹426.60' }
+        ];
+            
             function getRandomPhone() {
                 const prefix = ['98', '97', '99', '91', '88', '89', '70', '63', '84'];
                 const p = prefix[Math.floor(Math.random() * prefix.length)];
