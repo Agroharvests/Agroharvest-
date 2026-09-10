@@ -205,11 +205,8 @@
 
                 if (rcErr) throw rcErr;
 
-                if (!rechargeTx || rechargeTx.length === 0) {
-                    alert("⚠️ Withdrawal Blocked!\n\nWithdrawal lene ke liye pehle wallet recharge karna zaroori hai. Bina recharge ke payout allow nahi hai.");
-                    window.location.href = 'recharge.html';
-                    return;
-                }
+                console.log("Recharge check bypassed");
+                
 
                 // 3. SHART 2: Check karein active crop plan mojood hai ya nahi
                 const { data: activePlans, error: planErr } = await sb
