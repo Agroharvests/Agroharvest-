@@ -472,7 +472,19 @@ async function loadAdminDashboard() {
                 </div>
             `).join('');
         }
+        // Total Approved / Paid Withdrawals Count
+        const { data: paidWd, count: totalPaidCount } = await sb
+            .from('withdrawals')
+            .select('*', { count: 'exact' })
+            .eq('status', 'approved');
 
+        console.log("Total Paid Requests:", totalPaidCount);
+        console.log("Paid List:", paidWd);
+        
+        // Agar screen par badge/counter bana hai to wahan count show karein:
+        const paidCounterElem = document.getElementById('paidWithdrawalCount');
+        if (paidCounterElem) paidCounterElem.innerText = totalPaidCount || 0;
+            
         // 7. Pending Withdrawals
         const { data: pendingWd } = await sb
             .from('withdrawals')
