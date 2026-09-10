@@ -497,7 +497,8 @@ async function loadAdminDashboard() {
                         <div>
                             <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
                             <div style="font-size:11px; color:#64748b; margin-top:2px;">
-                                Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc || 'N/A'}</b><br>
+                                Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc_code || w.ifsc || 'N/A'}</b>
+                                
                                 (${w.holder_name || w.name || 'N/A'})
                             </div>
                         </div>
