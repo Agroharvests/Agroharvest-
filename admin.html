@@ -483,25 +483,39 @@ async function loadAdminDashboard() {
         const wdContainer = document.getElementById('pendingWithdrawalsContainer');
         document.getElementById('withdrawalCountBadge').innerText = pendingWd ? pendingWd.length : 0;
 
-        if (!pendingWd || pendingWd.length === 0) {
+                if (!pendingWd || pendingWd.length === 0) {
             wdContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending withdrawal requests.</p>';
         } else {
-            wdContainer.innerHTML = pendingWd.map(w => `
+            wdContainer.innerHTML = pendingWd.map(w => {
+                const reqAmt = parseFloat(w.amount || 0);
+                const fee = Math.round(reqAmt * 0.10 * 100) / 100;
+                const netPay = (reqAmt - fee).toFixed(2);
+
+                return `
                 <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
-                        <strong style="color:#dc2626; font-size:15px;">₹${w.amount}</strong>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
+                            <div style="font-size:11px; color:#64748b; margin-top:2px;">
+                                Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc || 'N/A'}</b><br>
+                                (${w.holder_name || w.name || 'N/A'})
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:11px; color:#dc2626; text-decoration:line-through; font-weight:700;">Req: ₹${reqAmt.toFixed(0)}</span>
+                            <strong style="display:block; color:#16a34a; font-size:16px; font-weight:900;">Net: ₹${netPay}</strong>
+                            <span style="font-size:9px; color:#64748b; font-weight:700;">(-10% Fee: ₹${fee})</span>
+                        </div>
                     </div>
-                    <div style="font-size:11px; color:#64748b; margin:4px 0;">
-                        Bank: <b>${w.account_number}</b> | IFSC: <b>${w.ifsc_code}</b> (${w.holder_name})
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:6px;">
-                        <button type="button" onclick="window.approveWithdrawal('${w.id}')" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Mark Paid</button>
-                        <button type="button" onclick="window.rejectWithdrawal('${w.id}', '${w.user_id}', ${w.amount})" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject & Refund</button>
+                    <div style="display:flex; gap:6px; margin-top:10px;">
+                        <button type="button" onclick="window.approveWithdrawal('${w.id}')" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Mark Paid (₹${netPay})</button>
+                        <button type="button" onclick="window.rejectWithdrawal('${w.id}', '${w.phone}', ${reqAmt})" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject & Refund</button>
                     </div>
                 </div>
-            `).join('');
-        }
+                `;
+            }).join('');
+                }
+        
 
         // 8. Render Detailed Users
         renderUserDetailedCards(allUsersList);
