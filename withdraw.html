@@ -258,24 +258,26 @@
                     return;
                 }
 
-                // 4. SHART 3: Daily Withdrawal Limit (1 Request Per Day Limit)
+                                // 4. SHART 3: Strict 1 Request Per Day Limit (Today midnight to now)
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
 
                 const { data: todayWithdrawals, error: wdCheckErr } = await sb
                     .from('withdrawals')
-                    .select('id, created_at')
+                    .select('id, status')
                     .eq('user_id', activeUser.id)
+                    .neq('status', 'rejected')
                     .gte('created_at', todayStart.toISOString());
 
                 if (wdCheckErr) throw wdCheckErr;
 
                 if (todayWithdrawals && todayWithdrawals.length > 0) {
-                    alert("⚠️ Daily Withdrawal Limit Reached!\n\nAap aaj ka 1 withdrawal request pehle hi laga chuke hain. Agla request agle payout day par try karein.");
+                    alert("⚠️ Daily Withdrawal Limit Reached!\n\nAap aaj ka 1 withdrawal request pehle hi laga chuke hain. Ek din me sirf ek hi request allowed hai!");
                     btn.disabled = false;
                     btn.innerText = "Confirm Bank Withdrawal";
                     return;
                 }
+                
 
                 btn.innerText = "Processing Request...";
 
