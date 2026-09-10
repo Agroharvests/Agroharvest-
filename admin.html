@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AgroHarvest Admin - Platform Control</title>
-    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Supabase JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -245,7 +243,6 @@
 <body>
 
 <div class="admin-wrapper">
-    <!-- Top Header Bar -->
     <div class="top-header">
         <div>
             <h2>AgroHarvest Admin</h2>
@@ -262,39 +259,36 @@
     </div>
 
     <div class="admin-body">
-        <!-- GLOBAL NOTICE BROADCAST BOX -->
-<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:0 0 20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span style="font-weight:700; font-size:14px; color:#1e293b;">📢 Broadcast Notice to All Users</span>
-        <label style="font-size:12px; font-weight:600; color:#475569; display:flex; align-items:center; gap:5px; cursor:pointer;">
-            <input type="checkbox" id="noticeActiveCheckbox" checked> Show Notice
-        </label>
-    </div>
-    <textarea id="adminNoticeInput" rows="2" placeholder="Yahan notice likhein... (e.g. Aaj shaam 6 baje naya plan aayega!)" 
-        style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none; resize:none;"></textarea>
-    <button type="button" onclick="publishGlobalNotice()" style="width:100%; margin-top:8px; background:#059669; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px; border-radius:8px; cursor:pointer;">
-        🚀 Publish Notice Live
-    </button>
-</div>
-        <!-- WHATSAPP BROADCAST NUMBERS EXPORTER -->
-<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:0 0 20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span style="font-weight:700; font-size:14px; color:#1e293b;">📲 Inactive WhatsApp Broadcast Tool</span>
-        <span id="inactiveCountBadge" style="background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">Ready</span>
-    </div>
-    <p style="font-size:12px; color:#64748b; margin:0 0 12px 0;">Inactive users ke numbers ko 1 click mein copy karein aur apne WhatsApp Broadcast list mein paste karke ek sath message bhejein.</p>
-    
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button type="button" onclick="copyInactiveNumbers()" style="flex:1; background:#25D366; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px 14px; border-radius:8px; cursor:pointer;">
-            📋 Copy All Inactive Numbers
-        </button>
-        <button type="button" onclick="copyOfferMessageText()" style="flex:1; background:#0284c7; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px 14px; border-radius:8px; cursor:pointer;">
-            📝 Copy Offer Message
-        </button>
-    </div>
-</div>
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:0 0 20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-weight:700; font-size:14px; color:#1e293b;">📢 Broadcast Notice to All Users</span>
+                <label style="font-size:12px; font-weight:600; color:#475569; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" id="noticeActiveCheckbox" checked> Show Notice
+                </label>
+            </div>
+            <textarea id="adminNoticeInput" rows="2" placeholder="Yahan notice likhein..." 
+                style="width:100%; box-sizing:border-box; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; outline:none; resize:none;"></textarea>
+            <button type="button" onclick="publishGlobalNotice()" style="width:100%; margin-top:8px; background:#059669; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px; border-radius:8px; cursor:pointer;">
+                🚀 Publish Notice Live
+            </button>
+        </div>
+                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; margin:0 0 20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-weight:700; font-size:14px; color:#1e293b;">📲 Inactive WhatsApp Broadcast Tool</span>
+                <span id="inactiveCountBadge" style="background:#fee2e2; color:#ef4444; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">Ready</span>
+            </div>
+            <p style="font-size:12px; color:#64748b; margin:0 0 12px 0;">Inactive users ke numbers ko 1 click mein copy karein aur apne WhatsApp Broadcast list mein paste karke ek sath message bhejein.</p>
+            
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" onclick="copyInactiveNumbers()" style="flex:1; background:#25D366; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px 14px; border-radius:8px; cursor:pointer;">
+                    📋 Copy All Inactive Numbers
+                </button>
+                <button type="button" onclick="copyOfferMessageText()" style="flex:1; background:#0284c7; color:#ffffff; font-weight:700; font-size:13px; border:none; padding:10px 14px; border-radius:8px; cursor:pointer;">
+                    📝 Copy Offer Message
+                </button>
+            </div>
+        </div>
         
-        <!-- 4 Stats Cards Grid -->
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">Total Registered Users</span>
@@ -313,7 +307,7 @@
                 <span id="statTotalWithdrawals" class="stat-value red">₹0</span>
             </div>
         </div>
-                <!-- Update Receiver UPI ID -->
+
         <div class="card">
             <div class="card-title-row">
                 <h3>Update Receiver UPI ID</h3>
@@ -323,7 +317,6 @@
             <button type="button" onclick="saveSingleUpi()" class="btn-green-main">Save New UPI</button>
         </div>
 
-        <!-- VIP Premium Plans Control -->
         <div class="card">
             <div class="card-title-row">
                 <h3>VIP Premium Plans Control</h3>
@@ -334,7 +327,6 @@
             </div>
         </div>
 
-        <!-- Manual Balance Adjustment -->
         <div class="card">
             <div class="card-title-row">
                 <h3>Manual Balance Adjustment</h3>
@@ -344,7 +336,6 @@
             <button type="button" onclick="applyManualBalance()" class="btn-green-main">Apply Balance Change</button>
         </div>
 
-        <!-- Pending Recharges -->
         <div class="card">
             <div class="card-title-row">
                 <h3>Pending Recharges</h3>
@@ -355,7 +346,6 @@
             </div>
         </div>
 
-        <!-- Pending Withdrawals -->
         <div class="card">
             <div class="card-title-row">
                 <h3>Pending Withdrawals</h3>
@@ -366,7 +356,6 @@
             </div>
         </div>
 
-        <!-- User Investments & Downlines Detailed Card List -->
         <div class="card">
             <div class="card-title-row">
                 <h3>User Investments & Downlines</h3>
@@ -378,8 +367,8 @@
             </div>
         </div>
     </div>
-                </div>
-    <script>
+</div>
+<script>
 const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
@@ -393,6 +382,7 @@ function getSupabase() {
 
 let allUsersList = [];
 let allOrdersList = [];
+let allWithdrawalsList = [];
 
 async function loadAdminDashboard() {
     const sb = getSupabase();
@@ -440,12 +430,13 @@ async function loadAdminDashboard() {
         const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
         document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
 
-        // 5. Approved Withdrawals
-        const { data: approvedWithdrawals } = await sb.from('withdrawals').select('amount').eq('status', 'approved');
-        const totalWith = (approvedWithdrawals || []).reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
+        // 5. Approved Withdrawals (Global Store for Per-User Totals)
+        const { data: approvedWithdrawals } = await sb.from('withdrawals').select('user_id, phone, amount').eq('status', 'approved');
+        allWithdrawalsList = approvedWithdrawals || [];
+        const totalWith = allWithdrawalsList.reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
         document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
         
-        // 6. Pending Recharges
+      // 6. Pending Recharges
         const { data: pendingRecharges } = await sb
             .from('recharges')
             .select('*')
@@ -472,19 +463,7 @@ async function loadAdminDashboard() {
                 </div>
             `).join('');
         }
-        // Total Approved / Paid Withdrawals Count
-        const { data: paidWd, count: totalPaidCount } = await sb
-            .from('withdrawals')
-            .select('*', { count: 'exact' })
-            .eq('status', 'approved');
 
-        console.log("Total Paid Requests:", totalPaidCount);
-        console.log("Paid List:", paidWd);
-        
-        // Agar screen par badge/counter bana hai to wahan count show karein:
-        const paidCounterElem = document.getElementById('paidWithdrawalCount');
-        if (paidCounterElem) paidCounterElem.innerText = totalPaidCount || 0;
-            
         // 7. Pending Withdrawals
         const { data: pendingWd } = await sb
             .from('withdrawals')
@@ -495,7 +474,7 @@ async function loadAdminDashboard() {
         const wdContainer = document.getElementById('pendingWithdrawalsContainer');
         document.getElementById('withdrawalCountBadge').innerText = pendingWd ? pendingWd.length : 0;
 
-                if (!pendingWd || pendingWd.length === 0) {
+        if (!pendingWd || pendingWd.length === 0) {
             wdContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending withdrawal requests.</p>';
         } else {
             wdContainer.innerHTML = pendingWd.map(w => {
@@ -510,7 +489,6 @@ async function loadAdminDashboard() {
                             <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
                             <div style="font-size:11px; color:#64748b; margin-top:2px;">
                                 Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc_code || w.ifsc || 'N/A'}</b>
-                                
                                 (${w.holder_name || w.name || 'N/A'})
                             </div>
                         </div>
@@ -527,8 +505,7 @@ async function loadAdminDashboard() {
                 </div>
                 `;
             }).join('');
-                }
-        
+        }
 
         // 8. Render Detailed Users
         renderUserDetailedCards(allUsersList);
@@ -536,8 +513,108 @@ async function loadAdminDashboard() {
     } catch (err) {
         console.error("Admin dashboard load error:", err);
     }
+    }
+    // 9. Search / Filter Users
+function filterUserCards() {
+    const query = document.getElementById('userSearchInput').value.trim().toLowerCase();
+    if (!query) {
+        renderUserDetailedCards(allUsersList);
+        return;
+    }
+    const filtered = allUsersList.filter(u => {
+        const phone = String(u.phone || '').toLowerCase();
+        const refCode = String(u.referral_code || u.ref_code || '').toLowerCase();
+        return phone.includes(query) || refCode.includes(query);
+    });
+    renderUserDetailedCards(filtered);
 }
 
+// 10. Render Detailed User Cards with Downlines and Investments
+function renderUserDetailedCards(users) {
+    const container = document.getElementById('userDetailedCardsContainer');
+    if (!container) return;
+
+    if (!users || users.length === 0) {
+        container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Koi user nahi mila.</p>';
+        return;
+    }
+
+    container.innerHTML = users.map(user => {
+        const userPhone = user.phone || 'N/A';
+        const userRef = user.referral_code || user.ref_code || 'N/A';
+        const balance = parseFloat(user.balance || 0).toFixed(2);
+
+        // Calculate Downlines (Direct referrals)
+        const downlines = allUsersList.filter(u => 
+            (u.referred_by && u.referred_by === userRef) || 
+            (u.inviter_phone && u.inviter_phone === userPhone)
+        );
+
+        // User Active Orders/Plans
+        const userOrders = allOrdersList.filter(o => 
+            o.phone === userPhone || o.user_id === user.id
+        );
+        const totalInvested = userOrders.reduce((sum, o) => sum + parseFloat(o.plan_amount || o.amount || 0), 0);
+
+        // User Total Withdrawals
+        const userWithdrawals = allWithdrawalsList.filter(w => 
+            w.phone === userPhone || w.user_id === user.id
+        );
+        const totalWithdrawn = userWithdrawals.reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
+
+        // Format Plan Names/Badges
+        let plansHtml = '';
+        if (userOrders.length > 0) {
+            plansHtml = userOrders.map(o => 
+                `<span style="display:inline-block; background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; margin:2px;">₹${o.plan_amount || o.amount} (${o.plan_name || 'Active'})</span>`
+            ).join(' ');
+        } else {
+            plansHtml = '<span style="color:#94a3b8; font-size:11px; font-weight:700;">No active plans</span>';
+        }
+
+        return `
+        <div class="user-detail-card">
+            <div class="user-top-row">
+                <span class="user-phone">📱 ${userPhone}</span>
+                <span class="user-ref-badge">Code: ${userRef}</span>
+            </div>
+
+            <div class="user-stats-mini-grid">
+                <div class="mini-stat-box">
+                    <span class="mini-stat-label">Current Balance</span>
+                    <span class="mini-stat-val">₹${balance}</span>
+                </div>
+                <div class="mini-stat-box">
+                    <span class="mini-stat-label">Total Invested</span>
+                    <span class="mini-stat-val blue">₹${totalInvested.toFixed(0)}</span>
+                </div>
+                <div class="mini-stat-box">
+                    <span class="mini-stat-label">Total Withdrawn</span>
+                    <span class="mini-stat-val red">₹${totalWithdrawn.toFixed(0)}</span>
+                </div>
+                <div class="mini-stat-box">
+                    <span class="mini-stat-label">Direct Referrals</span>
+                    <span class="mini-stat-val dark">${downlines.length} Users</span>
+                </div>
+            </div>
+
+            <div class="user-plans-tag" style="margin-bottom:8px;">
+                <span style="display:block; font-size:10px; color:#64748b; font-weight:800; margin-bottom:4px; text-transform:uppercase;">Invested Plans:</span>
+                <div>${plansHtml}</div>
+            </div>
+
+            ${downlines.length > 0 ? `
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; margin-top:6px;">
+                <span style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; display:block; margin-bottom:4px;">Referred Team:</span>
+                <div style="max-height:80px; overflow-y:auto; font-size:11px; color:#334155; font-weight:700;">
+                    ${downlines.map(d => `<div>• ${d.phone}</div>`).join('')}
+                </div>
+            </div>` : ''}
+        </div>
+        `;
+    }).join('');
+}
+    // 11. Approve & Reject Action Handlers
 window.approveRecharge = async function(rechargeId, phone, amount) {
     if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
     const sb = getSupabase();
@@ -603,148 +680,8 @@ window.rejectWithdrawal = async function(wdId, userId, amount) {
         alert("Error: " + err.message);
     }
 };
-        function renderUserDetailedCards(users) {
-    const container = document.getElementById('userDetailedCardsContainer');
-    if (!users || users.length === 0) {
-        container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>';
-        return;
-    }
 
-    function getDirectDownlines(parentUsers) {
-        const parentCodes = new Set();
-        parentUsers.forEach(u => {
-            const code = (u.referral_code || u.ref_code || '').trim().toLowerCase();
-            if (code) parentCodes.add(code);
-        });
-
-        return allUsersList.filter(candidate => {
-            if (parentUsers.some(p => p.id === candidate.id)) return false;
-            const refBy = (candidate.referred_by || candidate.invited_by || '').trim().toLowerCase();
-            return refBy && parentCodes.has(refBy);
-        });
-    }
-
-    container.innerHTML = users.map(user => {
-        const userOrders = allOrdersList.filter(o => o.user_id === user.id);
-        const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || 0), 0);
-
-        const l1Members = getDirectDownlines([user]);
-        const l2Members = l1Members.length > 0 ? getDirectDownlines(l1Members) : [];
-        const l3Members = l2Members.length > 0 ? getDirectDownlines(l2Members) : [];
-        const totalTeamCount = l1Members.length + l2Members.length + l3Members.length;
-
-                        const renderBadges = (list, bg, fg) => {
-            if (!list || !Array.isArray(list) || list.length === 0) {
-                return '<span style="color:#94a3b8; font-size:10px; font-weight:600;">None</span>';
-            }
-            return list.map(m => {
-                if (!m) return '';
-                const mOrders = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) 
-                    ? allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active') 
-                    : [];
-                const hasActive = mOrders.length > 0;
-                
-                const planTag = hasActive 
-                    ? `<span style="background:#10b981; color:#fff; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:700;">🟢 Active: ${mOrders.map(o => o.plan_name).join(', ')}</span>`
-                    : `<span style="background:#e2e8f0; color:#64748b; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:600;">⚪ Inactive</span>`;
-                
-                let downCount = 0;
-                try {
-                    if (typeof getDirectDownlines === 'function') {
-                        downCount = getDirectDownlines(m).length;
-                    }
-                } catch(e) { downCount = 0; }
-
-                const downTag = downCount > 0 
-                    ? `<span style="background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:700;">↳ Team: ${downCount}</span>` 
-                    : '';
-
-                return `
-                    <div style="display:inline-flex; align-items:center; gap:5px; background:${bg}; color:${fg}; padding:4px 8px; border-radius:6px; margin:3px 2px; border:1px solid rgba(0,0,0,0.06); font-size:11px; flex-wrap:wrap;">
-                        <span style="font-weight:700;">📱 ${m.phone || 'N/A'}</span>
-                        ${planTag}
-                        ${downTag}
-                    </div>
-                `;
-            }).join(' ');
-        };
-        
-        
-
-        const plansHtml = userOrders.length > 0
-            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name} (₹${o.price})</span>`).join('')
-            : '<span style="color:#94a3b8; font-weight:700;">No active plan</span>';
-
-        return `
-            <div class="user-detail-card">
-                <div class="user-top-row">
-                    <div>
-                        <div class="user-phone">+91 ${user.phone}</div>
-                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Invited By: <b style="color:#0f172a;">${user.referred_by || user.invited_by || 'Direct'}</b></span>
-                    </div>
-                    <button onclick="exportFullUserStatement('${user.id}', '${user.phone}')" style="background:#0f172a; color:#fff; border:none; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer; margin-top:4px;">📊 Download Full History</button>
-                    <span class="user-ref-badge">${user.referral_code || user.ref_code || 'N/A'}</span>
-                </div>
-<div style="font-size: 10px; color: #64748b; font-weight: 600; margin-top: 3px;">
-    📅 Joined: ${new Date(user.created_at).toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}
-</div>
-
-                <div class="user-stats-mini-grid">
-                    <div class="mini-stat-box">
-                        <span class="mini-stat-label">WALLET BALANCE</span>
-                        <span class="mini-stat-val">₹${parseFloat(user.balance || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="mini-stat-box">
-                        <span class="mini-stat-label">TEAM INCOME</span>
-                        <span class="mini-stat-val red">₹${parseFloat(user.team_income || 0).toFixed(2)}</span>
-                    </div>
-                    <div class="mini-stat-box">
-                        <span class="mini-stat-label">TOTAL NETWORK (L1-L3)</span>
-                        <span class="mini-stat-val blue">${totalTeamCount} Members</span>
-                    </div>
-                    <div class="mini-stat-box">
-                        <span class="mini-stat-label">TOTAL INVESTMENT</span>
-                        <span class="mini-stat-val">₹${totalInvested.toFixed(2)}</span>
-                    </div>
-                </div>
-
-                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:10px; margin-bottom:8px;">
-                    <span style="font-size:10px; font-weight:800; color:#0f172a; text-transform:uppercase; display:block; margin-bottom:6px;">
-                        <i class="fa-solid fa-sitemap"></i> Team Network Tree:
-                    </span>
-                    <div style="margin-bottom:6px; font-size:11px;">
-                        <b style="color:#0369a1;">Level 1 (${l1Members.length}):</b>
-                        <div>${renderBadges(l1Members, '#e0f2fe', '#0369a1')}</div>
-                    </div>
-                    <div style="margin-bottom:6px; font-size:11px;">
-                        <b style="color:#7c3aed;">Level 2 (${l2Members.length}):</b>
-                        <div>${renderBadges(l2Members, '#f3e8ff', '#6b21a8')}</div>
-                    </div>
-                    <div style="font-size:11px;">
-                        <b style="color:#b45309;">Level 3 (${l3Members.length}):</b>
-                        <div>${renderBadges(l3Members, '#fef3c7', '#92400e')}</div>
-                    </div>
-                </div>
-
-                <div class="user-plans-tag">
-                    <span style="font-size:9px; font-weight:800; color:#64748b; display:block; margin-bottom:2px;">ACTIVE PURCHASED PLANS:</span>
-                    ${plansHtml}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function filterUserCards() {
-    const q = document.getElementById('userSearchInput').value.toLowerCase().trim();
-    const filtered = allUsersList.filter(u => 
-        (u.phone && u.phone.includes(q)) || 
-        (u.referral_code && u.referral_code.toLowerCase().includes(q)) ||
-        (u.referred_by && u.referred_by.toLowerCase().includes(q))
-    );
-    renderUserDetailedCards(filtered);
-}
-
+// 12. Receiver UPI Save Function
 async function saveSingleUpi() {
     const newUpi = document.getElementById('targetUpiInput').value.trim();
     if (!newUpi) return alert("Kripya UPI ID dalein!");
@@ -759,6 +696,7 @@ async function saveSingleUpi() {
     }
 }
 
+// 13. Manual Balance Adjustment
 async function applyManualBalance() {
     const phone = document.getElementById('manualUserPhone').value.trim();
     const amt = parseFloat(document.getElementById('manualAmount').value);
@@ -772,7 +710,6 @@ async function applyManualBalance() {
         const newBal = (parseFloat(user.balance) || 0) + amt;
         await sb.from('profiles').update({ balance: newBal }).eq('id', user.id);
 
-        // --- AUTOMATIC TRANSACTION HISTORY LOG ---
         if (amt > 0) {
             const { data: userOrder } = await sb
                 .from('orders')
@@ -795,7 +732,6 @@ async function applyManualBalance() {
                 created_at: new Date().toISOString()
             }]);
         }
-        // ------------------------------------------
 
         alert(`✅ Balance Updated! New Balance: ₹${newBal.toFixed(2)}`);
         document.getElementById('manualUserPhone').value = '';
@@ -805,9 +741,8 @@ async function applyManualBalance() {
         alert("Adjustment error: " + e.message);
     }
 }
-        
 
-
+// 14. Daily Income Cron & Rollback
 async function runDailyIncomeCron() {
     if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
     const sb = getSupabase();
@@ -839,18 +774,7 @@ async function runDailyIncomeCron() {
         alert("Income cron error: " + err.message);
     }
 }
-function formatJoinDate(dateStr) {
-    if (!dateStr) return 'N/A';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-        
+
 async function rollbackExtraDailyIncome() {
     if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh aaj ki duplicate/extra daily income ko wapas minus kar dega.")) return;
     const sb = getSupabase();
@@ -895,142 +819,16 @@ async function rollbackExtraDailyIncome() {
     }
 }
 
-function toggleVipPlan(amt) {
-    alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
-}
-
-window.addEventListener('DOMContentLoaded', loadAdminDashboard);
-        function exportFullUserStatement(userId, userPhone) {
-    try {
-        const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList 
-                    : ((typeof users !== 'undefined' && Array.isArray(users)) ? users : []);
-        
-        const parentUser = uList.find(u => u && (u.id === userId || String(u.phone).trim() === String(userPhone).trim()));
-        
-        if (!parentUser) {
-            alert("User record nahi mila!");
-            return;
-        }
-
-        const oList = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) ? allOrdersList : [];
-
-        // Direct matching logic for L1, L2, L3
-        const getChildren = (parents) => {
-            const pCodes = new Set();
-            parents.forEach(p => {
-                if (p.referral_code) pCodes.add(String(p.referral_code).trim().toUpperCase());
-                if (p.ref_code) pCodes.add(String(p.ref_code).trim().toUpperCase());
-                if (p.phone) pCodes.add(String(p.phone).trim());
-            });
-
-            return uList.filter(u => {
-                if (!u || parents.some(p => p.id === u.id)) return false;
-                const ref = String(u.referred_by || u.invited_by || u.parent_referral || '').trim().toUpperCase();
-                return ref && pCodes.has(ref);
-            });
-        };
-
-        const l1 = getChildren([parentUser]);
-        const l2 = l1.length > 0 ? getChildren(l1) : [];
-        const l3 = l2.length > 0 ? getChildren(l2) : [];
-
-        let csv = "data:text/csv;charset=utf-8,";
-
-        // 1. OVERVIEW
-        csv += "=== USER ACCOUNT OVERVIEW ===\n";
-        csv += `Phone Number,'+91 ${parentUser.phone || ''}\n`;
-        csv += `Referral Code,${parentUser.referral_code || parentUser.ref_code || 'N/A'}\n`;
-        csv += `Invited By,${parentUser.invited_by || parentUser.referred_by || 'Direct'}\n`;
-        csv += `Wallet Balance,Rs ${parentUser.balance || 0}\n`;
-        csv += `Team Commission Income,Rs ${parentUser.team_income || 0}\n`;
-        csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleDateString('en-IN') : 'N/A'}\n\n`;
-
-        // 2. PURCHASED PLANS
-        csv += "=== PURCHASED PLANS HISTORY ===\n";
-        csv += "Plan Name,Daily Yield (Rs),Status,Purchase Date\n";
-        const userOwnOrders = oList.filter(o => o && o.user_id === parentUser.id);
-        if (userOwnOrders.length > 0) {
-            userOwnOrders.forEach(o => {
-                const oDt = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${o.plan_name || 'Active Plan'}","${o.daily_income || 0}","${(o.status || 'active').toUpperCase()}","${oDt}"\n`;
-            });
-        } else {
-            csv += "No Active Purchased Plans,,,\n";
-        }
-        csv += "\n";
-
-        // 3. WITHDRAWALS
-        csv += "=== WITHDRAWAL REQUESTS ===\n";
-        csv += "Date,Amount (Rs),Status\n";
-        const wList = (typeof allWithdrawalsList !== 'undefined' && Array.isArray(allWithdrawalsList)) ? allWithdrawalsList 
-                    : ((typeof withdrawals !== 'undefined' && Array.isArray(withdrawals)) ? withdrawals : []);
-        const userWd = wList.filter(w => w && (w.user_id === parentUser.id || String(w.phone) === String(parentUser.phone)));
-        if (userWd.length > 0) {
-            userWd.forEach(w => {
-                const wDt = w.created_at ? new Date(w.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${wDt}","${w.amount || 0}","${(w.status || 'pending').toUpperCase()}"\n`;
-            });
-        } else {
-            csv += "No Withdrawals Recorded,,\n";
-        }
-        csv += "\n";
-
-        // 4. DOWNLINE MEMBERS (L1, L2, L3)
-        csv += "=== DOWNLINE TEAM TREE (L1 - L3) ===\n";
-        csv += "Level,Member Phone,Referral Code,Plan Status,Active Plans,Joined Date\n";
-
-        const appendRows = (list, lvl) => {
-            list.forEach(m => {
-                const mOrders = oList.filter(o => o && o.user_id === m.id && o.status === 'active');
-                const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
-                const pNames = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' + ') : "None";
-                const mDt = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${lvl}","'+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
-            });
-        };
-
-        if (l1.length === 0 && l2.length === 0 && l3.length === 0) {
-            csv += "No Downline Members Found,,,,,\n";
-        } else {
-            appendRows(l1, "Level 1");
-            appendRows(l2, "Level 2");
-            appendRows(l3, "Level 3");
-        }
-
-        const encodedUri = encodeURI(csv);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Report_${parentUser.phone}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-    } catch(err) {
-        alert("Export error: " + err.message);
-    }
-        }
-        
-        async function publishGlobalNotice() {
+// 15. Broadcast Notice & WhatsApp Exporters
+async function publishGlobalNotice() {
     const btn = document.querySelector("button[onclick='publishGlobalNotice()']");
     const originalText = btn ? btn.innerHTML : "🚀 Publish Notice Live";
-    
+    const sb = getSupabase();
+
     try {
         if (btn) {
             btn.innerHTML = "⏳ Publishing...";
             btn.disabled = true;
-        }
-
-        // Har tarike ka Supabase client detect karein
-        const client = (typeof _supabase !== 'undefined') ? _supabase 
-                     : (typeof supabaseClient !== 'undefined') ? supabaseClient
-                     : (typeof supabase !== 'undefined' && typeof supabase.from === 'function') ? supabase
-                     : (typeof window.supabaseClient !== 'undefined') ? window.supabaseClient
-                     : null;
-
-        if (!client) {
-            alert("Error: Database connection nahi mila. Ek baar page refresh karein.");
-            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
-            return;
         }
 
         const text = (document.getElementById('adminNoticeInput')?.value || '').trim();
@@ -1038,11 +836,10 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 
         if (!text) {
             alert("Kripya pehle notice box me kuchh text likhein!");
-            if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
             return;
         }
 
-        const { error } = await client
+        const { error } = await sb
             .from('app_settings')
             .upsert({ 
                 id: 'global_notice', 
@@ -1051,24 +848,20 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
                 updated_at: new Date().toISOString() 
             });
 
-        if (error) {
-            alert("Database Error: " + error.message);
-        } else {
-            alert("✅ Notice successfully broadcast ho gaya hai!");
-        }
-
+        if (error) throw error;
+        alert("✅ Notice successfully broadcast ho gaya hai!");
     } catch (err) {
-        alert("Click Error: " + err.message);
+        alert("Broadcast Error: " + err.message);
     } finally {
         if (btn) {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     }
-        }
-        function getInactivePhoneList() {
-    const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList 
-                : ((typeof users !== 'undefined' && Array.isArray(users)) ? users : []);
+}
+
+function getInactivePhoneList() {
+    const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList : [];
     const oList = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) ? allOrdersList : [];
 
     const activeUserIds = new Set(
@@ -1080,10 +873,7 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 
 function copyInactiveNumbers() {
     const inactiveUsers = getInactivePhoneList();
-    if (inactiveUsers.length === 0) {
-        alert("Filhaal koi inactive user nahi mila ya data load ho raha hai!");
-        return;
-    }
+    if (inactiveUsers.length === 0) return alert("Filhaal koi inactive user nahi mila ya data load ho raha hai!");
 
     const numbers = inactiveUsers.map(u => {
         let p = String(u.phone).replace(/[^0-9]/g, '');
@@ -1101,12 +891,16 @@ function copyInactiveNumbers() {
 
 function copyOfferMessageText() {
     const msg = "🌾 AgroHarvest Special Offer 🌾\n\nNamaste! Aapka account ban chuka hai lekin farm active nahi hai.\n\n⚡ LIMITED OFFER: Aaj kisi bhi plan se recharge karne par payein seedha ₹50 INSTANT CASHBACK apne wallet mein!\n💰 Daily return har raat automatic wallet mein credit hoga.\n\n👉 Abhi login karein aur apna first plan start karein!";
-    
     navigator.clipboard.writeText(msg).then(() => {
-        alert("✅ Offer message copy ho gaya hai! WhatsApp Broadcast group mein paste karke send kar dein.");
+        alert("✅ Offer message copy ho gaya hai!");
     });
 }
-        
+
+function toggleVipPlan(amt) {
+    alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
+}
+
+window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 </script>
 </body>
 </html>
