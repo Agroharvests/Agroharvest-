@@ -37,7 +37,8 @@
         .btn-withdraw:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .history-card { background: white; margin: 0 16px 20px; border-radius: 20px; padding: 18px; border: 1.5px solid #e2e8f0; }
-        .history-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+        .history-item { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; transition: transform 0.1s ease; }
+        .history-item:active { transform: scale(0.98); }
         .badge-status { font-size: 11px; font-weight: 900; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
         .badge-approved { background: #dcfce7; color: #15803d; }
         .badge-pending { background: #fef3c7; color: #b45309; }
@@ -114,6 +115,51 @@
         </div>
     </div>
 
+    <!-- Payout Receipt Modal -->
+    <div id="payoutReceiptModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); justify-content:center; align-items:center; z-index:9999; padding:20px;">
+        <div style="background:#ffffff; width:100%; max-width:360px; border-radius:20px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.15); text-align:center;">
+            
+            <div id="receiptIconBox" style="width:56px; height:56px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                <i id="receiptIcon" class="fa-solid fa-check" style="color:#16a34a; font-size:24px;"></i>
+            </div>
+
+            <h3 id="receiptHeading" style="font-size:18px; font-weight:800; color:#0f172a; margin-bottom:4px;">Payout Receipt</h3>
+            <p id="receiptSub" style="font-size:12px; color:#64748b; margin-bottom:18px;">Transaction details</p>
+
+            <div style="background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:14px; padding:14px; margin-bottom:18px;">
+                <span style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">Net Payout Amount</span>
+                <div id="receiptNetAmt" style="font-size:26px; font-weight:900; color:#16a34a; margin-top:4px;">₹0.00</div>
+            </div>
+
+            <div style="text-align:left; font-size:12px; display:flex; flex-direction:column; gap:10px; border-bottom:1px solid #f1f5f9; padding-bottom:14px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748b; font-weight:600;">Requested Amount:</span>
+                    <span id="receiptReqAmt" style="font-weight:700; color:#0f172a;">₹0.00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748b; font-weight:600;">Platform Fee (10%):</span>
+                    <span id="receiptFeeAmt" style="font-weight:700; color:#dc2626;">- ₹0.00</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748b; font-weight:600;">Bank Account:</span>
+                    <span id="receiptAccNum" style="font-weight:700; color:#0f172a;">A/C: ****</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748b; font-weight:600;">Transfer Mode:</span>
+                    <span style="font-weight:700; color:#0f172a;">IMPS / Bank Transfer</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748b; font-weight:600;">Status:</span>
+                    <span id="receiptStatusBadge" style="font-weight:800; padding:2px 8px; border-radius:4px; font-size:10px;">APPROVED</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeReceiptModal()" style="width:100%; background:#0f172a; color:#ffffff; border:none; padding:12px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer;">
+                Close Receipt
+            </button>
+        </div>
+    </div>
+
     <script>
         const activeUser = (typeof requireAuth === 'function') ? requireAuth() : (typeof getActiveUser === 'function' ? getActiveUser() : null);
         let userCurrentBalance = 0;
@@ -122,8 +168,7 @@
             await loadUserProfileAndBank();
             await loadWithdrawalHistory();
         });
-
-        async function loadUserProfileAndBank() {
+            async function loadUserProfileAndBank() {
             if (!activeUser) return;
             const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
             if (!sb) return;
@@ -195,18 +240,8 @@
             btn.innerText = "Checking Rules & Recharge...";
 
             try {
-                // 2. SHART 1: Check karein user ne kabhi Real Recharge kiya hai ya nahi
-                const { data: rechargeTx, error: rcErr } = await sb
-                    .from('transactions')
-                    .select('id')
-                    .eq('user_id', activeUser.id)
-                    .eq('type', 'recharge')
-                    .limit(1);
-
-                if (rcErr) throw rcErr;
-
+                // 2. Recharge condition check bypassed
                 console.log("Recharge check bypassed");
-                
 
                 // 3. SHART 2: Check karein active crop plan mojood hai ya nahi
                 const { data: activePlans, error: planErr } = await sb
@@ -321,15 +356,18 @@
                     if (item.status === 'rejected') badgeClass = 'badge-rejected';
 
                     const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Recent';
+                    const reqAmt = parseFloat(item.amount || 0);
+                    const netAmt = item.final_amount ? parseFloat(item.final_amount) : (reqAmt * 0.90);
+                    const last4Acc = (item.account_number || item.account || '5224').slice(-4);
 
                     return `
-                        <div class="history-item">
+                        <div class="history-item" onclick="openReceiptModal('${reqAmt}', '${netAmt}', '${last4Acc}', '${item.status}')">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <strong style="font-size: 14px; color: #0f172a;">Req: ₹${parseFloat(item.amount).toFixed(2)}</strong>
+                                <strong style="font-size: 14px; color: #0f172a;">Req: ₹${reqAmt.toFixed(2)}</strong>
                                 <span class="badge-status ${badgeClass}">${item.status}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 600;">
-                                <span>Net: ₹${parseFloat(item.final_amount || item.amount).toFixed(2)} (A/C: ${item.account_number ? item.account_number.slice(-4) : '****'})</span>
+                                <span>Net: ₹${netAmt.toFixed(2)} (A/C: ${last4Acc})</span>
                                 <span>${dateStr}</span>
                             </div>
                         </div>
@@ -340,7 +378,56 @@
                 box.innerHTML = `<p style="font-size: 12px; color: #ef4444; font-weight: 700; text-align: center; padding: 10px;">${err.message}</p>`;
             }
         }
+
+        // Receipt Modal Handlers
+        function openReceiptModal(reqAmt, netAmt, last4Acc, status) {
+            const req = parseFloat(reqAmt || 0);
+            const net = parseFloat(netAmt || (req * 0.90));
+            const fee = (req - net).toFixed(2);
+            const currentStatus = (status || 'pending').toLowerCase();
+
+            document.getElementById('receiptReqAmt').innerText = `₹${req.toFixed(2)}`;
+            document.getElementById('receiptFeeAmt').innerText = `- ₹${fee}`;
+            document.getElementById('receiptNetAmt').innerText = `₹${net.toFixed(2)}`;
+            document.getElementById('receiptAccNum').innerText = `A/C: ****${last4Acc}`;
+
+            const badge = document.getElementById('receiptStatusBadge');
+            const iconBox = document.getElementById('receiptIconBox');
+            const icon = document.getElementById('receiptIcon');
+            const heading = document.getElementById('receiptHeading');
+
+            if (currentStatus === 'approved') {
+                heading.innerText = "Payout Approved";
+                badge.innerText = "APPROVED";
+                badge.style.background = "#dcfce7";
+                badge.style.color = "#15803d";
+                iconBox.style.background = "#dcfce7";
+                icon.className = "fa-solid fa-check";
+                icon.style.color = "#16a34a";
+            } else if (currentStatus === 'rejected') {
+                heading.innerText = "Payout Rejected";
+                badge.innerText = "REJECTED";
+                badge.style.background = "#fee2e2";
+                badge.style.color = "#dc2626";
+                iconBox.style.background = "#fee2e2";
+                icon.className = "fa-solid fa-xmark";
+                icon.style.color = "#dc2626";
+            } else {
+                heading.innerText = "Payout Processing";
+                badge.innerText = "PENDING";
+                badge.style.background = "#fef3c7";
+                badge.style.color = "#b45309";
+                iconBox.style.background = "#fef3c7";
+                icon.className = "fa-solid fa-clock";
+                icon.style.color = "#b45309";
+            }
+
+            document.getElementById('payoutReceiptModal').style.display = 'flex';
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('payoutReceiptModal').style.display = 'none';
+        }
     </script>
 </body>
-    </html>
-    
+</html>
