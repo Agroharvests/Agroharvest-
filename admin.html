@@ -399,23 +399,6 @@
         </div>
     </div>
 </div>
-
-<script>
-const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
-
-let supabaseClient = null;
-function getSupabase() {
-    if (!supabaseClient && window.supabase) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-    return supabaseClient;
-}
-
-let allUsersList = [];
-let allOrdersList = [];
-let allWithdrawalsList = [];
-let currentMemberTab = 'all';
 <script>
 const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
@@ -441,129 +424,141 @@ async function loadAdminDashboard() {
     }
 
     try {
-        // 1. Live UPI
+        // 1. Live UPI Receiver
         try {
             let { data: upiSetting } = await sb.from('admin_settings').select('*').eq('key', 'receiver_upi').maybeSingle();
             if (!upiSetting) {
                 const res = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
-                upiSetting = res.data;
+                upiSetting = res ? res.data : null;
             }
-            if (upiSetting && upiSetting.value) {
-                document.getElementById('currentUpiBadge').innerText = upiSetting.value;
-                document.getElementById('targetUpiInput').value = upiSetting.value;
-            } else {
-                document.getElementById('currentUpiBadge').innerText = "8433184062@axl";
-                document.getElementById('targetUpiInput').value = "8433184062@axl";
-            }
+            const currentUpi = (upiSetting && upiSetting.value) ? upiSetting.value : "8433184062@axl";
+            const upiBadge = document.getElementById('currentUpiBadge');
+            const upiInput = document.getElementById('targetUpiInput');
+            if (upiBadge) upiBadge.innerText = currentUpi;
+            if (upiInput) upiInput.value = currentUpi;
         } catch(e) {
-            document.getElementById('currentUpiBadge').innerText = "8433184062@axl";
+            const upiBadge = document.getElementById('currentUpiBadge');
+            if (upiBadge) upiBadge.innerText = "8433184062@axl";
         }
 
         // 2. Fetch Profiles
         let { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
         if (!profiles || profiles.length === 0) {
             const res = await sb.from('users').select('*').order('created_at', { ascending: false });
-            profiles = res.data || [];
+            profiles = (res && res.data) ? res.data : [];
         }
         allUsersList = profiles || [];
-        document.getElementById('statTotalUsers').innerText = allUsersList.length;
-        document.getElementById('userCountBadge').innerText = `${allUsersList.length} Users`;
-
-        // 3. Fetch Active Orders
-        let { data: orders } = await sb.from('orders').select('*').eq('status', 'active');
-        allOrdersList = orders || [];
-        document.getElementById('statActivePlans').innerText = allOrdersList.length;
         
+        const totalUsersEl = document.getElementById('statTotalUsers');
+        const userBadgeEl = document.getElementById('userCountBadge');
+        if (totalUsersEl) totalUsersEl.innerText = allUsersList.length;
+        if (userBadgeEl) userBadgeEl.innerText = `${allUsersList.length} Users`;
+
+        // 3. Fetch Orders
+        let { data: orders } = await sb.from('orders').select('*');
+        allOrdersList = orders || [];
+        const activeOrdersCount = allOrdersList.filter(o => o && o.status === 'active').length;
+        const activePlansEl = document.getElementById('statActivePlans');
+        if (activePlansEl) activePlansEl.innerText = activeOrdersCount;
+
         // 4. Approved Recharges
-        const { data: approvedRecharges } = await sb.from('transactions').select('amount').eq('type', 'recharge');
-        const totalRec = (approvedRecharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
-        document.getElementById('statTotalRecharges').innerText = `₹${totalRec.toFixed(0)}`;
+        try {
+            const { data: recharges } = await sb.from('transactions').select('amount').eq('type', 'recharge');
+            const totalRec = (recharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+            const totalRecEl = document.getElementById('statTotalRecharges');
+            if (totalRecEl) totalRecEl.innerText = `₹${totalRec.toFixed(0)}`;
+        } catch(e) {}
 
         // 5. Approved Withdrawals
-        const { data: approvedWithdrawals } = await sb.from('withdrawals').select('user_id, phone, amount').eq('status', 'approved');
-        allWithdrawalsList = approvedWithdrawals || [];
-        const totalWith = allWithdrawalsList.reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
-        document.getElementById('statTotalWithdrawals').innerText = `₹${totalWith.toFixed(0)}`;
-        
-        // 6. Pending Recharges
-        const { data: pendingRecharges } = await sb
-            .from('recharges')
-            .select('*')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false });
-
-        const recContainer = document.getElementById('pendingRechargesContainer');
-        document.getElementById('rechargeCountBadge').innerText = pendingRecharges ? pendingRecharges.length : 0;
-        
-        if (!pendingRecharges || pendingRecharges.length === 0) {
-            recContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>';
-        } else {
-            recContainer.innerHTML = pendingRecharges.map(r => `
-                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <strong style="font-size:14px; color:#0f172a;">📱 ${r.phone}</strong>
-                        <strong style="color:#16a34a; font-size:15px;">₹${r.amount}</strong>
-                    </div>
-                    <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr || 'N/A'}</b></div>
-                    <div style="display:flex; gap:6px; margin-top:6px;">
-                        <button type="button" onclick="window.approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
-                        <button type="button" onclick="window.rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
-                    </div>
-                </div>
-            `).join('');
+        try {
+            const { data: withdrawals } = await sb.from('withdrawals').select('*');
+            allWithdrawalsList = withdrawals || [];
+            const approvedWd = allWithdrawalsList.filter(w => w && w.status === 'approved');
+            const totalWith = approvedWd.reduce((sum, w) => sum + parseFloat(w.amount || 0), 0);
+            const totalWithEl = document.getElementById('statTotalWithdrawals');
+            if (totalWithEl) totalWithEl.innerText = `₹${totalWith.toFixed(0)}`;
+        } catch(e) {
+            allWithdrawalsList = [];
         }
 
-        // 7. Pending Withdrawals
-        const { data: pendingWd } = await sb
-            .from('withdrawals')
-            .select('*')
-            .eq('status', 'pending')
-            .order('created_at', { ascending: false });
+        // 6. Pending Recharges
+        try {
+            const { data: pendingRecharges } = await sb.from('recharges').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            const recContainer = document.getElementById('pendingRechargesContainer');
+            const recBadge = document.getElementById('rechargeCountBadge');
+            if (recBadge) recBadge.innerText = pendingRecharges ? pendingRecharges.length : 0;
 
-        const wdContainer = document.getElementById('pendingWithdrawalsContainer');
-        document.getElementById('withdrawalCountBadge').innerText = pendingWd ? pendingWd.length : 0;
-
-        if (!pendingWd || pendingWd.length === 0) {
-            wdContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending withdrawal requests.</p>';
-        } else {
-            wdContainer.innerHTML = pendingWd.map(w => {
-                const reqAmt = parseFloat(w.amount || 0);
-                const fee = Math.round(reqAmt * 0.10 * 100) / 100;
-                const netPay = (reqAmt - fee).toFixed(2);
-
-                return `
-                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div>
-                            <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
-                            <div style="font-size:11px; color:#64748b; margin-top:2px;">
-                                Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc_code || w.ifsc || 'N/A'}</b>
-                                (${w.holder_name || w.name || 'N/A'})
+            if (recContainer) {
+                if (!pendingRecharges || pendingRecharges.length === 0) {
+                    recContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending recharge requests.</p>';
+                } else {
+                    recContainer.innerHTML = pendingRecharges.map(r => `
+                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="font-size:14px; color:#0f172a;">📱 ${r.phone}</strong>
+                                <strong style="color:#16a34a; font-size:15px;">₹${r.amount}</strong>
+                            </div>
+                            <div style="font-size:11px; color:#64748b; margin:4px 0;">UTR: <b>${r.utr || 'N/A'}</b></div>
+                            <div style="display:flex; gap:6px; margin-top:6px;">
+                                <button type="button" onclick="window.approveRecharge('${r.id}', '${r.phone}', ${r.amount})" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Approve</button>
+                                <button type="button" onclick="window.rejectRecharge('${r.id}')" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject</button>
                             </div>
                         </div>
-                        <div style="text-align:right;">
-                            <span style="font-size:11px; color:#dc2626; text-decoration:line-through; font-weight:700;">Req: ₹${reqAmt.toFixed(0)}</span>
-                            <strong style="display:block; color:#16a34a; font-size:16px; font-weight:900;">Net: ₹${netPay}</strong>
-                            <span style="font-size:9px; color:#64748b; font-weight:700;">(-10% Fee: ₹${fee})</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:6px; margin-top:10px;">
-                        <button type="button" onclick="window.approveWithdrawal('${w.id}')" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Mark Paid (₹${netPay})</button>
-                        <button type="button" onclick="window.rejectWithdrawal('${w.id}', '${w.phone}', ${reqAmt})" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject & Refund</button>
-                    </div>
-                </div>
-                `;
-            }).join('');
-        }
+                    `).join('');
+                }
+            }
+        } catch(e) {}
 
-        // 8. Render Filtered Cards
+        // 7. Pending Withdrawals
+        try {
+            const pendingWd = allWithdrawalsList.filter(w => w && w.status === 'pending');
+            const wdContainer = document.getElementById('pendingWithdrawalsContainer');
+            const wdBadge = document.getElementById('withdrawalCountBadge');
+            if (wdBadge) wdBadge.innerText = pendingWd.length;
+
+            if (wdContainer) {
+                if (pendingWd.length === 0) {
+                    wdContainer.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No pending withdrawal requests.</p>';
+                } else {
+                    wdContainer.innerHTML = pendingWd.map(w => {
+                        const reqAmt = parseFloat(w.amount || 0);
+                        const fee = Math.round(reqAmt * 0.10 * 100) / 100;
+                        const netPay = (reqAmt - fee).toFixed(2);
+                        return `
+                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                <div>
+                                    <strong style="font-size:14px; color:#0f172a;">📱 ${w.phone}</strong>
+                                    <div style="font-size:11px; color:#64748b; margin-top:2px;">
+                                        Bank: <b>${w.account_number || w.account || 'N/A'}</b> | IFSC: <b>${w.ifsc_code || w.ifsc || 'N/A'}</b>
+                                        (${w.holder_name || w.name || 'N/A'})
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span style="font-size:11px; color:#dc2626; text-decoration:line-through; font-weight:700;">Req: ₹${reqAmt.toFixed(0)}</span>
+                                    <strong style="display:block; color:#16a34a; font-size:16px; font-weight:900;">Net: ₹${netPay}</strong>
+                                    <span style="font-size:9px; color:#64748b; font-weight:700;">(-10% Fee: ₹${fee})</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:6px; margin-top:10px;">
+                                <button type="button" onclick="window.approveWithdrawal('${w.id}')" class="btn-green-main" style="padding:8px; font-size:11px; flex:1; cursor:pointer;">Mark Paid (₹${netPay})</button>
+                                <button type="button" onclick="window.rejectWithdrawal('${w.id}', '${w.phone}', ${reqAmt})" class="btn-green-main" style="background:#dc2626; padding:8px; font-size:11px; flex:1; cursor:pointer;">Reject & Refund</button>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+                }
+            }
+        } catch(e) {}
+
+        // 8. Filter and Render
         filterUserCards();
 
     } catch (err) {
         console.error("Admin dashboard load error:", err);
     }
-    }
-    // 9. Active / Inactive Tab Switcher
+}
+
 function setUserFilter(tab) {
     currentMemberTab = tab;
 
@@ -584,7 +579,6 @@ function setUserFilter(tab) {
     filterUserCards();
 }
 
-// 10. Filter Search & Active/Inactive Segregation
 function filterUserCards() {
     const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
 
@@ -597,9 +591,13 @@ function filterUserCards() {
     const totalActive = allUsersList.filter(u => activeUserIds.has(String(u.id).trim())).length;
     const totalInactive = allUsersList.length - totalActive;
 
-    if (document.getElementById('countAll')) document.getElementById('countAll').innerText = allUsersList.length;
-    if (document.getElementById('countActive')) document.getElementById('countActive').innerText = totalActive;
-    if (document.getElementById('countInactive')) document.getElementById('countInactive').innerText = totalInactive;
+    const countAllEl = document.getElementById('countAll');
+    const countActEl = document.getElementById('countActive');
+    const countInactEl = document.getElementById('countInactive');
+
+    if (countAllEl) countAllEl.innerText = allUsersList.length;
+    if (countActEl) countActEl.innerText = totalActive;
+    if (countInactEl) countInactEl.innerText = totalInactive;
 
     let list = allUsersList.filter(u => 
         (u.phone && String(u.phone).includes(q)) || 
@@ -615,14 +613,13 @@ function filterUserCards() {
 
     renderUserDetailedCards(list);
 }
-
-// 11. Render Detailed Cards with Full Team Tree, Total Withdrawn & Join Date
+    // 11. Render Detailed Cards with Full Team Tree, Total Withdrawn & Join Date
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!container) return;
 
     if (!users || users.length === 0) {
-        container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700;">No users found.</p>';
+        container.innerHTML = '<p style="font-size: 12px; color: #94a3b8; font-weight: 700; padding: 10px;">No users found.</p>';
         return;
     }
 
@@ -641,11 +638,11 @@ function renderUserDetailedCards(users) {
     }
 
     container.innerHTML = users.map(user => {
-        const userOrders = allOrdersList.filter(o => o.user_id === user.id);
+        const userOrders = allOrdersList.filter(o => o.user_id === user.id && o.status === 'active');
         const totalInvested = userOrders.reduce((acc, o) => acc + parseFloat(o.price || o.plan_amount || o.amount || 0), 0);
 
         const userTotalWithdrawn = (allWithdrawalsList || [])
-            .filter(w => (w.user_id === user.id || String(w.phone).trim() === String(user.phone).trim()))
+            .filter(w => w && w.status === 'approved' && (w.user_id === user.id || String(w.phone).trim() === String(user.phone).trim()))
             .reduce((acc, w) => acc + parseFloat(w.amount || 0), 0);
 
         const l1Members = getDirectDownlines([user]);
@@ -659,22 +656,14 @@ function renderUserDetailedCards(users) {
             }
             return list.map(m => {
                 if (!m) return '';
-                const mOrders = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) 
-                    ? allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active') 
-                    : [];
+                const mOrders = allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active');
                 const hasActive = mOrders.length > 0;
                 
                 const planTag = hasActive 
                     ? `<span style="background:#10b981; color:#fff; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:700;">🟢 Active: ${mOrders.map(o => o.plan_name).join(', ')}</span>`
                     : `<span style="background:#e2e8f0; color:#64748b; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:600;">⚪ Inactive</span>`;
                 
-                let downCount = 0;
-                try {
-                    if (typeof getDirectDownlines === 'function') {
-                        downCount = getDirectDownlines([m]).length;
-                    }
-                } catch(e) { downCount = 0; }
-
+                const downCount = getDirectDownlines([m]).length;
                 const downTag = downCount > 0 
                     ? `<span style="background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px; font-size:9px; font-weight:700;">↳ Team: ${downCount}</span>` 
                     : '';
@@ -690,7 +679,7 @@ function renderUserDetailedCards(users) {
         };
 
         const plansHtml = userOrders.length > 0
-            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name} (₹${o.price || o.plan_amount || o.amount})</span>`).join('')
+            ? userOrders.map(o => `<span style="color:#16a34a; font-weight:800; margin-right:6px;">${o.plan_name} (₹${o.price || o.plan_amount || o.amount || 0})</span>`).join('')
             : '<span style="color:#94a3b8; font-weight:700;">No active plan</span>';
 
         return `
@@ -702,7 +691,7 @@ function renderUserDetailedCards(users) {
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
                         <span class="user-ref-badge">${user.referral_code || user.ref_code || 'N/A'}</span>
-                        <button onclick="exportFullUserStatement('${user.id}', '${user.phone}')" style="background:#0f172a; color:#fff; border:none; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer;">📊 Download Full History</button>
+                        <button onclick="exportFullUserStatement('${user.id}', '${user.phone}')" style="background:#0f172a; color:#fff; border:none; padding:4px 8px; border-radius:5px; font-size:10px; font-weight:700; cursor:pointer;">📊 Full History</button>
                     </div>
                 </div>
 
@@ -758,23 +747,87 @@ function renderUserDetailedCards(users) {
             </div>
         `;
     }).join('');
-    }
-    // 12. Save Live UPI Receiver ID
-async function saveSingleUpi() {
-    const newUpi = document.getElementById('targetUpiInput').value.trim();
-    if (!newUpi) return alert("Kripya UPI ID dalein!");
-
-    const sb = getSupabase();
-    try {
-        await sb.from('admin_settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
-        alert("✅ New UPI ID Saved: " + newUpi);
-        document.getElementById('currentUpiBadge').innerText = newUpi;
-    } catch (err) {
-        alert("Error saving UPI: " + err.message);
-    }
 }
 
-// 13. Manual Balance Add / Deduct
+// 12. Export CSV Statement
+function exportFullUserStatement(userId, userPhone) {
+    try {
+        const parentUser = allUsersList.find(u => u && (u.id === userId || String(u.phone).trim() === String(userPhone).trim()));
+        if (!parentUser) return alert("User record nahi mila!");
+
+        const getChildren = (parents) => {
+            const pCodes = new Set();
+            parents.forEach(p => {
+                if (p.referral_code) pCodes.add(String(p.referral_code).trim().toUpperCase());
+                if (p.ref_code) pCodes.add(String(p.ref_code).trim().toUpperCase());
+                if (p.phone) pCodes.add(String(p.phone).trim());
+            });
+
+            return allUsersList.filter(u => {
+                if (!u || parents.some(p => p.id === u.id)) return false;
+                const ref = String(u.referred_by || u.invited_by || '').trim().toUpperCase();
+                return ref && pCodes.has(ref);
+            });
+        };
+
+        const l1 = getChildren([parentUser]);
+        const l2 = l1.length > 0 ? getChildren(l1) : [];
+        const l3 = l2.length > 0 ? getChildren(l2) : [];
+
+        let csv = "data:text/csv;charset=utf-8,";
+        csv += "=== USER ACCOUNT OVERVIEW ===\n";
+        csv += `Phone Number,'+91 ${parentUser.phone || ''}\n`;
+        csv += `Referral Code,${parentUser.referral_code || parentUser.ref_code || 'N/A'}\n`;
+        csv += `Invited By,${parentUser.invited_by || parentUser.referred_by || 'Direct'}\n`;
+        csv += `Wallet Balance,Rs ${parentUser.balance || 0}\n`;
+        csv += `Team Commission Income,Rs ${parentUser.team_income || 0}\n\n`;
+
+        csv += "=== PURCHASED PLANS HISTORY ===\n";
+        csv += "Plan Name,Daily Yield (Rs),Status,Purchase Date\n";
+        const userOwnOrders = allOrdersList.filter(o => o && o.user_id === parentUser.id);
+        if (userOwnOrders.length > 0) {
+            userOwnOrders.forEach(o => {
+                const oDt = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'N/A';
+                csv += `"${o.plan_name || 'Active Plan'}","${o.daily_income || 0}","${(o.status || 'active').toUpperCase()}","${oDt}"\n`;
+            });
+        } else {
+            csv += "No Active Purchased Plans,,,\n";
+        }
+        csv += "\n";
+
+        csv += "=== DOWNLINE TEAM TREE (L1 - L3) ===\n";
+        csv += "Level,Member Phone,Referral Code,Plan Status,Active Plans,Joined Date\n";
+
+        const appendRows = (list, lvl) => {
+            list.forEach(m => {
+                const mOrders = allOrdersList.filter(o => o && o.user_id === m.id && o.status === 'active');
+                const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
+                const pNames = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' + ') : "None";
+                const mDt = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'N/A';
+                csv += `"${lvl}","'+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
+            });
+        };
+
+        if (l1.length === 0 && l2.length === 0 && l3.length === 0) {
+            csv += "No Downline Members Found,,,,,\n";
+        } else {
+            appendRows(l1, "Level 1");
+            appendRows(l2, "Level 2");
+            appendRows(l3, "Level 3");
+        }
+
+        const encodedUri = encodeURI(csv);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Statement_${parentUser.phone}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch(err) {
+        alert("Export error: " + err.message);
+    }
+    }
+    // 13. Balance Adjustment
 async function applyManualBalance() {
     const phone = document.getElementById('manualUserPhone').value.trim();
     const amt = parseFloat(document.getElementById('manualAmount').value);
@@ -820,118 +873,26 @@ async function applyManualBalance() {
     }
 }
 
-// 14. Export Comprehensive Account CSV Statement
-function exportFullUserStatement(userId, userPhone) {
+// 14. Save Receiver UPI
+async function saveSingleUpi() {
+    const newUpi = document.getElementById('targetUpiInput').value.trim();
+    if (!newUpi) return alert("Kripya UPI ID dalein!");
+
+    const sb = getSupabase();
     try {
-        const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList : [];
-        const parentUser = uList.find(u => u && (u.id === userId || String(u.phone).trim() === String(userPhone).trim()));
-        
-        if (!parentUser) {
-            alert("User record nahi mila!");
-            return;
-        }
-
-        const oList = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) ? allOrdersList : [];
-
-        const getChildren = (parents) => {
-            const pCodes = new Set();
-            parents.forEach(p => {
-                if (p.referral_code) pCodes.add(String(p.referral_code).trim().toUpperCase());
-                if (p.ref_code) pCodes.add(String(p.ref_code).trim().toUpperCase());
-                if (p.phone) pCodes.add(String(p.phone).trim());
-            });
-
-            return uList.filter(u => {
-                if (!u || parents.some(p => p.id === u.id)) return false;
-                const ref = String(u.referred_by || u.invited_by || u.parent_referral || '').trim().toUpperCase();
-                return ref && pCodes.has(ref);
-            });
-        };
-
-        const l1 = getChildren([parentUser]);
-        const l2 = l1.length > 0 ? getChildren(l1) : [];
-        const l3 = l2.length > 0 ? getChildren(l2) : [];
-
-        let csv = "data:text/csv;charset=utf-8,";
-
-        // 1. Overview
-        csv += "=== USER ACCOUNT OVERVIEW ===\n";
-        csv += `Phone Number,'+91 ${parentUser.phone || ''}\n`;
-        csv += `Referral Code,${parentUser.referral_code || parentUser.ref_code || 'N/A'}\n`;
-        csv += `Invited By,${parentUser.invited_by || parentUser.referred_by || 'Direct'}\n`;
-        csv += `Wallet Balance,Rs ${parentUser.balance || 0}\n`;
-        csv += `Team Commission Income,Rs ${parentUser.team_income || 0}\n`;
-        csv += `Joined Date,${parentUser.created_at ? new Date(parentUser.created_at).toLocaleDateString('en-IN') : 'N/A'}\n\n`;
-
-        // 2. Purchased Plans
-        csv += "=== PURCHASED PLANS HISTORY ===\n";
-        csv += "Plan Name,Daily Yield (Rs),Status,Purchase Date\n";
-        const userOwnOrders = oList.filter(o => o && o.user_id === parentUser.id);
-        if (userOwnOrders.length > 0) {
-            userOwnOrders.forEach(o => {
-                const oDt = o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${o.plan_name || 'Active Plan'}","${o.daily_income || 0}","${(o.status || 'active').toUpperCase()}","${oDt}"\n`;
-            });
-        } else {
-            csv += "No Active Purchased Plans,,,\n";
-        }
-        csv += "\n";
-
-        // 3. Withdrawals
-        csv += "=== WITHDRAWAL REQUESTS ===\n";
-        csv += "Date,Amount (Rs),Status\n";
-        const wList = (typeof allWithdrawalsList !== 'undefined' && Array.isArray(allWithdrawalsList)) ? allWithdrawalsList : [];
-        const userWd = wList.filter(w => w && (w.user_id === parentUser.id || String(w.phone) === String(parentUser.phone)));
-        if (userWd.length > 0) {
-            userWd.forEach(w => {
-                const wDt = w.created_at ? new Date(w.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${wDt}","${w.amount || 0}","${(w.status || 'pending').toUpperCase()}"\n`;
-            });
-        } else {
-            csv += "No Withdrawals Recorded,,\n";
-        }
-        csv += "\n";
-
-        // 4. Downline Team Tree
-        csv += "=== DOWNLINE TEAM TREE (L1 - L3) ===\n";
-        csv += "Level,Member Phone,Referral Code,Plan Status,Active Plans,Joined Date\n";
-
-        const appendRows = (list, lvl) => {
-            list.forEach(m => {
-                const mOrders = oList.filter(o => o && o.user_id === m.id && o.status === 'active');
-                const st = mOrders.length > 0 ? "ACTIVE" : "INACTIVE";
-                const pNames = mOrders.length > 0 ? mOrders.map(o => o.plan_name).join(' + ') : "None";
-                const mDt = m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : 'N/A';
-                csv += `"${lvl}","'+91 ${m.phone}","${m.referral_code || ''}","${st}","${pNames}","${mDt}"\n`;
-            });
-        };
-
-        if (l1.length === 0 && l2.length === 0 && l3.length === 0) {
-            csv += "No Downline Members Found,,,,,\n";
-        } else {
-            appendRows(l1, "Level 1");
-            appendRows(l2, "Level 2");
-            appendRows(l3, "Level 3");
-        }
-
-        const encodedUri = encodeURI(csv);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Report_${parentUser.phone}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-    } catch(err) {
-        alert("Export error: " + err.message);
+        await sb.from('admin_settings').upsert({ key: 'receiver_upi', value: newUpi }, { onConflict: 'key' });
+        alert("✅ New UPI ID Saved: " + newUpi);
+        const badge = document.getElementById('currentUpiBadge');
+        if (badge) badge.innerText = newUpi;
+    } catch (err) {
+        alert("Error saving UPI: " + err.message);
     }
-    }
-    // 15. Approvals & Rejections for Recharges / Withdrawals
+}
+
+// 15. Approve & Reject Handlers
 window.approveRecharge = async function(rechargeId, phone, amount) {
     if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
     const sb = getSupabase();
-    if (!sb) return alert("Database connection error!");
-
     try {
         let { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
         if (user) {
@@ -976,14 +937,14 @@ window.approveWithdrawal = async function(wdId) {
     }
 };
 
-window.rejectWithdrawal = async function(wdId, userId, amount) {
+window.rejectWithdrawal = async function(wdId, phone, amount) {
     if (!confirm(`Withdrawal reject karke ₹${amount} user ko wapas refund karein?`)) return;
     const sb = getSupabase();
     try {
-        const { data: prof } = await sb.from('profiles').select('balance').eq('id', userId).single();
+        const { data: prof } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
         if (prof) {
             const newBal = (parseFloat(prof.balance) || 0) + parseFloat(amount);
-            await sb.from('profiles').update({ balance: newBal }).eq('id', userId);
+            await sb.from('profiles').update({ balance: newBal }).eq('id', prof.id);
         }
         await sb.from('withdrawals').update({ status: 'rejected' }).eq('id', wdId);
         alert("❌ Withdrawal Rejected and Refunded to User Wallet.");
@@ -993,7 +954,7 @@ window.rejectWithdrawal = async function(wdId, userId, amount) {
     }
 };
 
-// 16. Daily Yield Distribution Cron
+// 16. Cron Distribution (⚡ 12 AM)
 async function runDailyIncomeCron() {
     if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
     const sb = getSupabase();
@@ -1026,7 +987,7 @@ async function runDailyIncomeCron() {
     }
 }
 
-// 17. Duplicate Daily Income Auto-Rollback Engine
+// 17. Duplicate Daily Income Auto-Rollback Engine (Fix Button)
 async function rollbackExtraDailyIncome() {
     if (!confirm("⚠️ KYA AAP SURE HAIN?\n\nYeh aaj ki duplicate/extra daily income ko wapas minus kar dega.")) return;
     const sb = getSupabase();
@@ -1078,55 +1039,34 @@ async function publishGlobalNotice() {
     const sb = getSupabase();
 
     try {
-        if (btn) {
-            btn.innerHTML = "⏳ Publishing...";
-            btn.disabled = true;
-        }
-
+        if (btn) { btn.innerHTML = "⏳ Publishing..."; btn.disabled = true; }
         const text = (document.getElementById('adminNoticeInput')?.value || '').trim();
         const active = document.getElementById('noticeActiveCheckbox') ? document.getElementById('noticeActiveCheckbox').checked : true;
 
-        if (!text) {
-            alert("Kripya pehle notice box me kuchh text likhein!");
-            return;
-        }
+        if (!text) return alert("Kripya notice me kuchh text likhein!");
 
-        const { error } = await sb
-            .from('app_settings')
-            .upsert({ 
-                id: 'global_notice', 
-                notice_text: text, 
-                is_active: active, 
-                updated_at: new Date().toISOString() 
-            });
+        const { error } = await sb.from('app_settings').upsert({ 
+            id: 'global_notice', 
+            notice_text: text, 
+            is_active: active, 
+            updated_at: new Date().toISOString() 
+        });
 
         if (error) throw error;
         alert("✅ Notice successfully broadcast ho gaya hai!");
     } catch (err) {
-        alert("Broadcast Error: " + err.message);
+        alert("Notice Error: " + err.message);
     } finally {
-        if (btn) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
+        if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
     }
 }
 
 // 19. WhatsApp Broadcaster Helpers
-function getInactivePhoneList() {
-    const uList = (typeof allUsersList !== 'undefined' && Array.isArray(allUsersList)) ? allUsersList : [];
-    const oList = (typeof allOrdersList !== 'undefined' && Array.isArray(allOrdersList)) ? allOrdersList : [];
-
-    const activeUserIds = new Set(
-        oList.filter(o => o && o.status === 'active').map(o => String(o.user_id).trim())
-    );
-
-    return uList.filter(u => u && u.phone && !activeUserIds.has(String(u.id).trim()));
-}
-
 function copyInactiveNumbers() {
-    const inactiveUsers = getInactivePhoneList();
-    if (inactiveUsers.length === 0) return alert("Filhaal koi inactive user nahi mila ya data load ho raha hai!");
+    const activeUserIds = new Set(allOrdersList.filter(o => o && o.status === 'active').map(o => String(o.user_id).trim()));
+    const inactiveUsers = allUsersList.filter(u => u && u.phone && !activeUserIds.has(String(u.id).trim()));
+
+    if (inactiveUsers.length === 0) return alert("Koi inactive user nahi mila!");
 
     const numbers = inactiveUsers.map(u => {
         let p = String(u.phone).replace(/[^0-9]/g, '');
@@ -1136,16 +1076,14 @@ function copyInactiveNumbers() {
     navigator.clipboard.writeText(numbers).then(() => {
         const badge = document.getElementById('inactiveCountBadge');
         if (badge) badge.innerText = `${inactiveUsers.length} Copied`;
-        alert(`✅ ${inactiveUsers.length} Inactive users ke number copy ho gaye hain!`);
-    }).catch(() => {
-        alert("Copy nahi ho paya, browser permission check karein.");
+        alert(`✅ ${inactiveUsers.length} Inactive users ke number copy ho gaye!`);
     });
 }
 
 function copyOfferMessageText() {
     const msg = "🌾 AgroHarvest Special Offer 🌾\n\nNamaste! Aapka account ban chuka hai lekin farm active nahi hai.\n\n⚡ LIMITED OFFER: Aaj kisi bhi plan se recharge karne par payein seedha ₹50 INSTANT CASHBACK apne wallet mein!\n💰 Daily return har raat automatic wallet mein credit hoga.\n\n👉 Abhi login karein aur apna first plan start karein!";
     navigator.clipboard.writeText(msg).then(() => {
-        alert("✅ Offer message copy ho gaya hai!");
+        alert("✅ Offer message copy ho gaya!");
     });
 }
 
@@ -1157,4 +1095,3 @@ window.addEventListener('DOMContentLoaded', loadAdminDashboard);
 </script>
 </body>
 </html>
-    
