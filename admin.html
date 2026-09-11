@@ -1087,11 +1087,20 @@ function copyOfferMessageText() {
     });
 }
 
-function toggleVipPlan(amt) {
-    alert(`VIP ₹${amt} Plan is currently LOCKED by admin configuration.`);
+async function toggleVipPlan(amt) {
+    const sb = getSupabase();
+    if (!sb) return alert("Database error!");
+    
+    if (confirm(`Kya aap ₹${amt} plan ka status toggle karna chahte hain?`)) {
+        try {
+            await sb.from('plans').update({ status: 'active', is_locked: false }).eq('price', amt);
+            alert(`✅ ₹${amt} Plan successfully UNLOCKED kar diya gaya hai! Ab user isse kharid sakte hain.`);
+        } catch(e) {
+            alert("Error updating plan: " + e.message);
+        }
+    }
 }
-
-window.addEventListener('DOMContentLoaded', loadAdminDashboard);
+    
 </script>
 </body>
 </html>
