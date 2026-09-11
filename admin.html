@@ -7,7 +7,7 @@
     <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Supabase JS CDN -->
+    <!-- Supabase JS CDN Official -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -330,7 +330,7 @@
                 <h3>VIP Premium Plans Control</h3>
             </div>
             <div class="vip-grid">
-                <button type="button" class="vip-btn" onclick="toggleVipPlan(4999)">₹4,999: UNLOCKED 🔒</button>
+                <button type="button" class="vip-btn" onclick="toggleVipPlan(4999)" style="background: #16a34a;">₹4,999: UNLOCKED 🟢</button>
                 <button type="button" class="vip-btn" onclick="toggleVipPlan(9999)">₹9,999: LOCKED 🔒</button>
             </div>
         </div>
@@ -343,8 +343,8 @@
             <input type="text" id="manualUserPhone" class="input-box" placeholder="User Mobile Number (10 Digits)" maxlength="10">
             <input type="number" id="manualAmount" class="input-box" placeholder="Amount (+ to Add, - to Deduct)">
             <button type="button" onclick="applyManualBalance()" class="btn-green-main">Apply Balance Change</button>
-                    </div>
-                    <!-- Pending Recharges -->
+        </div>
+                <!-- Pending Recharges -->
         <div class="card">
             <div class="card-title-row">
                 <h3>Pending Recharges</h3>
@@ -372,10 +372,8 @@
                 <h3>User Investments & Downlines</h3>
                 <span id="userCountBadge" class="badge-pill" style="background:#dcfce7; color:#15803d;">0 Users</span>
             </div>
-            
-            <!-- Search Bar -->
             <input type="text" id="userSearchInput" class="input-box" placeholder="🔍 Search by Mobile or Ref Code..." oninput="filterUserCards()">
-
+            
             <!-- ACTIVE / INACTIVE FILTER TABS -->
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <button type="button" id="tabAll" onclick="setUserFilter('all')" 
@@ -392,21 +390,25 @@
                 </button>
             </div>
 
-            <!-- Cards Container -->
             <div id="userDetailedCardsContainer">
                 <p style="font-size: 12px; color: #94a3b8; font-weight: 700;">Loading user data...</p>
             </div>
         </div>
     </div>
-</div>
-<script>
+    </div>
+                    <script>
 const SUPABASE_URL = "https://wdchtaltpmxfvknjyour.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkY2h0YWx0cG14ZnZrbmp5b3VyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5OTAyOTgsImV4cCI6MjEwMzU2NjI5OH0.VBU2BUYvTMK799803kDG3qmqiucBtGkNiFAifl9hUA4";
 
 let supabaseClient = null;
+
 function getSupabase() {
-    if (!supabaseClient && window.supabase) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (!supabaseClient) {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.warn("Supabase CDN library abhi ready nahi hui hai, retry hoga...");
+        }
     }
     return supabaseClient;
 }
@@ -417,14 +419,15 @@ let allWithdrawalsList = [];
 let currentMemberTab = 'all';
 
 async function loadAdminDashboard() {
-    const sb = getSupabase();
+    let sb = getSupabase();
     if (!sb) {
-        console.error("Supabase client initialize nahi hua!");
+        // Auto-retry agar CDN load hone me thoda time le
+        setTimeout(loadAdminDashboard, 500);
         return;
     }
 
     try {
-        // 1. Live UPI Receiver
+        // 1. Live Receiver UPI Fetch
         try {
             let { data: upiSetting } = await sb.from('admin_settings').select('*').eq('key', 'receiver_upi').maybeSingle();
             if (!upiSetting) {
@@ -441,8 +444,8 @@ async function loadAdminDashboard() {
             if (upiBadge) upiBadge.innerText = "8433184062@axl";
         }
 
-        // 2. Fetch Profiles
-        let { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+        // 2. Fetch All Registered Users / Profiles
+        let { data: profiles, error: pErr } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
         if (!profiles || profiles.length === 0) {
             const res = await sb.from('users').select('*').order('created_at', { ascending: false });
             profiles = (res && res.data) ? res.data : [];
@@ -454,14 +457,14 @@ async function loadAdminDashboard() {
         if (totalUsersEl) totalUsersEl.innerText = allUsersList.length;
         if (userBadgeEl) userBadgeEl.innerText = `${allUsersList.length} Users`;
 
-        // 3. Fetch Orders
+        // 3. Fetch Orders & Calculate Active Planted Plans
         let { data: orders } = await sb.from('orders').select('*');
         allOrdersList = orders || [];
         const activeOrdersCount = allOrdersList.filter(o => o && o.status === 'active').length;
         const activePlansEl = document.getElementById('statActivePlans');
         if (activePlansEl) activePlansEl.innerText = activeOrdersCount;
 
-        // 4. Approved Recharges
+        // 4. Calculate Approved Recharges
         try {
             const { data: recharges } = await sb.from('transactions').select('amount').eq('type', 'recharge');
             const totalRec = (recharges || []).reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
@@ -469,7 +472,7 @@ async function loadAdminDashboard() {
             if (totalRecEl) totalRecEl.innerText = `₹${totalRec.toFixed(0)}`;
         } catch(e) {}
 
-        // 5. Approved Withdrawals
+        // 5. Calculate Total Paid Withdrawals
         try {
             const { data: withdrawals } = await sb.from('withdrawals').select('*');
             allWithdrawalsList = withdrawals || [];
@@ -480,8 +483,7 @@ async function loadAdminDashboard() {
         } catch(e) {
             allWithdrawalsList = [];
         }
-
-        // 6. Pending Recharges
+                                // 6. Render Pending Recharges
         try {
             const { data: pendingRecharges } = await sb.from('recharges').select('*').eq('status', 'pending').order('created_at', { ascending: false });
             const recContainer = document.getElementById('pendingRechargesContainer');
@@ -509,7 +511,7 @@ async function loadAdminDashboard() {
             }
         } catch(e) {}
 
-        // 7. Pending Withdrawals
+        // 7. Render Pending Withdrawals (With 10% Fee Deduction Preview)
         try {
             const pendingWd = allWithdrawalsList.filter(w => w && w.status === 'pending');
             const wdContainer = document.getElementById('pendingWithdrawalsContainer');
@@ -551,7 +553,7 @@ async function loadAdminDashboard() {
             }
         } catch(e) {}
 
-        // 8. Filter and Render
+        // 8. Trigger Initial Card Filtering & Display
         filterUserCards();
 
     } catch (err) {
@@ -559,6 +561,7 @@ async function loadAdminDashboard() {
     }
 }
 
+// 9. Tab Switcher (All / Active / Inactive)
 function setUserFilter(tab) {
     currentMemberTab = tab;
 
@@ -579,6 +582,7 @@ function setUserFilter(tab) {
     filterUserCards();
 }
 
+// 10. Filter Engine with Live Search
 function filterUserCards() {
     const q = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
 
@@ -612,8 +616,8 @@ function filterUserCards() {
     }
 
     renderUserDetailedCards(list);
-}
-    // 11. Render Detailed Cards with Full Team Tree, Total Withdrawn & Join Date
+                        }
+                        // 11. Render Detailed Cards with Full Team Tree, Total Withdrawn & Join Date
 function renderUserDetailedCards(users) {
     const container = document.getElementById('userDetailedCardsContainer');
     if (!container) return;
@@ -747,9 +751,8 @@ function renderUserDetailedCards(users) {
             </div>
         `;
     }).join('');
-}
-
-// 12. Export CSV Statement
+                                    }
+                        // 12. Full Account CSV Statement Exporter
 function exportFullUserStatement(userId, userPhone) {
     try {
         const parentUser = allUsersList.find(u => u && (u.id === userId || String(u.phone).trim() === String(userPhone).trim()));
@@ -826,8 +829,9 @@ function exportFullUserStatement(userId, userPhone) {
     } catch(err) {
         alert("Export error: " + err.message);
     }
-    }
-    // 13. Balance Adjustment
+}
+
+// 13. Manual Balance Adjustment Function
 async function applyManualBalance() {
     const phone = document.getElementById('manualUserPhone').value.trim();
     const amt = parseFloat(document.getElementById('manualAmount').value);
@@ -887,12 +891,13 @@ async function saveSingleUpi() {
     } catch (err) {
         alert("Error saving UPI: " + err.message);
     }
-}
-
-// 15. Approve & Reject Handlers
+                        }
+                        // 15. Approvals & Rejections for Recharges / Withdrawals
 window.approveRecharge = async function(rechargeId, phone, amount) {
     if (!confirm(`Recharge approve karein aur ₹${amount} user (${phone}) ke wallet me credit karein?`)) return;
     const sb = getSupabase();
+    if (!sb) return alert("Database connection error!");
+
     try {
         let { data: user } = await sb.from('profiles').select('*').eq('phone', phone).maybeSingle();
         if (user) {
@@ -954,7 +959,7 @@ window.rejectWithdrawal = async function(wdId, phone, amount) {
     }
 };
 
-// 16. Cron Distribution (⚡ 12 AM)
+// 16. Daily Yield Distribution Cron (⚡ 12 AM)
 async function runDailyIncomeCron() {
     if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
     const sb = getSupabase();
@@ -1087,20 +1092,27 @@ function copyOfferMessageText() {
     });
 }
 
+// 20. VIP Plan Toggle Admin Controller
 async function toggleVipPlan(amt) {
     const sb = getSupabase();
-    if (!sb) return alert("Database error!");
-    
+    if (!sb) return alert("Database connection error!");
+
     if (confirm(`Kya aap ₹${amt} plan ka status toggle karna chahte hain?`)) {
         try {
             await sb.from('plans').update({ status: 'active', is_locked: false }).eq('price', amt);
-            alert(`✅ ₹${amt} Plan successfully UNLOCKED kar diya gaya hai! Ab user isse kharid sakte hain.`);
+            alert(`✅ ₹${amt} Plan ka status database me update ho gaya!`);
         } catch(e) {
             alert("Error updating plan: " + e.message);
         }
     }
 }
-    
+
+// 21. Bulletproof Execution Trigger
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(loadAdminDashboard, 300);
+} else {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(loadAdminDashboard, 300));
+}
 </script>
 </body>
 </html>
