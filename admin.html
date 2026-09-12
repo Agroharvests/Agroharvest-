@@ -959,11 +959,19 @@ window.rejectWithdrawal = async function(wdId, phone, amount) {
     }
 };
 
-// 16. Daily Yield Distribution Cron (⚡ 12 AM)
+        // 16. Daily Yield Distribution Cron ( ⚡ 12 AM )
 async function runDailyIncomeCron() {
+    // 🏖️ Sunday Holiday Protection Lock
+    const todayDay = new Date().getDay();
+    if (todayDay === 0) {
+        alert("🏖️ Weekend Holiday Notice!\n\nAaj SUNDAY hai. Sunday ko farm maintenance ki wajah se daily income distribute nahi hoti hai.");
+        return;
+    }
+
     if (!confirm("Kya aap sabhi active plans ki daily harvest income credit karna chahte hain?")) return;
     const sb = getSupabase();
     try {
+        
         const { data: orders } = await sb.from('orders').select('*').eq('status', 'active');
         if (!orders || orders.length === 0) return alert("Koi active plan nahi mila.");
 
