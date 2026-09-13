@@ -185,7 +185,8 @@
   </div>
 
   <div style="border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2);">
-    <img src="sunday_offer.jpg" alt="Sunday Offer" style="width: 100%; height: auto; display: block;">
+    <img src="./sunday_offer.jpg.jpg" alt="Sunday Offer" style="width: 100%; height: auto; display: block; border-radius: 10px;">
+      
   </div>
 
   <div style="background: rgba(255,255,255,0.12); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
@@ -800,11 +801,12 @@ async function loadSundayOfferStats() {
         const percent = Math.min(100, Math.round((count / target) * 100));
 
         const countEl = document.getElementById('sundayDirectCount');
+                const countEl = document.getElementById('sundayDirectCount');
         const pBar = document.getElementById('sundayProgressBar');
         const statusEl = document.getElementById('sundayBonusStatus');
 
-        if (countEl) countEl.innerText = `${count} / ${target}`;
-        if (pBar) pBar.style.width = `${percent}%`;
+        if (countEl) countEl.innerText = count + " / " + target;
+        if (pBar) pBar.style.width = percent + "%";
 
         if (count >= 10 && statusEl) {
             statusEl.innerHTML = "🎉 <b style='color:#00e676;'>Target Completed!</b> Free bonus plan claim karein!";
@@ -816,14 +818,14 @@ async function loadSundayOfferStats() {
 
 function shareOfferWhatsApp() {
     const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    const link = `${window.location.origin}/index.html?ref=${refCode}`;
-    const text = `🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥%0AAaj hi apni ID activate karein aur regular daily harvest profit paayein!%0AJoin Link: ${encodeURIComponent(link)}`;
-    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+    const link = window.location.origin + "/index.html?ref=" + refCode;
+    const text = "🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\nJoin Link: " + link;
+    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank");
 }
 
 function copyMySundayLink() {
     const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    const link = `${window.location.origin}/index.html?ref=${refCode}`;
+    const link = window.location.origin + "/index.html?ref=" + refCode;
     navigator.clipboard.writeText(link).then(() => {
         alert("✅ Referral link copy ho gaya!");
     });
@@ -833,6 +835,7 @@ function copyMySundayLink() {
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(loadSundayOfferStats, 1000);
 });
+        
 </script>
     
     
