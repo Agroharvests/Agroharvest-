@@ -817,27 +817,52 @@ async function loadSundayOfferStats() {
 }
 
 function shareOfferWhatsApp() {
-    const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    const link = window.location.origin + "/index.html?ref=" + refCode;
-    const text = "🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\nJoin Link: " + link;
-    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank");
+    var ref = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    if (!ref) {
+        var u = localStorage.getItem('user') || localStorage.getItem('agro_user');
+        if (u) {
+            try {
+                var p = JSON.parse(u);
+                ref = p.referral_code || p.phone || '';
+            } catch(e) {}
+        }
+    }
+    var link = window.location.origin + '/index.html' + (ref ? ('?ref=' + encodeURIComponent(ref)) : '');
+    var text = 'AGROHARVEST SUNDAY OFFER: Aaj 10 ID active karao aur same plan FREE bonus pao! Link: ' + link;
+    window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
 }
 
 function copyMySundayLink() {
-    const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    const link = window.location.origin + "/index.html?ref=" + refCode;
-    navigator.clipboard.writeText(link).then(() => {
-        alert("✅ Referral link copy ho gaya!");
-    });
+    var ref = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    if (!ref) {
+        var u = localStorage.getItem('user') || localStorage.getItem('agro_user');
+        if (u) {
+            try {
+                var p = JSON.parse(u);
+                ref = p.referral_code || p.phone || '';
+            } catch(e) {}
+        }
+    }
+    var link = window.location.origin + '/index.html' + (ref ? ('?ref=' + encodeURIComponent(ref)) : '');
+    
+    var tempInput = document.createElement('input');
+    tempInput.value = link;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    try {
+        document.execCommand('copy');
+        alert('Invite Link Copy Ho Gaya:\n' + link);
+    } catch (err) {
+        prompt('Link copy karein:', link);
+    }
+    document.body.removeChild(tempInput);
 }
 
-// Page load hone par run karein
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(loadSundayOfferStats, 1000);
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof loadSundayOfferStats === 'function') {
+        setTimeout(loadSundayOfferStats, 1200);
+    }
 });
-        
 </script>
-    
-    
 </body>
 </html>
