@@ -410,7 +410,7 @@
     }
 
     let activeUser = null;
-    let targetUpiId = "8433184062@axl";
+let targetUpiId = "G1H0007196@mairtel";
     let targetUpiName = "AgroHarvest";
     let base64Screenshot = "";
 
@@ -448,11 +448,16 @@
         const sb = getSupabase();
         if (sb) {
             try {
-                // Fetch Live Receiver UPI
-                const { data: settingData } = await sb.from('settings').select('*').eq('key', 'receiver_upi').maybeSingle();
-                if (settingData && settingData.value) {
-                    targetUpiId = settingData.value.trim();
-                }
+                // Fetch Live Receiver UPI from upi_accounts
+try {
+    const { data: upiRow } = await sb.from('upi_accounts').select('upi_id').limit(1).maybeSingle();
+    if (upiRow && upiRow.upi_id) {
+        targetUpiId = upiRow.upi_id.trim();
+    }
+} catch(e) {
+    console.warn("UPI fetch fallback:", e);
+}
+                
 
                 // Live User Balance Sync
                 if (activeUser) {
