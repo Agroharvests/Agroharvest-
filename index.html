@@ -732,10 +732,83 @@ if (document.readyState === 'loading') {
             }
 }
 
-// Initialize Live Transactions
-if (typeof initTxFeed === 'function') {
-    initTxFeed();
+// --- AUTO TRANSACTIONS & BUTTONS FIX ---
+function startAutoTransactions() {
+    var dummyUsers = ['84****7573', '63****6622', '98****6902', '88****9911', '70****3124', '91****4455', '95****8820'];
+    var dummyPlans = ['Rs.499', 'Rs.1,499', 'Rs.499', 'Rs.2,999', 'Rs.499'];
+
+    // Container dhoondna chahe ID koi bhi ho
+    var target = document.getElementById('liveTxContainer') || 
+                 document.getElementById('recentTransactionsList') || 
+                 document.querySelector('.tx-card') || 
+                 document.querySelector('[class*="tx-"]');
+
+    if (!target) {
+        var headings = document.querySelectorAll('h3, div, span');
+        for (var i = 0; i < headings.length; i++) {
+            if (headings[i].innerText && headings[i].innerText.indexOf('Recent Transactions') !== -1) {
+                target = headings[i].parentElement.parentElement;
+                break;
+            }
+        }
+    }
+
+    if (!target) return;
+
+    function addRow() {
+        var u = dummyUsers[Math.floor(Math.random() * dummyUsers.length)];
+        var p = dummyPlans[Math.floor(Math.random() * dummyPlans.length)];
+        var item = document.createElement('div');
+        item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#fff7ed; padding:10px 14px; border-radius:12px; margin-top:8px; border:1px solid #ffedd5; font-size:13px; font-weight:600;';
+        item.innerHTML = '<div style="display:flex; align-items:center; gap:8px;">🛒 <span>User ' + u + '<br><small style="color:#888; font-weight:normal;">Purchased Plan</small></span></div><span style="color:#d97706; font-weight:700;">' + p + '</span>';
+        
+        target.appendChild(item);
+        if (target.children.length > 5) {
+            target.removeChild(target.children[1]);
+        }
+    }
+
+    // Pehle se 3 rows load kar dena
+    for (var k = 0; k < 3; k++) { addRow(); }
+    setInterval(addRow, 3000);
 }
+
+// WhatsApp Share Handler
+function shareOfferWhatsApp() {
+    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var base = window.location.origin + window.location.pathname;
+    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
+    var msg = '🔥 AGROHARVEST SUNDAY MEGA OFFER 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\n\n👉 Join Link: ' + joinLink;
+    window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+}
+
+// Copy Link Handler
+function copyMySundayLink() {
+    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var base = window.location.origin + window.location.pathname;
+    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
+
+    var inp = document.createElement('textarea');
+    inp.value = joinLink;
+    inp.style.position = 'fixed';
+    inp.style.left = '-9999px';
+    document.body.appendChild(inp);
+    inp.focus();
+    inp.select();
+    try {
+        document.execCommand('copy');
+        alert('✅ Referral Link Copy Ho Gaya:\n' + joinLink);
+    } catch (err) {
+        prompt('Link copy karein:', joinLink);
+    }
+    document.body.removeChild(inp);
+}
+
+// Auto Run Everything
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(startAutoTransactions, 500);
+});
+setTimeout(startAutoTransactions, 1500);
 </script>
 </body>
 </html>
