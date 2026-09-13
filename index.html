@@ -818,25 +818,31 @@ async function loadSundayOfferStats() {
 
 function shareOfferWhatsApp() {
     var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    var fullUrl = window.location.href.split('?')[0];
-    var joinLink = fullUrl + '?ref=' + p;
-    var msg = 'AgroHarvest Sunday Mega Offer! Join link: ' + joinLink;
+    var base = window.location.origin + window.location.pathname;
+    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
+    var msg = '🔥 AGROHARVEST SUNDAY MEGA OFFER 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\nJoin Link: ' + joinLink;
     window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
 }
 
 function copyMySundayLink() {
     var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    var fullUrl = window.location.href.split('?')[0];
-    var joinLink = fullUrl + '?ref=' + p;
+    var base = window.location.origin + window.location.pathname;
+    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
 
     var inp = document.createElement('textarea');
     inp.value = joinLink;
+    inp.style.position = 'fixed';
+    inp.style.left = '-9999px';
     document.body.appendChild(inp);
+    inp.focus();
     inp.select();
-    document.execCommand('copy');
+    try {
+        document.execCommand('copy');
+        alert('✅ Referral Link Copy Ho Gaya:\n' + joinLink);
+    } catch (err) {
+        prompt('Link copy karein:', joinLink);
+    }
     document.body.removeChild(inp);
-
-    alert('Referral link copy ho gaya:\n' + joinLink);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
