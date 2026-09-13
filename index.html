@@ -203,14 +203,14 @@
     </div>
   </div>
 
-  <div style="display: flex; gap: 10px;">
-    <button onclick="shareOfferWhatsApp()" style="flex: 1; background: #25d366; color: #fff; border: none; padding: 11px; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
-      📲 WhatsApp Share
-    </button>
-    <button onclick="copyMySundayLink()" style="background: #ffffff; color: #1e3c72; border: none; padding: 11px 15px; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer;">
-      📋 Copy Link
-    </button>
-  </div>
+<div style="display: flex; gap: 10px; margin-top: 10px;">
+  <a id="sundayWaBtn" href="https://api.whatsapp.com/send?text=AGROHARVEST%20SUNDAY%20OFFER%3A%20Aaj%2010%20ID%20active%20karao%20aur%20pao%20Same%20Plan%20FREE%20BONUS!" target="_blank" style="flex: 1; background: #25d366; color: #ffffff; text-decoration: none; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center;">
+    📲 WhatsApp Share
+  </a>
+  <button type="button" id="sundayCopyBtn" style="background: #ffffff; color: #1e3c72; border: 1px solid #ccc; padding: 12px 16px; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+    📋 Copy Link
+  </button>
+</div>
 </div>
         
         <!-- Live Transactions Box -->
@@ -817,50 +817,31 @@ async function loadSundayOfferStats() {
 }
 
 function shareOfferWhatsApp() {
-    var ref = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    if (!ref) {
-        var u = localStorage.getItem('user') || localStorage.getItem('agro_user');
-        if (u) {
-            try {
-                var p = JSON.parse(u);
-                ref = p.referral_code || p.phone || '';
-            } catch(e) {}
-        }
-    }
-    var link = window.location.origin + '/index.html' + (ref ? ('?ref=' + encodeURIComponent(ref)) : '');
-    var text = 'AGROHARVEST SUNDAY OFFER: Aaj 10 ID active karao aur same plan FREE bonus pao! Link: ' + link;
-    window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var fullUrl = window.location.href.split('?')[0];
+    var joinLink = fullUrl + '?ref=' + p;
+    var msg = 'AgroHarvest Sunday Mega Offer! Join link: ' + joinLink;
+    window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
 }
 
 function copyMySundayLink() {
-    var ref = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
-    if (!ref) {
-        var u = localStorage.getItem('user') || localStorage.getItem('agro_user');
-        if (u) {
-            try {
-                var p = JSON.parse(u);
-                ref = p.referral_code || p.phone || '';
-            } catch(e) {}
-        }
-    }
-    var link = window.location.origin + '/index.html' + (ref ? ('?ref=' + encodeURIComponent(ref)) : '');
-    
-    var tempInput = document.createElement('input');
-    tempInput.value = link;
-    document.body.appendChild(tempInput);
-    tempInput.select();
-    try {
-        document.execCommand('copy');
-        alert('Invite Link Copy Ho Gaya:\n' + link);
-    } catch (err) {
-        prompt('Link copy karein:', link);
-    }
-    document.body.removeChild(tempInput);
+    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var fullUrl = window.location.href.split('?')[0];
+    var joinLink = fullUrl + '?ref=' + p;
+
+    var inp = document.createElement('textarea');
+    inp.value = joinLink;
+    document.body.appendChild(inp);
+    inp.select();
+    document.execCommand('copy');
+    document.body.removeChild(inp);
+
+    alert('Referral link copy ho gaya:\n' + joinLink);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof loadSundayOfferStats === 'function') {
-        setTimeout(loadSundayOfferStats, 1200);
+        setTimeout(loadSundayOfferStats, 1000);
     }
 });
 </script>
