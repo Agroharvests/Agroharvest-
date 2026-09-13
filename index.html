@@ -730,120 +730,12 @@ if (document.readyState === 'loading') {
 } else {
     fetchLiveNotice();
             }
-      // Sunday Live Offer Tracking & Share
-async function loadSundayOfferStats() {
-    const isSunday = new Date().getDay() === 0;
-    const card = document.getElementById('sundayDhamakaCard');
-    if (!card) return;
-
-    if (!isSunday) {
-        card.style.display = 'none';
-        return;
-    }
-    card.style.display = 'block';
-
-    try {
-        const userCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code');
-        if (!userCode) return;
-
-        const sb = (typeof getSupabase === 'function') ? getSupabase() : window.supabaseClient;
-        if (!sb) return;
-
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const { data, error } = await sb
-            .from('orders')
-            .select('id, profiles!inner(referred_by)')
-            .eq('status', 'active')
-            .eq('profiles.referred_by', userCode)
-            .gte('created_at', startOfDay.toISOString());
-
-        if (error) throw error;
-
-        const count = data ? data.length : 0;
-        const target = 10;
-        const percent = Math.min(100, Math.round((count / target) * 100));
-
-        const countEl = document.getElementById('sundayDirectCount');
-                const countEl = document.getElementById('sundayDirectCount');
-        const pBar = document.getElementById('sundayProgressBar');
-        const statusEl = document.getElementById('sundayBonusStatus');
-
-        if (countEl) countEl.innerText = count + " / " + target;
-        if (pBar) pBar.style.width = percent + "%";
-
-        if (count >= 10 && statusEl) {
-            statusEl.innerHTML = "🎉 <b style='color:#00e676;'>Target Completed!</b> Free bonus plan claim karein!";
-        }
-    } catch (e) {
-        console.log("Sunday counter load error:", e);
-    }
 }
 
-    function shareOfferWhatsApp() {
-    var p = localStorage.getItem('agro_user_referral_code') || 
-            localStorage.getItem('referral_code') || 
-            localStorage.getItem('user_phone') || 
-            localStorage.getItem('phone') || '';
-            
-    if (!p) {
-        var rawUser = localStorage.getItem('user') || localStorage.getItem('agro_user');
-        if (rawUser) {
-            try {
-                var u = JSON.parse(rawUser);
-                p = u.referral_code || u.phone || u.id || '';
-            } catch(e) {}
-        }
-    }
-
-    var base = window.location.origin + window.location.pathname;
-    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
-    var msg = 'AgroHarvest Sunday Mega Offer! Join link: ' + joinLink;
-    
-    window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
+// Initialize Live Transactions
+if (typeof initTxFeed === 'function') {
+    initTxFeed();
 }
-
-function copyMySundayLink() {
-    var p = localStorage.getItem('agro_user_referral_code') || 
-            localStorage.getItem('referral_code') || 
-            localStorage.getItem('user_phone') || 
-            localStorage.getItem('phone') || '';
-            
-    if (!p) {
-        var rawUser = localStorage.getItem('user') || localStorage.getItem('agro_user');
-        if (rawUser) {
-            try {
-                var u = JSON.parse(rawUser);
-                p = u.referral_code || u.phone || u.id || '';
-            } catch(e) {}
-        }
-    }
-
-    var base = window.location.origin + window.location.pathname;
-    var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
-
-    var inp = document.createElement('textarea');
-    inp.value = joinLink;
-    inp.style.position = 'fixed';
-    inp.style.left = '-9999px';
-    document.body.appendChild(inp);
-    inp.focus();
-    inp.select();
-    try {
-        document.execCommand('copy');
-        alert('Referral Link Copy Ho Gaya:\n' + joinLink);
-    } catch (err) {
-        prompt('Link copy karein:', joinLink);
-    }
-    document.body.removeChild(inp);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof loadSundayOfferStats === 'function') {
-        setTimeout(loadSundayOfferStats, 1000);
-    }
-});
 </script>
 </body>
 </html>
