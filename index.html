@@ -176,7 +176,42 @@
                 <span>My Team</span>
             </a>
         </div>
+<!-- Sunday Dhamaka Live Offer Card -->
+<div id="sundayDhamakaCard" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-radius: 16px; padding: 16px; margin: 15px 0; color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.25); border: 2px solid #ffcc00;">
+  
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+    <span style="background: #ff2a00; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase;">⚡ Sunday Mega Offer</span>
+    <span style="font-size: 12px; color: #ffeb3b; font-weight: 600;">Sirf Aaj Raat 12 Baje Tak</span>
+  </div>
 
+  <div style="border-radius: 12px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2);">
+    <img src="sunday_offer.jpg" alt="Sunday Offer" style="width: 100%; height: auto; display: block;">
+  </div>
+
+  <div style="background: rgba(255,255,255,0.12); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <span style="font-size: 13px; font-weight: 600;">Aaj Ki Direct Active IDs:</span>
+      <span id="sundayDirectCount" style="font-size: 17px; font-weight: 800; color: #ffeb3b;">0 / 10</span>
+    </div>
+    
+    <div style="background: rgba(0,0,0,0.3); border-radius: 10px; height: 10px; overflow: hidden;">
+      <div id="sundayProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff8c00, #4caf50); border-radius: 10px; transition: width 0.4s ease;"></div>
+    </div>
+    <div id="sundayBonusStatus" style="font-size: 11px; color: #e0e0e0; margin-top: 6px; text-align: center;">
+      10 ID Active karwayein aur same plan FREE bonus paayein!
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 10px;">
+    <button onclick="shareOfferWhatsApp()" style="flex: 1; background: #25d366; color: #fff; border: none; padding: 11px; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+      📲 WhatsApp Share
+    </button>
+    <button onclick="copyMySundayLink()" style="background: #ffffff; color: #1e3c72; border: none; padding: 11px 15px; font-size: 13px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+      📋 Copy Link
+    </button>
+  </div>
+</div>
+        
         <!-- Live Transactions Box -->
         <div class="tx-card">
             <div class="tx-card-header">
@@ -729,41 +764,77 @@ if (document.readyState === 'loading') {
 } else {
     fetchLiveNotice();
             }
-      // Sunday Offer Auto Popup Logic
-function checkAndShowSundayOffer() {
+      // Sunday Live Offer Tracking & Share
+async function loadSundayOfferStats() {
     const isSunday = new Date().getDay() === 0;
-    const alreadyDismissed = sessionStorage.getItem('sunday_offer_closed');
-    if (isSunday && !alreadyDismissed) {
-        const modal = document.getElementById('sundayOfferModal');
-        if (modal) modal.style.display = 'flex';
+    const card = document.getElementById('sundayDhamakaCard');
+    if (!card) return;
+
+    if (!isSunday) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = 'block';
+
+    try {
+        const userCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code');
+        if (!userCode) return;
+
+        const sb = (typeof getSupabase === 'function') ? getSupabase() : window.supabaseClient;
+        if (!sb) return;
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const { data, error } = await sb
+            .from('orders')
+            .select('id, profiles!inner(referred_by)')
+            .eq('status', 'active')
+            .eq('profiles.referred_by', userCode)
+            .gte('created_at', startOfDay.toISOString());
+
+        if (error) throw error;
+
+        const count = data ? data.length : 0;
+        const target = 10;
+        const percent = Math.min(100, Math.round((count / target) * 100));
+
+        const countEl = document.getElementById('sundayDirectCount');
+        const pBar = document.getElementById('sundayProgressBar');
+        const statusEl = document.getElementById('sundayBonusStatus');
+
+        if (countEl) countEl.innerText = `${count} / ${target}`;
+        if (pBar) pBar.style.width = `${percent}%`;
+
+        if (count >= 10 && statusEl) {
+            statusEl.innerHTML = "🎉 <b style='color:#00e676;'>Target Completed!</b> Free bonus plan claim karein!";
+        }
+    } catch (e) {
+        console.log("Sunday counter load error:", e);
     }
 }
 
-function closeSundayOfferPopup() {
-    const modal = document.getElementById('sundayOfferModal');
-    if (modal) modal.style.display = 'none';
-    sessionStorage.setItem('sunday_offer_closed', 'true');
+function shareOfferWhatsApp() {
+    const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    const link = `${window.location.origin}/index.html?ref=${refCode}`;
+    const text = `🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥%0AAaj hi apni ID activate karein aur regular daily harvest profit paayein!%0AJoin Link: ${encodeURIComponent(link)}`;
+    window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
 }
 
-setTimeout(checkAndShowSundayOffer, 800);
-        
-        
-                </script>
-    <!-- Sunday Offer Popup Modal -->
-<div id="sundayOfferModal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
-  <div style="background:#fff; max-width:380px; width:100%; border-radius:18px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.4); text-align:center; position:relative;">
+function copyMySundayLink() {
+    const refCode = localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    const link = `${window.location.origin}/index.html?ref=${refCode}`;
+    navigator.clipboard.writeText(link).then(() => {
+        alert("✅ Referral link copy ho gaya!");
+    });
+}
+
+// Page load hone par run karein
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(loadSundayOfferStats, 1000);
+});
     
-    <button onclick="closeSundayOfferPopup()" style="position:absolute; top:10px; right:10px; z-index:10; background:rgba(0,0,0,0.6); color:#fff; border:none; width:32px; height:32px; border-radius:50%; font-size:20px; cursor:pointer;">&times;</button>
-    
-    <img src="sunday_offer.jpg" alt="Sunday Offer" style="width:100%; height:auto; display:block; max-height:420px; object-fit:contain;">
-    
-    <div style="padding:14px 16px; background:#fff;">
-      <button onclick="closeSundayOfferPopup()" style="width:100%; background:linear-gradient(135deg, #ff8c00, #ff2a00); color:#fff; border:none; padding:12px; font-size:15px; font-weight:700; border-radius:10px; cursor:pointer;">
-        🔥 Abhi Invite Karein & Bonus Paayein
-      </button>
-    </div>
-  </div>
-</div>
+    </script>
     
 </body>
 </html>
