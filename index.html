@@ -816,7 +816,7 @@ async function loadSundayOfferStats() {
     }
 }
 
-function shareOfferWhatsApp() {
+    function shareOfferWhatsApp() {
     var p = localStorage.getItem('agro_user_referral_code') || 
             localStorage.getItem('referral_code') || 
             localStorage.getItem('user_phone') || 
@@ -834,8 +834,7 @@ function shareOfferWhatsApp() {
 
     var base = window.location.origin + window.location.pathname;
     var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
-    
-    var msg = '🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\n\n👉 Invite Link: ' + joinLink;
+    var msg = 'AgroHarvest Sunday Mega Offer! Join link: ' + joinLink;
     
     window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
 }
@@ -868,7 +867,7 @@ function copyMySundayLink() {
     inp.select();
     try {
         document.execCommand('copy');
-        alert('✅ Referral Link Copy Ho Gaya:\n' + joinLink);
+        alert('Referral Link Copy Ho Gaya:\n' + joinLink);
     } catch (err) {
         prompt('Link copy karein:', joinLink);
     }
