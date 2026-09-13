@@ -729,9 +729,41 @@ if (document.readyState === 'loading') {
 } else {
     fetchLiveNotice();
             }
+      // Sunday Offer Auto Popup Logic
+function checkAndShowSundayOffer() {
+    const isSunday = new Date().getDay() === 0;
+    const alreadyDismissed = sessionStorage.getItem('sunday_offer_closed');
+    if (isSunday && !alreadyDismissed) {
+        const modal = document.getElementById('sundayOfferModal');
+        if (modal) modal.style.display = 'flex';
+    }
+}
+
+function closeSundayOfferPopup() {
+    const modal = document.getElementById('sundayOfferModal');
+    if (modal) modal.style.display = 'none';
+    sessionStorage.setItem('sunday_offer_closed', 'true');
+}
+
+setTimeout(checkAndShowSundayOffer, 800);
         
         
                 </script>
+    <!-- Sunday Offer Popup Modal -->
+<div id="sundayOfferModal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
+  <div style="background:#fff; max-width:380px; width:100%; border-radius:18px; overflow:hidden; box-shadow:0 15px 35px rgba(0,0,0,0.4); text-align:center; position:relative;">
+    
+    <button onclick="closeSundayOfferPopup()" style="position:absolute; top:10px; right:10px; z-index:10; background:rgba(0,0,0,0.6); color:#fff; border:none; width:32px; height:32px; border-radius:50%; font-size:20px; cursor:pointer;">&times;</button>
+    
+    <img src="sunday_offer.jpg" alt="Sunday Offer" style="width:100%; height:auto; display:block; max-height:420px; object-fit:contain;">
+    
+    <div style="padding:14px 16px; background:#fff;">
+      <button onclick="closeSundayOfferPopup()" style="width:100%; background:linear-gradient(135deg, #ff8c00, #ff2a00); color:#fff; border:none; padding:12px; font-size:15px; font-weight:700; border-radius:10px; cursor:pointer;">
+        🔥 Abhi Invite Karein & Bonus Paayein
+      </button>
+    </div>
+  </div>
+</div>
     
 </body>
 </html>
