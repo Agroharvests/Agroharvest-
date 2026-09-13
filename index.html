@@ -204,10 +204,10 @@
   </div>
 
 <div style="display: flex; gap: 10px; margin-top: 10px;">
-  <a id="sundayWaBtn" href="https://api.whatsapp.com/send?text=AGROHARVEST%20SUNDAY%20OFFER%3A%20Aaj%2010%20ID%20active%20karao%20aur%20pao%20Same%20Plan%20FREE%20BONUS!" target="_blank" style="flex: 1; background: #25d366; color: #ffffff; text-decoration: none; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; text-align: center;">
+  <button type="button" onclick="shareOfferWhatsApp()" style="flex: 1; background: #25d366; color: #ffffff; border: none; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
     📲 WhatsApp Share
-  </a>
-  <button type="button" id="sundayCopyBtn" style="background: #ffffff; color: #1e3c72; border: 1px solid #ccc; padding: 12px 16px; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer;">
+  </button>
+  <button type="button" onclick="copyMySundayLink()" style="background: #ffffff; color: #1e3c72; border: 1px solid #ccc; padding: 12px 16px; font-size: 14px; font-weight: 700; border-radius: 10px; cursor: pointer;">
     📋 Copy Link
   </button>
 </div>
@@ -817,15 +817,45 @@ async function loadSundayOfferStats() {
 }
 
 function shareOfferWhatsApp() {
-    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var p = localStorage.getItem('agro_user_referral_code') || 
+            localStorage.getItem('referral_code') || 
+            localStorage.getItem('user_phone') || 
+            localStorage.getItem('phone') || '';
+            
+    if (!p) {
+        var rawUser = localStorage.getItem('user') || localStorage.getItem('agro_user');
+        if (rawUser) {
+            try {
+                var u = JSON.parse(rawUser);
+                p = u.referral_code || u.phone || u.id || '';
+            } catch(e) {}
+        }
+    }
+
     var base = window.location.origin + window.location.pathname;
     var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
-    var msg = '🔥 AGROHARVEST SUNDAY MEGA OFFER 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\nJoin Link: ' + joinLink;
+    
+    var msg = '🔥 *AGROHARVEST SUNDAY MEGA OFFER* 🔥\n\n10 ID Active karwao aur pao Same Plan FREE BONUS!\n\n👉 Invite Link: ' + joinLink;
+    
     window.location.href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(msg);
 }
 
 function copyMySundayLink() {
-    var p = localStorage.getItem('user_phone') || localStorage.getItem('agro_user_referral_code') || localStorage.getItem('referral_code') || '';
+    var p = localStorage.getItem('agro_user_referral_code') || 
+            localStorage.getItem('referral_code') || 
+            localStorage.getItem('user_phone') || 
+            localStorage.getItem('phone') || '';
+            
+    if (!p) {
+        var rawUser = localStorage.getItem('user') || localStorage.getItem('agro_user');
+        if (rawUser) {
+            try {
+                var u = JSON.parse(rawUser);
+                p = u.referral_code || u.phone || u.id || '';
+            } catch(e) {}
+        }
+    }
+
     var base = window.location.origin + window.location.pathname;
     var joinLink = base + (p ? ('?ref=' + encodeURIComponent(p)) : '');
 
