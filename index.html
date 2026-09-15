@@ -407,7 +407,7 @@
             alert('⚠️ ' + title + ' abhi UPCOMING hai! Admin ke unlock karne ke baad hi open hoga.');
         }
 
-                async function checkUpcomingPlans() {
+        async function checkUpcomingPlans() {
             const b4 = document.getElementById('badge4999');
             if (b4) { b4.className = 'ribbon-badge ribbon-green'; b4.innerText = 'VIP Active'; }
             const btn4 = document.getElementById('btnPlan4999');
@@ -424,11 +424,6 @@
                 btn9.className = 'btn-invest btn-invest-gold';
                 btn9.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
                 btn9.setAttribute('onclick', "buySeedPlan('Royal Empire', 9999, 3200, 90)");
-            }
-            }
-            
-            } catch (e) {
-                console.warn("Settings check error:", e);
             }
         }
 
