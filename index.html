@@ -407,37 +407,26 @@
             alert('⚠️ ' + title + ' abhi UPCOMING hai! Admin ke unlock karne ke baad hi open hoga.');
         }
 
-        async function checkUpcomingPlans() {
-            const sb = (typeof getSupabase === 'function') ? getSupabase() : (window.supabaseClient || window.sb || supabase);
-            if (!sb) return;
-            try {
-                const { data: settings } = await sb.from('admin_settings').select('*');
-                if (settings) {
-                    const p4999 = settings.find(s => s.key === 'plan_4999_open');
-                    const p9999 = settings.find(s => s.key === 'plan_9999_open');
+                async function checkUpcomingPlans() {
+            const b4 = document.getElementById('badge4999');
+            if (b4) { b4.className = 'ribbon-badge ribbon-green'; b4.innerText = 'VIP Active'; }
+            const btn4 = document.getElementById('btnPlan4999');
+            if (btn4) {
+                btn4.className = 'btn-invest btn-invest-green';
+                btn4.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
+                btn4.setAttribute('onclick', "buySeedPlan('Platinum Agro', 4999, 1500, 70)");
+            }
 
-                    if (p4999 && p4999.value == '1') {
-                        const b4 = document.getElementById('badge4999');
-                        if (b4) { b4.className = 'ribbon-badge ribbon-green'; b4.innerText = 'VIP Active'; }
-                        const btn4 = document.getElementById('btnPlan4999');
-                        if (btn4) {
-                            btn4.className = 'btn-invest btn-invest-green';
-                            btn4.innerHTML = 'Invest ₹4,999 <i class="fa-solid fa-arrow-right"></i>';
-                            btn4.setAttribute('onclick', "buySeedPlan('Platinum Agro', 4999, 1500, 70)");
-                        }
-                    }
-
-                    if (p9999 && p9999.value == '1') {
-                        const b9 = document.getElementById('badge9999');
-                        if (b9) { b9.className = 'ribbon-badge ribbon-gold'; b9.innerText = '👑 VIP Active'; }
-                        const btn9 = document.getElementById('btnPlan9999');
-                        if (btn9) {
-                            btn9.className = 'btn-invest btn-invest-gold';
-                            btn9.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
-                            btn9.setAttribute('onclick', "buySeedPlan('Royal Empire', 9999, 3200, 90)");
-                        }
-                    }
-                }
+            const b9 = document.getElementById('badge9999');
+            if (b9) { b9.className = 'ribbon-badge ribbon-gold'; b9.innerText = '👑 VIP Active'; }
+            const btn9 = document.getElementById('btnPlan9999');
+            if (btn9) {
+                btn9.className = 'btn-invest btn-invest-gold';
+                btn9.innerHTML = 'Invest ₹9,999 <i class="fa-solid fa-arrow-right"></i>';
+                btn9.setAttribute('onclick', "buySeedPlan('Royal Empire', 9999, 3200, 90)");
+            }
+            }
+            
             } catch (e) {
                 console.warn("Settings check error:", e);
             }
